@@ -13,8 +13,12 @@ export class ProductController {
     return this.service.getById(id, tenantId);
   }
 
-  async listByStore(storeId: string, tenantId: string) {
-    return this.service.listByStore(storeId, tenantId);
+  async listByStore(
+    storeId: string,
+    tenantId: string,
+    opts?: { q?: string; page?: number; limit?: number }
+  ) {
+    return this.service.listByStore(storeId, tenantId, opts);
   }
 
   async update(id: string, tenantId: string, body: unknown) {

@@ -24,8 +24,12 @@ export class ProductService {
     return product;
   }
 
-  async listByStore(storeId: string, tenantId: string) {
-    return this.repository.findManyByStore(storeId, tenantId);
+  async listByStore(
+    storeId: string,
+    tenantId: string,
+    opts?: { q?: string; page?: number; limit?: number }
+  ) {
+    return this.repository.findManyByStore(storeId, tenantId, opts);
   }
 
   async update(id: string, tenantId: string, input: UpdateProductInput) {

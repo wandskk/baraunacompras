@@ -1,13 +1,22 @@
 import Link from "next/link";
 import { getPublicStoreWithProducts } from "@/lib/store-public";
+import { isProductAvailable } from "@/lib/store-public";
+import { StoreFilters } from "./StoreFilters";
 
 type PageProps = {
   params: Promise<{ tenantSlug: string }>;
+  searchParams: Promise<{ q?: string; categoryId?: string; page?: string }>;
 };
 
-export default async function StoreHomePage({ params }: PageProps) {
+export default async function StoreHomePage({ params, searchParams }: PageProps) {
   const { tenantSlug } = await params;
-  const data = await getPublicStoreWithProducts(tenantSlug);
+  const { q, categoryId, page } = await searchParams;
+  const data = await getPublicStoreWithProducts(tenantSlug, undefined, {
+    q: q ?? undefined,
+    categoryId: categoryId ?? undefined,
+    page: page ? parseInt(page, 10) : 1,
+    limit: 12,
+  });
   if (!data) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -15,63 +24,103 @@ export default async function StoreHomePage({ params }: PageProps) {
       </div>
     );
   }
-  const { store, products, categories } = data;
+  const { store, products, categories, pagination } = data;
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">{store.name}</h1>
-        <p className="mt-1 text-gray-500">
-          Confira nossos produtos
-        </p>
+        <p className="mt-1 text-gray-500">Confira nossos produtos</p>
       </div>
-      {categories.length > 0 && (
-        <div className="mb-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Categorias
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <span
-                key={cat.id}
-                className="rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground"
-              >
-                {cat.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      <StoreFilters
+        tenantSlug={tenantSlug}
+        categories={categories}
+        currentCategoryId={categoryId}
+        currentSearch={q}
+      />
       <div>
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Produtos</h2>
         {products.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center text-gray-500">
-            Nenhum produto disponível no momento.
+            Nenhum produto encontrado.
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => (
-              <Link
-                key={product.id}
-                href={`/loja/${tenantSlug}/produtos/${product.slug}`}
-                className="block overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md"
-              >
-                <div className="p-6">
-                  <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                  {product.category && (
-                    <p className="mt-1 text-sm text-gray-500">
-                      {product.category.name}
-                    </p>
-                  )}
-                  <p className="mt-2 text-lg font-bold text-primary">
-                    R$ {Number(product.price).toFixed(2)}
-                  </p>
-                  <span className="mt-4 block w-full rounded-lg bg-primary py-2 text-center font-medium text-primary-foreground transition-opacity hover:opacity-90">
-                    Ver produto
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product) => {
+                const available = isProductAvailable(product);
+                return (
+                  <Link
+                    key={product.id}
+                    href={`/loja/${tenantSlug}/produtos/${product.slug}`}
+                    className={`block overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md ${!available ? "opacity-75" : ""}`}
+                  >
+                    {product.imageUrl && (
+                      <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                      {product.category && (
+                        <p className="mt-1 text-sm text-gray-500">
+                          {product.category.name}
+                        </p>
+                      )}
+                      {product.description && (
+                        <p className="mt-2 line-clamp-2 text-sm text-gray-600">
+                          {product.description}
+                        </p>
+                      )}
+                      <div className="mt-2 flex items-center justify-between">
+                        <p className="text-lg font-bold text-primary">
+                          R$ {Number(product.price).toFixed(2)}
+                        </p>
+                        {!available && (
+                          <span className="text-xs text-gray-500">Indisponível</span>
+                        )}
+                      </div>
+                      <span
+                        className={`mt-4 block w-full rounded-lg py-2 text-center font-medium transition-opacity hover:opacity-90 ${
+                          available
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-gray-200 text-gray-500"
+                        }`}
+                      >
+                        Ver produto
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            {pagination && pagination.total > pagination.limit && (
+              <div className="mt-6 flex justify-center gap-2">
+                {pagination.page > 1 && (
+                  <Link
+                    href={`/loja/${tenantSlug}?page=${pagination.page - 1}${categoryId ? `&categoryId=${categoryId}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                  >
+                    Anterior
+                  </Link>
+                )}
+                <span className="flex items-center px-4 py-2 text-sm text-gray-600">
+                  Página {pagination.page} de {Math.ceil(pagination.total / pagination.limit)}
+                </span>
+                {pagination.page * pagination.limit < pagination.total && (
+                  <Link
+                    href={`/loja/${tenantSlug}?page=${pagination.page + 1}${categoryId ? `&categoryId=${categoryId}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                  >
+                    Próxima
+                  </Link>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

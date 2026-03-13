@@ -17,19 +17,57 @@ export async function getPublicStore(tenantSlug: string, storeSlug?: string) {
   return { store, tenantId: tenant.id };
 }
 
-export async function getPublicStoreWithProducts(tenantSlug: string, storeSlug?: string) {
+type ProductFilters = {
+  categoryId?: string;
+  q?: string;
+  page?: number;
+  limit?: number;
+};
+
+export async function getPublicStoreWithProducts(
+  tenantSlug: string,
+  storeSlug?: string,
+  filters?: ProductFilters
+) {
   const data = await getPublicStore(tenantSlug, storeSlug);
   if (!data) return null;
-  const [products, categories] = await Promise.all([
+  const page = filters?.page ?? 1;
+  const limit = filters?.limit ?? 50;
+  const skip = (page - 1) * limit;
+  const where: { storeId: string; tenantId: string; categoryId?: string; AND?: object[] } = {
+    storeId: data.store.id,
+    tenantId: data.tenantId,
+  };
+  if (filters?.categoryId) where.categoryId = filters.categoryId;
+  if (filters?.q?.trim()) {
+    where.AND = [
+      {
+        OR: [
+          { name: { contains: filters.q!, mode: "insensitive" as const } },
+          { description: { contains: filters.q!, mode: "insensitive" as const } },
+        ],
+      },
+    ];
+  }
+  const [products, categories, total] = await Promise.all([
     prisma.product.findMany({
-      where: { storeId: data.store.id, tenantId: data.tenantId },
+      where,
       include: { category: true },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
     }),
     prisma.category.findMany({
       where: { tenantId: data.tenantId },
     }),
+    prisma.product.count({ where }),
   ]);
-  return { store: data.store, products, categories };
+  return {
+    store: data.store,
+    products,
+    categories,
+    pagination: { page, limit, total },
+  };
 }
 
 export async function getPublicProduct(
@@ -48,4 +86,8 @@ export async function getPublicProduct(
     include: { category: true },
   });
   return product;
+}
+
+export function isProductAvailable(product: { stock: number }): boolean {
+  return product.stock > 0;
 }

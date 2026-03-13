@@ -62,4 +62,12 @@ export class CartItemRepository {
       include: { product: true },
     });
   }
+
+  async findByCartAndProduct(cartId: string, productId: string) {
+    return prisma.cartItem.findUnique({
+      where: {
+        cartId_productId: { cartId, productId },
+      },
+    });
+  }
 }

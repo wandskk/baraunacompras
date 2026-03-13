@@ -7,9 +7,10 @@ type Props = {
   tenantSlug: string;
   productId: string;
   productName?: string;
+  disabled?: boolean;
 };
 
-export function AddToCartButton({ tenantSlug, productId }: Props) {
+export function AddToCartButton({ tenantSlug, productId, disabled }: Props) {
   const [loading, setLoading] = useState(false);
   const [added, setAdded] = useState(false);
 
@@ -34,7 +35,7 @@ export function AddToCartButton({ tenantSlug, productId }: Props) {
   return (
     <Button
       onClick={handleClick}
-      disabled={loading}
+      disabled={loading || disabled}
       fullWidth
       variant={added ? "secondary" : undefined}
     >

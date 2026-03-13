@@ -67,24 +67,28 @@ model Category {
 }
 
 model Product {
-  id         String     @id @default(cuid())
-  name       String
-  slug       String
-  price      Decimal    @db.Decimal(10, 2)
-  tenantId   String
-  storeId    String
-  categoryId String?
-  store      Store      @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  category   Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  description String?  @db.Text
+  imageUrl    String?
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  tenantId    String
+  storeId     String
+  categoryId  String?
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  cartItems  CartItem[]
-  orderItems OrderItem[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
 
   @@unique([tenantId, storeId, slug])
   @@index([tenantId])
   @@index([storeId])
+  @@index([categoryId])
 }
 
 model Customer {

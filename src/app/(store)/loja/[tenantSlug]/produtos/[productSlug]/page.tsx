@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getPublicProduct } from "@/lib/store-public";
+import { getPublicProduct, isProductAvailable } from "@/lib/store-public";
 import { Button } from "@/components/ui";
 import { AddToCartButton } from "./AddToCartButton";
 
@@ -17,6 +17,7 @@ export default async function ProductPage({ params }: PageProps) {
       </div>
     );
   }
+  const available = isProductAvailable(product);
   const checkoutUrl = `/loja/${tenantSlug}/checkout?productId=${product.id}`;
   return (
     <div>
@@ -28,6 +29,15 @@ export default async function ProductPage({ params }: PageProps) {
       </Link>
       <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
         <div className="grid gap-8 lg:grid-cols-2">
+          {product.imageUrl && (
+            <div className="aspect-video overflow-hidden rounded-lg bg-gray-100">
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
             {product.category && (
@@ -35,17 +45,28 @@ export default async function ProductPage({ params }: PageProps) {
                 {product.category.name}
               </p>
             )}
-            <p className="mt-4 text-3xl font-bold text-primary">
-              R$ {Number(product.price).toFixed(2)}
-            </p>
+            {product.description && (
+              <p className="mt-4 text-gray-600">{product.description}</p>
+            )}
+            <div className="mt-4 flex items-center gap-4">
+              <p className="text-3xl font-bold text-primary">
+                R$ {Number(product.price).toFixed(2)}
+              </p>
+              {!available && (
+                <span className="rounded-full bg-gray-200 px-3 py-1 text-sm text-gray-600">
+                  Indisponível
+                </span>
+              )}
+            </div>
             <div className="mt-6 flex gap-3">
               <AddToCartButton
                 tenantSlug={tenantSlug}
                 productId={product.id}
                 productName={product.name}
+                disabled={!available}
               />
               <Link href={checkoutUrl} className="flex-1">
-                <Button variant="outline" fullWidth>
+                <Button variant="outline" fullWidth disabled={!available}>
                   Comprar agora
                 </Button>
               </Link>

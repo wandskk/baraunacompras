@@ -3,7 +3,10 @@ import { prisma } from "@/database/prisma";
 type CreateProductData = {
   name: string;
   slug: string;
+  description?: string;
+  imageUrl?: string;
   price: number;
+  stock?: number;
   tenantId: string;
   storeId: string;
   categoryId?: string;
@@ -34,11 +37,35 @@ export class ProductRepository {
     });
   }
 
-  async findManyByStore(storeId: string, tenantId: string) {
-    return prisma.product.findMany({
-      where: { storeId, tenantId },
-      include: { category: true },
-    });
+  async findManyByStore(
+    storeId: string,
+    tenantId: string,
+    opts?: { q?: string; page?: number; limit?: number }
+  ) {
+    const page = opts?.page ?? 1;
+    const limit = opts?.limit ?? 50;
+    const skip = (page - 1) * limit;
+    const where: { storeId: string; tenantId: string; OR?: object[] } = {
+      storeId,
+      tenantId,
+    };
+    if (opts?.q?.trim()) {
+      where.OR = [
+        { name: { contains: opts.q, mode: "insensitive" } },
+        { description: { contains: opts.q, mode: "insensitive" } },
+      ];
+    }
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        include: { category: true },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.product.count({ where }),
+    ]);
+    return { products, pagination: { page, limit, total } };
   }
 
   async update(id: string, tenantId: string, data: UpdateProductData) {
