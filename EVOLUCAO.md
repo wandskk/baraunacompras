@@ -20,8 +20,8 @@ Guia de desenvolvimento contínuo para tornar o SaaS mais robusto e completo.
 | 7.1 | **Autenticação** | ✅ JWT em cookie httpOnly (Web Crypto, Edge-compatível) | Alta |
 | 7.2 | **Middleware** | ✅ Proteger `/dashboard` e `/api/tenants/*` | Alta |
 | 7.3 | **Hash de senha** | ✅ bcrypt (compatível com SHA-256 legado) | Alta |
-| 7.4 | **Rate limiting** | Limitar requisições por IP em APIs públicas | Média |
-| 7.5 | **Tratamento de erros** | Handler global e mensagens padronizadas | Média |
+| 7.4 | **Rate limiting** | ✅ 10 req/min auth, 60 req/min public (middleware) | Média |
+| 7.5 | **Tratamento de erros** | ✅ apiErrorResponse com códigos, error.tsx, global-error.tsx | Média |
 | 7.6 | **Validação server-side** | ✅ Zod em rotas + params + apiErrorResponse | Alta |
 
 ---

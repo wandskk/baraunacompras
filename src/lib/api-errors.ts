@@ -1,7 +1,20 @@
 import { ZodError } from "zod";
 import { NextResponse } from "next/server";
 
-export function toErrorResponse(error: unknown): { status: number; json: object } {
+export type ApiErrorCode =
+  | "VALIDATION_ERROR"
+  | "NOT_FOUND"
+  | "UNAUTHORIZED"
+  | "BAD_REQUEST"
+  | "INTERNAL_ERROR";
+
+export type ApiErrorResponse = {
+  code: ApiErrorCode;
+  error: string;
+  details?: unknown;
+};
+
+export function toErrorResponse(error: unknown): { status: number; json: ApiErrorResponse } {
   if (error instanceof ZodError) {
     const issues = error.issues.map((i) => ({
       path: i.path.join("."),
@@ -9,12 +22,25 @@ export function toErrorResponse(error: unknown): { status: number; json: object 
     }));
     return {
       status: 400,
-      json: { error: "Validation failed", details: issues },
+      json: {
+        code: "VALIDATION_ERROR",
+        error: "Dados inválidos",
+        details: issues,
+      },
     };
   }
-  const message = error instanceof Error ? error.message : "Unknown error";
-  const status = message.toLowerCase().includes("not found") ? 404 : 400;
-  return { status, json: { error: message } };
+  const message = error instanceof Error ? error.message : "Erro interno";
+  const lower = message.toLowerCase();
+  if (lower.includes("not found") || lower.includes("não encontrado")) {
+    return { status: 404, json: { code: "NOT_FOUND", error: message } };
+  }
+  if (lower.includes("unauthorized") || lower.includes("invalid credentials")) {
+    return { status: 401, json: { code: "UNAUTHORIZED", error: message } };
+  }
+  return {
+    status: 400,
+    json: { code: "BAD_REQUEST", error: message },
+  };
 }
 
 export function apiErrorResponse(error: unknown): NextResponse {
