@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import { getPublicStore } from "@/lib/store-public";
+import { getSessionCookie, verifySessionToken } from "@/lib/jwt";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -15,6 +17,17 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
       </div>
     );
   }
+
+  let isStoreOwner = false;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(getSessionCookie())?.value;
+  if (token) {
+    const payload = await verifySessionToken(token);
+    if (payload && payload.tenantId === data.tenantId) {
+      isStoreOwner = true;
+    }
+  }
+
   const storeName = data.store.name;
   const store = data.store as { logoUrl?: string | null };
   const themeClass = `theme-${data.store.theme ?? "default"}`;
@@ -45,6 +58,14 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
             >
               Carrinho
             </a>
+            {isStoreOwner && (
+              <a
+                href="/dashboard"
+                className="text-sm font-medium text-primary hover:text-primary/80"
+              >
+                Dashboard
+              </a>
+            )}
           </nav>
         </div>
       </header>
