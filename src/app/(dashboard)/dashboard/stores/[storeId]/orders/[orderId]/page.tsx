@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { Button, LoadingSpinner } from "@/components/ui";
 import { useSession } from "@/hooks/useSession";
 
 type OrderItem = {
@@ -84,11 +84,7 @@ export default function OrderDetailPage() {
   }, [storeId, orderId, session]);
 
   if (sessionLoading || loading || !session) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-gray-500">Carregando...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando pedido..." minHeight="200px" />;
   }
 
   if (!order) {

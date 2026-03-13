@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { LoadingSpinner } from "@/components/ui";
 import { useSession } from "@/hooks/useSession";
 
 type Order = {
@@ -38,11 +39,7 @@ export default function OrdersPage() {
   }, [storeId, session]);
 
   if (sessionLoading || loading || !session) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-gray-500">Carregando...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando pedidos..." minHeight="200px" />;
   }
 
   return (

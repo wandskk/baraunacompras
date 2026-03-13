@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, LoadingSpinner } from "@/components/ui";
 import { useSession } from "@/hooks/useSession";
 
 type Category = {
@@ -81,11 +81,7 @@ export default function CategoriesPage() {
   }
 
   if (sessionLoading || loading || !session) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-gray-500">Carregando...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando categorias..." minHeight="200px" />;
   }
 
   return (

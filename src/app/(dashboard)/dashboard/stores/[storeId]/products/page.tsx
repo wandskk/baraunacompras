@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Button, Input, ImageUpload, Modal } from "@/components/ui";
+import { Button, Input, ImageUpload, LoadingSpinner, Modal } from "@/components/ui";
 import { useSession } from "@/hooks/useSession";
 
 type Product = {
@@ -157,11 +157,7 @@ export default function ProductsPage() {
   }
 
   if (sessionLoading || loading || !session) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-gray-500">Carregando...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando produtos..." minHeight="200px" />;
   }
 
   return (

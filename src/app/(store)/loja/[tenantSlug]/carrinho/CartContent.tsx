@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { Button, LoadingSpinner } from "@/components/ui";
 
 type CartItem = {
   id: string;
@@ -96,11 +96,7 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <p className="text-gray-500">Carregando carrinho...</p>
-      </div>
-    );
+    return <LoadingSpinner message="Carregando carrinho..." minHeight="200px" />;
   }
 
   if (!data?.items?.length) {
