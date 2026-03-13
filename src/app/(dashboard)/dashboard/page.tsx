@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@/components/ui";
-import { getSession, clearSession } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 type Store = {
   id: string;
@@ -17,7 +17,7 @@ type Store = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [session, setSession] = useState<ReturnType<typeof getSession>>(null);
+  const { session, loading: sessionLoading, logout } = useSession();
   const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -27,14 +27,10 @@ export default function DashboardPage() {
   const [createLoading, setCreateLoading] = useState(false);
 
   useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (!s) {
-      router.replace("/login");
-      return;
+    if (!sessionLoading && session) {
+      fetchStores(session.tenantId);
     }
-    fetchStores(s.tenantId);
-  }, [router]);
+  }, [session, sessionLoading]);
 
   async function fetchStores(tenantId: string) {
     try {
@@ -48,8 +44,8 @@ export default function DashboardPage() {
     }
   }
 
-  function handleLogout() {
-    clearSession();
+  async function handleLogout() {
+    await logout();
     router.replace("/login");
   }
 
@@ -94,7 +90,7 @@ export default function DashboardPage() {
     }
   }
 
-  if (loading || !session) {
+  if (sessionLoading || loading || !session) {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <p className="text-gray-500">Carregando...</p>

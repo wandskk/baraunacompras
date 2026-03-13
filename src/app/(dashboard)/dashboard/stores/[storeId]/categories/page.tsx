@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@/components/ui";
-import { getSession } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 type Category = {
   id: string;
@@ -17,7 +17,7 @@ export default function CategoriesPage() {
   const router = useRouter();
   const params = useParams();
   const storeId = params.storeId as string;
-  const [session, setSession] = useState<ReturnType<typeof getSession>>(null);
+  const { session, loading: sessionLoading } = useSession();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -27,14 +27,10 @@ export default function CategoriesPage() {
   const [createLoading, setCreateLoading] = useState(false);
 
   useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (!s) {
-      router.replace("/login");
-      return;
+    if (session) {
+      fetchCategories(session.tenantId);
     }
-    fetchCategories(s.tenantId);
-  }, [router]);
+  }, [session]);
 
   async function fetchCategories(tenantId: string) {
     try {
@@ -84,7 +80,7 @@ export default function CategoriesPage() {
     }
   }
 
-  if (loading || !session) {
+  if (sessionLoading || loading || !session) {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <p className="text-gray-500">Carregando...</p>

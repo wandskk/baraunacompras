@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@/components/ui";
-import { getSession } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 type Product = {
   id: string;
@@ -24,7 +24,7 @@ export default function ProductsPage() {
   const router = useRouter();
   const params = useParams();
   const storeId = params.storeId as string;
-  const [session, setSession] = useState<ReturnType<typeof getSession>>(null);
+  const { session, loading: sessionLoading } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,20 +37,17 @@ export default function ProductsPage() {
   const [createLoading, setCreateLoading] = useState(false);
 
   useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (!s) {
-      router.replace("/login");
-      return;
-    }
+    if (!session) return;
     Promise.all([
-      fetch(`/api/tenants/${s.tenantId}/stores/${storeId}/products`),
-      fetch(`/api/tenants/${s.tenantId}/categories`),
-    ]).then(async ([productsRes, categoriesRes]) => {
-      if (productsRes.ok) setProducts(await productsRes.json());
-      if (categoriesRes.ok) setCategories(await categoriesRes.json());
-    }).finally(() => setLoading(false));
-  }, [storeId, router]);
+      fetch(`/api/tenants/${session.tenantId}/stores/${storeId}/products`),
+      fetch(`/api/tenants/${session.tenantId}/categories`),
+    ])
+      .then(async ([productsRes, categoriesRes]) => {
+        if (productsRes.ok) setProducts(await productsRes.json());
+        if (categoriesRes.ok) setCategories(await categoriesRes.json());
+      })
+      .finally(() => setLoading(false));
+  }, [storeId, session]);
 
   function slugify(text: string) {
     return text
@@ -98,7 +95,7 @@ export default function ProductsPage() {
     }
   }
 
-  if (loading || !session) {
+  if (sessionLoading || loading || !session) {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <p className="text-gray-500">Carregando...</p>

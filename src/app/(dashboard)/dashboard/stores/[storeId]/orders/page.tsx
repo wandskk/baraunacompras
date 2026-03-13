@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { getSession } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 type Order = {
   id: string;
@@ -25,24 +25,19 @@ export default function OrdersPage() {
   const router = useRouter();
   const params = useParams();
   const storeId = params.storeId as string;
-  const [session, setSession] = useState<ReturnType<typeof getSession>>(null);
+  const { session, loading: sessionLoading } = useSession();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (!s) {
-      router.replace("/login");
-      return;
-    }
-    fetch(`/api/tenants/${s.tenantId}/stores/${storeId}/orders`)
+    if (!session) return;
+    fetch(`/api/tenants/${session.tenantId}/stores/${storeId}/orders`)
       .then((res) => (res.ok ? res.json() : []))
       .then(setOrders)
       .finally(() => setLoading(false));
-  }, [storeId, router]);
+  }, [storeId, session]);
 
-  if (loading || !session) {
+  if (sessionLoading || loading || !session) {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <p className="text-gray-500">Carregando...</p>

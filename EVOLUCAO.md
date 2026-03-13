@@ -17,8 +17,8 @@ Guia de desenvolvimento contínuo para tornar o SaaS mais robusto e completo.
 
 | # | Item | Descrição | Prioridade |
 |---|------|-----------|------------|
-| 7.1 | **Autenticação** | JWT ou NextAuth em vez de `localStorage` | Alta |
-| 7.2 | **Middleware** | Proteger rotas `/dashboard` e `/api` por auth | Alta |
+| 7.1 | **Autenticação** | ✅ JWT em cookie httpOnly (Web Crypto, Edge-compatível) | Alta |
+| 7.2 | **Middleware** | ✅ Proteger `/dashboard` e `/api/tenants/*` | Alta |
 | 7.3 | **Hash de senha** | ✅ bcrypt (compatível com SHA-256 legado) | Alta |
 | 7.4 | **Rate limiting** | Limitar requisições por IP em APIs públicas | Média |
 | 7.5 | **Tratamento de erros** | Handler global e mensagens padronizadas | Média |
