@@ -9,6 +9,7 @@ type CreateStoreData = {
   description?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
+  contactPhoneIsWhatsApp?: boolean;
   paymentMethods?: string | null;
   deliveryType?: string | null;
   deliveryFee?: number | null;

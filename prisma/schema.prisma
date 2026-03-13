@@ -42,6 +42,7 @@ model Store {
   description     String?  @db.Text
   contactEmail    String?
   contactPhone    String?
+  contactPhoneIsWhatsApp Boolean @default(false)
   paymentMethods  String?  @db.Text
   deliveryType    String?  @default("pickup")
   deliveryFee     Decimal? @db.Decimal(10, 2)

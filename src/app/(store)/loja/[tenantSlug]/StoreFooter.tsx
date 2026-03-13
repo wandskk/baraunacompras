@@ -96,9 +96,6 @@ export function StoreFooter({
     addressState,
     addressZipCode,
   });
-  const whatsappUrl = contactPhone
-    ? `https://wa.me/55${contactPhone.replace(/\D/g, "")}`
-    : null;
 
   return (
     <footer className="w-full border-t border-gray-200 bg-white/80 py-8">
@@ -138,17 +135,6 @@ export function StoreFooter({
               )}
             </div>
           </div>
-          {whatsappUrl && (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-green-700"
-            >
-              <span aria-hidden>💬</span>
-              WhatsApp
-            </a>
-          )}
         </div>
         <p className="mt-6 flex justify-center text-center text-xs text-gray-500 sm:justify-start">
           © {new Date().getFullYear()} {storeName} · Baraúna Compras

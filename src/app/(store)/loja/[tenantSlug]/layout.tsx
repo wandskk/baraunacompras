@@ -3,6 +3,7 @@ import { getPublicStore } from "@/lib/store-public";
 import { getSessionCookie, verifySessionToken } from "@/lib/jwt";
 import { StoreNav } from "./StoreNav";
 import { StoreFooter } from "./StoreFooter";
+import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -35,6 +36,7 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
     logoUrl?: string | null;
     contactEmail?: string | null;
     contactPhone?: string | null;
+    contactPhoneIsWhatsApp?: boolean;
     addressStreet?: string | null;
     addressNumber?: string | null;
     addressComplement?: string | null;
@@ -56,6 +58,12 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
       <main className="flex-1 py-6 sm:py-8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">{children}</div>
       </main>
+      {store.contactPhone && store.contactPhoneIsWhatsApp && (
+        <WhatsAppFloatingButton
+          phone={store.contactPhone}
+          storeName={storeName}
+        />
+      )}
       <StoreFooter
         storeName={storeName}
         contactEmail={store.contactEmail}

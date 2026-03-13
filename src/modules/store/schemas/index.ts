@@ -27,6 +27,7 @@ export const createStoreSchema = z.object({
   description: z.string().optional().nullable(),
   contactEmail: z.string().email("Email inválido").optional().nullable(),
   contactPhone: phoneSchema,
+  contactPhoneIsWhatsApp: z.boolean().optional().default(false),
   paymentMethods: z
     .array(paymentMethodEnum)
     .optional()

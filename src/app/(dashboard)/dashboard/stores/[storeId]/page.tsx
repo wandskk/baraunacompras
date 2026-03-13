@@ -60,6 +60,7 @@ type Store = {
   description?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
+  contactPhoneIsWhatsApp?: boolean;
   paymentMethods?: string | null;
   deliveryType?: string | null;
   deliveryFee?: number | string | null;
@@ -119,6 +120,7 @@ export default function StoreDetailPage() {
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [contactPhoneIsWhatsApp, setContactPhoneIsWhatsApp] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
   const [deliveryType, setDeliveryType] = useState("pickup");
   const [deliveryFee, setDeliveryFee] = useState("");
@@ -164,6 +166,7 @@ export default function StoreDetailPage() {
       setContactPhone(
         data.contactPhone ? formatPhone(data.contactPhone) : ""
       );
+      setContactPhoneIsWhatsApp(data.contactPhoneIsWhatsApp ?? false);
       try {
         setPaymentMethods(
           data.paymentMethods ? JSON.parse(data.paymentMethods) : []
@@ -227,6 +230,7 @@ export default function StoreDetailPage() {
         description: description || null,
         contactEmail: contactEmail || null,
         contactPhone: (contactPhone && contactPhone.replace(/\D/g, "")) || null,
+        contactPhoneIsWhatsApp: contactPhoneIsWhatsApp,
         paymentMethods: paymentMethods.length ? paymentMethods : null,
         deliveryType: deliveryType || null,
         deliveryFee:
@@ -446,6 +450,33 @@ export default function StoreDetailPage() {
                   onChange={(e) => setContactPhone(e.target.value)}
                   placeholder="(11) 99999-9999"
                 />
+              </div>
+              <div>
+                <p className="mb-2 text-sm font-medium text-gray-700">
+                  O número informado é WhatsApp?
+                </p>
+                <div className="flex gap-4">
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="radio"
+                      name="contactPhoneIsWhatsApp"
+                      checked={contactPhoneIsWhatsApp === true}
+                      onChange={() => setContactPhoneIsWhatsApp(true)}
+                      className="text-primary focus:ring-primary/20"
+                    />
+                    <span className="text-sm text-gray-700">Sim</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="radio"
+                      name="contactPhoneIsWhatsApp"
+                      checked={contactPhoneIsWhatsApp === false}
+                      onChange={() => setContactPhoneIsWhatsApp(false)}
+                      className="text-primary focus:ring-primary/20"
+                    />
+                    <span className="text-sm text-gray-700">Não</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>

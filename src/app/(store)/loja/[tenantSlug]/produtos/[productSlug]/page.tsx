@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { MessageCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import {
   getPublicProduct,
+  getPublicStore,
   getRelatedProducts,
   isProductAvailable,
 } from "@/lib/store-public";
@@ -28,7 +30,10 @@ function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default async function ProductPage({ params }: PageProps) {
   const { tenantSlug, productSlug } = await params;
-  const product = await getPublicProduct(tenantSlug, productSlug);
+  const [product, storeData] = await Promise.all([
+    getPublicProduct(tenantSlug, productSlug),
+    getPublicStore(tenantSlug),
+  ]);
   if (!product) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
@@ -43,6 +48,17 @@ export default async function ProductPage({ params }: PageProps) {
     );
   }
   const available = isProductAvailable(product);
+  const store = storeData?.store as {
+    contactPhone?: string | null;
+    contactPhoneIsWhatsApp?: boolean;
+    name?: string;
+  } | undefined;
+  const whatsappPhone = store?.contactPhone && store?.contactPhoneIsWhatsApp
+    ? store.contactPhone.replace(/\D/g, "")
+    : null;
+  const whatsappUrl = whatsappPhone
+    ? `https://wa.me/55${whatsappPhone}?text=${encodeURIComponent(`Olá! Tenho dúvidas sobre o produto: ${product.name}`)}`
+    : null;
   const stock = product.stock ?? 0;
   const price = Number(product.price);
   const relatedProducts = await getRelatedProducts(
@@ -114,6 +130,17 @@ export default async function ProductPage({ params }: PageProps) {
               )}
             </div>
 
+            {whatsappUrl && (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex w-fit items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-800 transition-colors hover:bg-green-100"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Tirar dúvidas no WhatsApp
+              </a>
+            )}
             <div className="mt-6">
               <ProductPurchaseSection
                 tenantSlug={tenantSlug}
