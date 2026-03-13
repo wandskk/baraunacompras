@@ -21,9 +21,9 @@ SaaS multi-tenant para lojas locais criarem e gerenciarem lojas online.
 | **Database/Prisma** | ✅ Estruturado | Tenant, User, Store, Category, Product, Order, Customer, Cart |
 | **Schemas Zod** | ✅ Implementados | auth, tenant, store, category, product, order, cart |
 | **Backend (módulos)** | ✅ Parcial | Controllers, Services, Repositories, UseCases em maioria dos módulos |
-| **API Routes** | ⚠️ Parcial | Apenas `/api/auth/*` e `/api/tenants` |
-| **Frontend** | ❌ Inicial | Apenas `layout.tsx` e `page.tsx`, sem Tailwind |
-| **Tailwind** | ❌ Não instalado | Necessário para temas futuros |
+| **API Routes** | ✅ Completo | auth, tenants, stores, categories, products, orders, customers, cart |
+| **Frontend** | ⚠️ Inicial | Apenas `layout.tsx` e `page.tsx`, Tailwind configurado |
+| **Tailwind** | ✅ Configurado | Tema base com CSS variables para temas futuros |
 
 ---
 
@@ -139,13 +139,13 @@ src/
 
 ## Pontos de atenção (schema atual)
 
-1. **Product** usa `price` como `Decimal` – Zod usa `number`; pode precisar `z.coerce.number()` ou `z.number()` com transform
+1. **Product** – `z.coerce.number()` aplicado para price
 2. **Cart** não tem `CartItem` – carrinho pode precisar de itens (produto + quantidade)
 3. **Order** não tem `OrderItem` – pedido pode precisar de itens (produto + quantidade + preço)
-4. **Customer** – não há módulo customer completo (repositories, services, controllers)
+4. **Customer** – módulo completo implementado
 
 Para MVP mínimo, pode-se começar com Order/Cart sem itens e evoluir depois.
 
 ---
 
-**Próxima etapa sugerida:** Fase 1 – Instalar Tailwind e configurar tema base.
+**Próxima etapa sugerida:** Fase 4 – Frontend Admin (Auth UI, Dashboard, gestão de lojas).
