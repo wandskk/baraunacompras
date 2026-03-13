@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatCurrency } from "@/lib/format";
 import { getPublicStoreWithProducts, getPublicStore } from "@/lib/store-public";
 import { CheckoutForm } from "./CheckoutForm";
 
@@ -99,7 +100,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
         <div className="mt-4 rounded-lg bg-gray-50 p-4">
           <p className="font-medium text-gray-900">{product.name}</p>
           <p className="mt-1 text-lg font-bold text-primary">
-            R$ {price.toFixed(2)}
+            {formatCurrency(price)}
           </p>
         </div>
         <CheckoutForm

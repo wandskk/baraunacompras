@@ -9,6 +9,7 @@ import {
   DataListItem,
   StoreListPageLayout,
 } from "@/components/dashboard";
+import { formatCurrency } from "@/lib/format";
 import { useSession } from "@/hooks/useSession";
 
 type Order = {
@@ -87,7 +88,7 @@ export default function OrdersPage() {
             </div>
             <div className="flex items-center gap-4">
               <p className="font-semibold text-primary">
-                R$ {Number(order.total).toFixed(2)}
+                {formatCurrency(Number(order.total))}
               </p>
               <span
                 className={`rounded-full px-2.5 py-1 text-xs font-medium ${

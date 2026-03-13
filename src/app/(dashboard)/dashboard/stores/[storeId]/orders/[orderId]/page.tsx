@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { formatCurrency } from "@/lib/format";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, LoadingSpinner } from "@/components/ui";
@@ -201,7 +202,7 @@ export default function OrderDetailPage() {
                   </p>
                 </div>
                 <p className="font-medium text-primary">
-                  R$ {(item.quantity * Number(item.price)).toFixed(2)}
+                  {formatCurrency(item.quantity * Number(item.price))}
                 </p>
               </li>
             ))}
@@ -210,7 +211,7 @@ export default function OrderDetailPage() {
             <p className="flex justify-between text-lg font-bold text-gray-900">
               Total
               <span className="text-primary">
-                R$ {Number(order.total).toFixed(2)}
+                {formatCurrency(order.total)}
               </span>
             </p>
           </div>

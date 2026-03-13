@@ -23,7 +23,9 @@ import {
   MapPin,
   FileText,
 } from "lucide-react";
-import { Button, Input, ImageUpload, LoadingSpinner } from "@/components/ui";
+import { Button, Input, ImageUpload, LoadingSpinner, MaskedInput } from "@/components/ui";
+import { formatCep, formatCurrency, formatPhone } from "@/lib/format";
+import { parseCurrencyToNumber, formatNumberToCurrency } from "@/lib/masks";
 import { useSession } from "@/hooks/useSession";
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -156,7 +158,9 @@ export default function StoreDetailPage() {
       setFaviconUrl(data.faviconUrl ?? "");
       setDescription(data.description ?? "");
       setContactEmail(data.contactEmail ?? "");
-      setContactPhone(data.contactPhone ?? "");
+      setContactPhone(
+        data.contactPhone ? formatPhone(data.contactPhone) : ""
+      );
       try {
         setPaymentMethods(
           data.paymentMethods ? JSON.parse(data.paymentMethods) : []
@@ -166,7 +170,7 @@ export default function StoreDetailPage() {
       }
       setDeliveryType(data.deliveryType ?? "pickup");
       setDeliveryFee(
-        data.deliveryFee != null ? String(data.deliveryFee) : ""
+        data.deliveryFee != null ? formatNumberToCurrency(Number(data.deliveryFee)) : ""
       );
       setDeliveryDays(
         data.deliveryDays != null ? String(data.deliveryDays) : ""
@@ -177,7 +181,9 @@ export default function StoreDetailPage() {
       setAddressNeighborhood(data.addressNeighborhood ?? "");
       setAddressCity(data.addressCity ?? "");
       setAddressState(data.addressState ?? "");
-      setAddressZipCode(data.addressZipCode ?? "");
+      setAddressZipCode(
+        data.addressZipCode ? formatCep(data.addressZipCode) : ""
+      );
     } finally {
       setLoading(false);
     }
@@ -197,11 +203,11 @@ export default function StoreDetailPage() {
         faviconUrl: faviconUrl || null,
         description: description || null,
         contactEmail: contactEmail || null,
-        contactPhone: contactPhone || null,
+        contactPhone: (contactPhone && contactPhone.replace(/\D/g, "")) || null,
         paymentMethods: paymentMethods.length ? paymentMethods : null,
         deliveryType: deliveryType || null,
         deliveryFee:
-          deliveryFee !== "" ? parseFloat(deliveryFee) || null : null,
+          deliveryFee !== "" ? parseCurrencyToNumber(deliveryFee) || null : null,
         deliveryDays:
           deliveryDays !== "" ? parseInt(deliveryDays, 10) || null : null,
         addressStreet: addressStreet || null,
@@ -210,7 +216,7 @@ export default function StoreDetailPage() {
         addressNeighborhood: addressNeighborhood || null,
         addressCity: addressCity || null,
         addressState: addressState || null,
-        addressZipCode: addressZipCode || null,
+        addressZipCode: (addressZipCode && addressZipCode.replace(/\D/g, "")) || null,
       };
       const res = await fetch(
         `/api/tenants/${session.tenantId}/stores/${storeId}`,
@@ -410,8 +416,9 @@ export default function StoreDetailPage() {
                   onChange={(e) => setContactEmail(e.target.value)}
                   placeholder="contato@loja.com"
                 />
-                <Input
+                <MaskedInput
                   label="Telefone / WhatsApp"
+                  mask="phone"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                   placeholder="(11) 99999-9999"
@@ -427,8 +434,9 @@ export default function StoreDetailPage() {
             </h2>
             <div className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
-                <Input
+                <MaskedInput
                   label="CEP"
+                  mask="cep"
                   value={addressZipCode}
                   onChange={(e) => setAddressZipCode(e.target.value)}
                   placeholder="00000-000"
@@ -533,11 +541,9 @@ export default function StoreDetailPage() {
               </div>
               {(deliveryType === "delivery" || deliveryType === "both") && (
                 <div className="grid gap-6 sm:grid-cols-2">
-                  <Input
+                  <MaskedInput
                     label="Valor do frete (R$)"
-                    type="number"
-                    step="0.01"
-                    min="0"
+                    mask="currency"
                     value={deliveryFee}
                     onChange={(e) => setDeliveryFee(e.target.value)}
                     placeholder="0,00"
@@ -607,7 +613,7 @@ export default function StoreDetailPage() {
                     </div>
                   </div>
                   <span className="text-xl font-bold text-emerald-700">
-                    R$ {stats.revenueThisMonth.toFixed(2)}
+                    {formatCurrency(stats.revenueThisMonth)}
                   </span>
                 </div>
               </div>
@@ -711,7 +717,7 @@ export default function StoreDetailPage() {
                         Contato
                       </p>
                       <p className="mt-0.5 font-medium text-gray-900">
-                        {store.contactPhone}
+                        {formatPhone(store.contactPhone)}
                       </p>
                     </div>
                   </div>
@@ -755,7 +761,7 @@ export default function StoreDetailPage() {
                           store.addressState
                             ? `${store.addressCity} - ${store.addressState}`
                             : store.addressCity || store.addressState,
-                        store.addressZipCode && store.addressZipCode,
+                        store.addressZipCode && formatCep(store.addressZipCode),
                       ]
                         .filter(Boolean)
                         .join(", ")}
@@ -801,7 +807,7 @@ export default function StoreDetailPage() {
                       </p>
                       <p className="mt-0.5 text-gray-900">
                         {store.deliveryFee != null
-                          ? `R$ ${Number(store.deliveryFee).toFixed(2)}`
+                          ? formatCurrency(Number(store.deliveryFee))
                           : "A combinar"}{" "}
                         {store.deliveryDays != null &&
                           `• ${store.deliveryDays} dia(s)`}

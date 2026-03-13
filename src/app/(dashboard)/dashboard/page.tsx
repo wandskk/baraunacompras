@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Button, Input, LoadingSpinner, Modal } from "@/components/ui";
+import { formatCurrency } from "@/lib/format";
 import { slugify } from "@/lib/slugify";
 import { useSession } from "@/hooks/useSession";
 
@@ -288,7 +289,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <span className="text-lg font-bold text-emerald-700">
-                          R$ {stats.revenueThisMonth.toFixed(2)}
+                          {formatCurrency(stats.revenueThisMonth)}
                         </span>
                       </div>
 

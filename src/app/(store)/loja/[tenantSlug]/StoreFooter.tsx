@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { formatPhone } from "@/lib/format";
 
 type Props = {
   storeName: string;
@@ -58,7 +59,7 @@ export function StoreFooter({
                   className="flex items-center gap-2 hover:text-gray-900"
                 >
                   <IconWrapper><PhoneIcon /></IconWrapper>
-                  {contactPhone}
+                  {formatPhone(contactPhone)}
                 </a>
               )}
               {contactEmail && (

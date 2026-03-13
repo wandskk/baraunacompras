@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { formatCurrency } from "@/lib/format";
 import { AddToCartButton } from "./produtos/[productSlug]/AddToCartButton";
 
 type Product = {
@@ -44,7 +45,7 @@ export function StoreProductCard({ tenantSlug, product, available }: Props) {
         <div className="flex flex-1 flex-col p-3 sm:p-4">
           <h3 className="font-semibold text-gray-900 line-clamp-2">{product.name}</h3>
           <p className="mt-1 text-lg font-bold text-primary">
-            R$ {price.toFixed(2)}
+            {formatCurrency(price)}
           </p>
           {!available && (
             <span className="mt-1 text-xs text-gray-500">Indisponível</span>

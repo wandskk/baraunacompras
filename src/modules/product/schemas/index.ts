@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const createProductSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
+  name: z.string().min(1, "Nome é obrigatório"),
+  slug: z.string().min(1, "Slug é obrigatório").regex(/^[a-z0-9-]+$/, "Slug inválido"),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
-  price: z.coerce.number().positive(),
-  stock: z.coerce.number().int().min(0).default(0),
+  price: z.coerce.number().positive("Preço deve ser maior que zero"),
+  stock: z.coerce.number().int().min(0, "Estoque não pode ser negativo").default(0),
   variations: z.array(z.string().min(1)).optional().default([]),
   sizes: z.array(z.string().min(1)).optional().default([]),
   tenantId: z.string().min(1),

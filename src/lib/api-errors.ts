@@ -20,11 +20,12 @@ export function toErrorResponse(error: unknown): { status: number; json: ApiErro
       path: i.path.join("."),
       message: i.message,
     }));
+    const firstMessage = issues[0]?.message ?? "Dados inválidos";
     return {
       status: 400,
       json: {
         code: "VALIDATION_ERROR",
-        error: "Dados inválidos",
+        error: firstMessage,
         details: issues,
       },
     };

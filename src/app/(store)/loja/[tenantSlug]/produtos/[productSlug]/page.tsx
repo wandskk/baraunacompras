@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatCurrency } from "@/lib/format";
 import {
   getPublicProduct,
   getRelatedProducts,
@@ -100,7 +101,7 @@ export default async function ProductPage({ params }: PageProps) {
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-3xl font-bold text-primary">
-                R$ {price.toFixed(2)}
+                {formatCurrency(price)}
               </p>
               {available ? (
                 <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">

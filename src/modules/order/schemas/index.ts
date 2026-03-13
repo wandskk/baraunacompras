@@ -14,15 +14,15 @@ export const updateOrderSchema = z.object({
 });
 
 export const checkoutSchema = z.object({
-  email: z.string().email(),
+  email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
   name: z.string().optional(),
   productId: z.string().min(1),
   quantity: z.coerce.number().int().min(1).default(1),
-  total: z.coerce.number().positive(),
+  total: z.coerce.number().positive("Total inválido"),
 });
 
 export const checkoutFromCartSchema = z.object({
-  email: z.string().email(),
+  email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
   name: z.string().optional(),
   cartId: z.string().min(1),
 });

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { Button, LoadingSpinner } from "@/components/ui";
+import { formatCurrency } from "@/lib/format";
 
 type CartItem = {
   id: string;
@@ -150,7 +151,7 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
                     </p>
                   )}
                   <p className="text-sm text-gray-500">
-                    R$ {Number(item.product.price).toFixed(2)} × {item.quantity}
+                    {formatCurrency(item.product.price)} × {item.quantity}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -182,7 +183,7 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
                   </Button>
                 </div>
                 <p className="w-24 text-right font-semibold text-primary">
-                  R$ {item.subtotal.toFixed(2)}
+                  {formatCurrency(item.subtotal)}
                 </p>
               </li>
             );
@@ -194,7 +195,7 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <p className="text-sm text-gray-500">Total</p>
           <p className="mt-1 text-2xl font-bold text-primary">
-            R$ {data.total.toFixed(2)}
+            {formatCurrency(data.total)}
           </p>
           <Link href={`/loja/${tenantSlug}/checkout?cartId=${data.cart?.id}`} className="mt-4 block">
             <Button fullWidth>Finalizar compra</Button>

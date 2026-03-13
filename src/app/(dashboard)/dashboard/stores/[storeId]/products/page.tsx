@@ -9,8 +9,11 @@ import {
   Input,
   ImageUpload,
   LoadingSpinner,
+  MaskedInput,
   Modal,
 } from "@/components/ui";
+import { formatCurrency } from "@/lib/format";
+import { formatNumberToCurrency, parseCurrencyToNumber } from "@/lib/masks";
 import {
   DataList,
   DataListItem,
@@ -117,7 +120,7 @@ export default function ProductsPage() {
     setSlug(product.slug);
     setDescription(product.description ?? "");
     setImageUrl(product.imageUrl ?? "");
-    setPrice(product.price);
+    setPrice(product.price ? formatNumberToCurrency(Number(product.price)) : "");
     setStock(String(product.stock ?? 0));
     setVariations(product.variations ?? []);
     setSizes(product.sizes ?? []);
@@ -143,7 +146,7 @@ export default function ProductsPage() {
         slug,
         description: description || undefined,
         imageUrl: imageUrl || undefined,
-        price: parseFloat(price),
+        price: parseCurrencyToNumber(price) || parseFloat(price) || 0,
         stock: parseInt(stock, 10) || 0,
         variations: variations.length > 0 ? variations : undefined,
         sizes: sizes.length > 0 ? sizes : undefined,
@@ -260,13 +263,12 @@ export default function ProductsPage() {
             />
           )}
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input
+            <MaskedInput
               label="Preço"
-              type="number"
-              step="0.01"
-              min="0"
+              mask="currency"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              placeholder="0,00"
               required
             />
             <Input
@@ -374,7 +376,7 @@ export default function ProductsPage() {
             </div>
             <div className="flex items-center gap-4">
               <p className="font-semibold text-primary">
-                R$ {Number(p.price).toFixed(2)}
+                {formatCurrency(Number(p.price))}
               </p>
               <Button
                 variant="outline"
