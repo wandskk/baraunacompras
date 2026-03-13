@@ -1,11 +1,48 @@
 import type { ReactNode } from "react";
-import { formatPhone } from "@/lib/format";
+import { formatCep, formatPhone } from "@/lib/format";
 
 type Props = {
   storeName: string;
   contactEmail?: string | null;
   contactPhone?: string | null;
+  addressStreet?: string | null;
+  addressNumber?: string | null;
+  addressComplement?: string | null;
+  addressNeighborhood?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressZipCode?: string | null;
 };
+
+function formatAddress(props: {
+  addressStreet?: string | null;
+  addressNumber?: string | null;
+  addressComplement?: string | null;
+  addressNeighborhood?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressZipCode?: string | null;
+}): string {
+  const parts: string[] = [];
+  if (props.addressStreet) {
+    let street = props.addressStreet;
+    if (props.addressNumber) street += `, ${props.addressNumber}`;
+    if (props.addressComplement) street += ` - ${props.addressComplement}`;
+    parts.push(street);
+  }
+  if (props.addressNeighborhood) parts.push(props.addressNeighborhood);
+  if (props.addressCity && props.addressState) {
+    parts.push(`${props.addressCity} - ${props.addressState}`);
+  } else if (props.addressCity) {
+    parts.push(props.addressCity);
+  } else if (props.addressState) {
+    parts.push(props.addressState);
+  }
+  if (props.addressZipCode) {
+    parts.push(formatCep(props.addressZipCode));
+  }
+  return parts.join(", ");
+}
 
 function IconWrapper({ children }: { children: ReactNode }) {
   return <span className="flex h-5 w-5 shrink-0 items-center justify-center text-gray-500">{children}</span>;
@@ -41,7 +78,24 @@ export function StoreFooter({
   storeName,
   contactEmail,
   contactPhone,
+  addressStreet,
+  addressNumber,
+  addressComplement,
+  addressNeighborhood,
+  addressCity,
+  addressState,
+  addressZipCode,
 }: Props) {
+  const hasAddress = addressStreet || addressCity || addressZipCode;
+  const addressText = formatAddress({
+    addressStreet,
+    addressNumber,
+    addressComplement,
+    addressNeighborhood,
+    addressCity,
+    addressState,
+    addressZipCode,
+  });
   const whatsappUrl = contactPhone
     ? `https://wa.me/55${contactPhone.replace(/\D/g, "")}`
     : null;
@@ -71,10 +125,17 @@ export function StoreFooter({
                   {contactEmail}
                 </a>
               )}
-              <div className="flex items-center gap-2 text-gray-500">
-                <IconWrapper><MapPinIcon /></IconWrapper>
-                <span>Entre em contato para mais informações</span>
-              </div>
+              {hasAddress ? (
+                <div className="flex items-start gap-2 text-gray-600">
+                  <IconWrapper><MapPinIcon /></IconWrapper>
+                  <span>{addressText}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-gray-500">
+                  <IconWrapper><MapPinIcon /></IconWrapper>
+                  <span>Entre em contato para mais informações</span>
+                </div>
+              )}
             </div>
           </div>
           {whatsappUrl && (
@@ -90,7 +151,7 @@ export function StoreFooter({
           )}
         </div>
         <p className="mt-6 flex justify-center text-center text-xs text-gray-500 sm:justify-start">
-          © {new Date().getFullYear()} {storeName}
+          © {new Date().getFullYear()} {storeName} · Baraúna Compras
         </p>
       </div>
     </footer>

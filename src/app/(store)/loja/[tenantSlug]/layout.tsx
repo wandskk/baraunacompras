@@ -31,7 +31,18 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
   }
 
   const storeName = data.store.name;
-  const store = data.store as { logoUrl?: string | null; contactEmail?: string | null; contactPhone?: string | null };
+  const store = data.store as {
+    logoUrl?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    addressStreet?: string | null;
+    addressNumber?: string | null;
+    addressComplement?: string | null;
+    addressNeighborhood?: string | null;
+    addressCity?: string | null;
+    addressState?: string | null;
+    addressZipCode?: string | null;
+  };
   const themeClass = `theme-${data.store.theme ?? "default"}`;
   return (
     <div className={`flex min-h-screen flex-col bg-gray-50 ${themeClass}`}>
@@ -49,6 +60,13 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
         storeName={storeName}
         contactEmail={store.contactEmail}
         contactPhone={store.contactPhone}
+        addressStreet={store.addressStreet}
+        addressNumber={store.addressNumber}
+        addressComplement={store.addressComplement}
+        addressNeighborhood={store.addressNeighborhood}
+        addressCity={store.addressCity}
+        addressState={store.addressState}
+        addressZipCode={store.addressZipCode}
       />
     </div>
   );

@@ -26,6 +26,7 @@ import {
 import { Button, Input, ImageUpload, LoadingSpinner, MaskedInput } from "@/components/ui";
 import { formatCep, formatCurrency, formatPhone } from "@/lib/format";
 import { parseCurrencyToNumber, formatNumberToCurrency } from "@/lib/masks";
+import { fetchAddressByCep } from "@/lib/viacep";
 import { useSession } from "@/hooks/useSession";
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -131,6 +132,8 @@ export default function StoreDetailPage() {
   const [addressZipCode, setAddressZipCode] = useState("");
   const [error, setError] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState("");
 
   useEffect(() => {
     if (session) {
@@ -186,6 +189,26 @@ export default function StoreDetailPage() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCepBlur() {
+    const digits = addressZipCode.replace(/\D/g, "");
+    if (digits.length !== 8) return;
+    setCepError("");
+    setCepLoading(true);
+    try {
+      const data = await fetchAddressByCep(addressZipCode);
+      if (data) {
+        setAddressStreet(data.logradouro ?? "");
+        setAddressNeighborhood(data.bairro ?? "");
+        setAddressCity(data.localidade ?? "");
+        setAddressState(data.uf ?? "");
+      } else {
+        setCepError("CEP não encontrado");
+      }
+    } finally {
+      setCepLoading(false);
     }
   }
 
@@ -434,13 +457,26 @@ export default function StoreDetailPage() {
             </h2>
             <div className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
-                <MaskedInput
-                  label="CEP"
-                  mask="cep"
-                  value={addressZipCode}
-                  onChange={(e) => setAddressZipCode(e.target.value)}
-                  placeholder="00000-000"
-                />
+                <div>
+                  <MaskedInput
+                    label="CEP"
+                    mask="cep"
+                    value={addressZipCode}
+                    onChange={(e) => {
+                      setAddressZipCode(e.target.value);
+                      setCepError("");
+                    }}
+                    onBlur={handleCepBlur}
+                    placeholder="00000-000"
+                    disabled={cepLoading}
+                  />
+                  {cepLoading && (
+                    <p className="mt-1 text-sm text-gray-500">Buscando endereço...</p>
+                  )}
+                  {cepError && (
+                    <p className="mt-1 text-sm text-amber-600">{cepError}</p>
+                  )}
+                </div>
                 <Input
                   label="Rua"
                   value={addressStreet}
