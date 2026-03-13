@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createProductSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
-  price: z.number().positive(),
+  price: z.coerce.number().positive(),
   tenantId: z.string().min(1),
   storeId: z.string().min(1),
   categoryId: z.string().optional(),
