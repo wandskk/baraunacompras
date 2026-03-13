@@ -1,20 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: oklch(0.55 0.22 262);
+  /* Cores Baraúna - inspiradas na logo da cidade */
+  --color-primary: #2F8743;       /* Verde Baraúna */
   --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.96 0.01 262);
-  --color-secondary-foreground: oklch(0.45 0.02 262);
-  --color-accent: oklch(0.55 0.18 145);
+  --color-secondary: #FCD000;    /* Amarelo Baraúna */
+  --color-secondary-foreground: #202C59;
+  --color-accent: #2266B0;       /* Azul Baraúna */
   --color-accent-foreground: oklch(1 0 0);
+  /* Azul marinho para texto e contornos */
+  --color-navy: #202C59;
 }
 
 .theme-default {
-  --color-primary: oklch(0.55 0.22 262);
+  --color-primary: #2F8743;
   --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.96 0.01 262);
-  --color-secondary-foreground: oklch(0.45 0.02 262);
-  --color-accent: oklch(0.55 0.18 145);
+  --color-secondary: #FCD000;
+  --color-secondary-foreground: #202C59;
+  --color-accent: #2266B0;
   --color-accent-foreground: oklch(1 0 0);
 }
 
@@ -47,7 +50,7 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-gray-50 text-gray-900;
   }
 }
 

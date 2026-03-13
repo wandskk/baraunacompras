@@ -1,4 +1,12 @@
+import { Nunito } from "next/font/google";
 import "./globals.css";
+
+const nunito = Nunito({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-nunito",
+});
 
 export default function RootLayout({
   children,
@@ -6,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR">
-      <body className="min-h-screen">{children}</body>
+    <html lang="pt-BR" className={nunito.variable}>
+      <body className={`${nunito.className} min-h-screen antialiased`}>{children}</body>
     </html>
   );
 }
