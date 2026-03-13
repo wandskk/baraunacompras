@@ -22,7 +22,7 @@ SaaS multi-tenant para lojas locais criarem e gerenciarem lojas online.
 | **Schemas Zod** | ✅ Implementados | auth, tenant, store, category, product, order, cart |
 | **Backend (módulos)** | ✅ Parcial | Controllers, Services, Repositories, UseCases em maioria dos módulos |
 | **API Routes** | ✅ Completo | auth, tenants, stores, categories, products, orders, customers, cart |
-| **Frontend** | ⚠️ Inicial | Apenas `layout.tsx` e `page.tsx`, Tailwind configurado |
+| **Frontend** | ✅ Parcial | Auth UI, Dashboard, Stores, Categories, Products, Orders |
 | **Tailwind** | ✅ Configurado | Tema base com CSS variables para temas futuros |
 
 ---
@@ -148,4 +148,4 @@ Para MVP mínimo, pode-se começar com Order/Cart sem itens e evoluir depois.
 
 ---
 
-**Próxima etapa sugerida:** Fase 4 – Frontend Admin (Auth UI, Dashboard, gestão de lojas).
+**Próxima etapa sugerida:** Fase 5 – Loja pública (páginas para clientes finais).
