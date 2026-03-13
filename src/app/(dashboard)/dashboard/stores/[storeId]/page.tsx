@@ -11,6 +11,7 @@ type Store = {
   name: string;
   slug: string;
   tenantId: string;
+  tenant?: { slug: string };
 };
 
 export default function StoreDetailPage() {
@@ -148,6 +149,16 @@ export default function StoreDetailPage() {
             <p>
               <span className="font-medium text-gray-500">Slug:</span> {store.slug}
             </p>
+            {store.tenant && (
+              <a
+                href={`/loja/${store.tenant.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-block font-medium text-primary hover:underline"
+              >
+                Ver loja →
+              </a>
+            )}
             <div className="mt-6 flex gap-2">
               <Link href={`/dashboard/stores/${storeId}/categories`}>
                 <Button variant="secondary">Categorias</Button>

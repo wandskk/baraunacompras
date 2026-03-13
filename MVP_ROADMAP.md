@@ -148,4 +148,4 @@ Para MVP mínimo, pode-se começar com Order/Cart sem itens e evoluir depois.
 
 ---
 
-**Próxima etapa sugerida:** Fase 5 – Loja pública (páginas para clientes finais).
+**Próxima etapa sugerida:** Fase 6 – Ajustes finais MVP (temas, CartItem se necessário).
