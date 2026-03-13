@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { FolderOpen, Plus } from "lucide-react";
-import { Button, Input, LoadingSpinner } from "@/components/ui";
+import { Button, Input, LoadingSpinner, Modal } from "@/components/ui";
 import {
   DataList,
   DataListItem,
@@ -25,7 +25,7 @@ export default function CategoriesPage() {
   const { session, loading: sessionLoading } = useSession();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [error, setError] = useState("");
@@ -66,7 +66,7 @@ export default function CategoriesPage() {
         return;
       }
       setCategories((prev) => [...prev, data]);
-      setShowCreate(false);
+      setModalOpen(false);
       setName("");
       setSlug("");
     } catch {
@@ -87,58 +87,63 @@ export default function CategoriesPage() {
       storeId={storeId}
       title="Categorias"
       actions={
-        <Button onClick={() => setShowCreate(true)} className="gap-2">
+        <Button onClick={() => setModalOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           Nova categoria
         </Button>
       }
     >
-      {showCreate && (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <form onSubmit={handleCreate} className="space-y-4">
-            <Input
-              label="Nome"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setSlug(slugify(e.target.value));
-              }}
-              required
-            />
-            <Input
-              label="Slug"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              required
-            />
-            {error && (
-              <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">
-                {error}
-              </p>
-            )}
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setShowCreate(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={createLoading}>
-                {createLoading ? "Criando..." : "Criar"}
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
+      <Modal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setError("");
+        }}
+        title="Nova categoria"
+      >
+        <form onSubmit={handleCreate} className="space-y-4">
+          <Input
+            label="Nome"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setSlug(slugify(e.target.value));
+            }}
+            required
+          />
+          <Input
+            label="Slug"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            required
+          />
+          {error && (
+            <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">
+              {error}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={createLoading}>
+              {createLoading ? "Criando..." : "Criar"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       <DataList
         empty={categories.length === 0}
         emptyMessage="Nenhuma categoria cadastrada."
         emptyIcon={FolderOpen}
         emptyAction={
-          !showCreate && (
-            <Button onClick={() => setShowCreate(true)} className="gap-2">
+          !modalOpen && (
+            <Button onClick={() => setModalOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />
               Criar primeira categoria
             </Button>

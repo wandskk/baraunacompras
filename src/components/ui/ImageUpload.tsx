@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { ImageIcon } from "lucide-react";
 
 type ImageUploadProps = {
   label: string;
@@ -20,6 +21,11 @@ export function ImageUpload({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [value]);
 
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -45,7 +51,10 @@ export function ImageUpload({
         return;
       }
 
-      if (data.url) onChange(data.url);
+      if (data.url) {
+        setImgError(false);
+        onChange(data.url);
+      }
     } catch {
       setError("Erro de conexão");
     } finally {
@@ -60,12 +69,16 @@ export function ImageUpload({
         {label}
       </label>
       <div className="flex flex-wrap items-center gap-4">
-        {value && (
+        {value && !imgError && (
           <div className="relative">
             <img
               src={value}
               alt="Preview"
-              className="h-20 w-20 rounded-lg border border-gray-200 object-cover"
+              className="h-32 w-32 rounded-lg border border-gray-200 bg-gray-100 object-contain"
+              loading="eager"
+              decoding="async"
+              referrerPolicy="no-referrer"
+              onError={() => setImgError(true)}
             />
             <button
               type="button"
@@ -85,8 +98,23 @@ export function ImageUpload({
                   strokeWidth={2}
                   d="M6 18L18 6M6 6l12 12"
                 />
-              </svg>
-            </button>
+            </svg>
+          </button>
+        </div>
+        )}
+        {value && imgError && (
+          <div className="flex h-32 w-32 items-center justify-center rounded-lg border border-amber-200 bg-amber-50">
+            <div className="text-center">
+              <ImageIcon className="mx-auto h-8 w-8 text-amber-500" />
+              <p className="mt-1 text-xs text-amber-700">Erro ao carregar</p>
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                className="mt-1 text-xs font-medium text-amber-700 underline hover:no-underline"
+              >
+                Remover
+              </button>
+            </div>
           </div>
         )}
         <div>

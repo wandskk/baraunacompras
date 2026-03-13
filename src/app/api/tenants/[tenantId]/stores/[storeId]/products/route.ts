@@ -14,6 +14,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const { searchParams } = request.nextUrl;
     const opts = searchSchema.parse({
       q: searchParams.get("q") ?? undefined,
+      lowStock: searchParams.get("lowStock") ?? undefined,
       page: searchParams.get("page") ?? undefined,
       limit: searchParams.get("limit") ?? undefined,
     });

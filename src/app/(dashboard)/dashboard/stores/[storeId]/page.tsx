@@ -654,7 +654,7 @@ export default function StoreDetailPage() {
                 </div>
               </div>
               <Link
-                href={`/dashboard/stores/${storeId}/products`}
+                href={`/dashboard/stores/${storeId}/products?lowStock=true`}
                 className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:border-red-200 hover:shadow-md"
               >
                 <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50/80 p-4">

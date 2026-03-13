@@ -1,9 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, Plus, Pencil, ShoppingBag } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Pencil,
+  ShoppingBag,
+  AlertTriangle,
+  Package,
+  DollarSign,
+  Layers,
+} from "lucide-react";
 import {
   Button,
   Input,
@@ -31,6 +40,7 @@ type Product = {
   description?: string | null;
   imageUrl?: string | null;
   stock?: number;
+  minStock?: number;
   variations?: string[];
   sizes?: string[];
   categoryId: string | null;
@@ -44,8 +54,11 @@ type Category = {
 
 export default function ProductsPage() {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const storeId = params.storeId as string;
   const { session, loading: sessionLoading } = useSession();
+  const initialLowStock = searchParams.get("lowStock") === "true";
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tenantSlug, setTenantSlug] = useState<string | null>(null);
@@ -58,10 +71,12 @@ export default function ProductsPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("0");
+  const [minStock, setMinStock] = useState("0");
   const [variations, setVariations] = useState<string[]>([]);
   const [sizes, setSizes] = useState<string[]>([]);
   const [categoryId, setCategoryId] = useState("");
   const [search, setSearch] = useState("");
+  const [lowStockFilter, setLowStockFilter] = useState(initialLowStock);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<{
     page: number;
@@ -72,14 +87,19 @@ export default function ProductsPage() {
   const [submitLoading, setSubmitLoading] = useState(false);
 
   useEffect(() => {
+    setLowStockFilter(searchParams.get("lowStock") === "true");
+  }, [searchParams]);
+
+  useEffect(() => {
     if (!session) return;
-    const searchParams = new URLSearchParams();
-    if (search) searchParams.set("q", search);
-    searchParams.set("page", String(page));
-    searchParams.set("limit", "10");
+    const qs = new URLSearchParams();
+    if (search) qs.set("q", search);
+    if (lowStockFilter) qs.set("lowStock", "true");
+    qs.set("page", String(page));
+    qs.set("limit", "10");
     Promise.all([
       fetch(
-        `/api/tenants/${session.tenantId}/stores/${storeId}/products?${searchParams}`,
+        `/api/tenants/${session.tenantId}/stores/${storeId}/products?${qs}`,
       ),
       fetch(`/api/tenants/${session.tenantId}/categories`),
       fetch(`/api/tenants/${session.tenantId}/stores/${storeId}`),
@@ -97,7 +117,7 @@ export default function ProductsPage() {
         }
       })
       .finally(() => setLoading(false));
-  }, [storeId, session, search, page]);
+  }, [storeId, session, search, page, lowStockFilter]);
 
   function openCreateModal() {
     setEditingProduct(null);
@@ -107,6 +127,7 @@ export default function ProductsPage() {
     setImageUrl("");
     setPrice("");
     setStock("0");
+    setMinStock("0");
     setVariations([]);
     setSizes([]);
     setCategoryId("");
@@ -122,6 +143,7 @@ export default function ProductsPage() {
     setImageUrl(product.imageUrl ?? "");
     setPrice(product.price ? formatNumberToCurrency(Number(product.price)) : "");
     setStock(String(product.stock ?? 0));
+    setMinStock(String(product.minStock ?? 0));
     setVariations(product.variations ?? []);
     setSizes(product.sizes ?? []);
     setCategoryId(product.categoryId ?? "");
@@ -148,6 +170,7 @@ export default function ProductsPage() {
         imageUrl: imageUrl || undefined,
         price: parseCurrencyToNumber(price) || parseFloat(price) || 0,
         stock: parseInt(stock, 10) || 0,
+        minStock: parseInt(minStock, 10) || 0,
         variations: variations.length > 0 ? variations : undefined,
         sizes: sizes.length > 0 ? sizes : undefined,
         categoryId: categoryId || undefined,
@@ -176,12 +199,15 @@ export default function ProductsPage() {
         setProducts((prev) =>
           prev.map((p) =>
             p.id === editingProduct.id
-              ? { ...data, stock: data.stock ?? 0 }
+              ? { ...data, stock: data.stock ?? 0, minStock: data.minStock ?? 0 }
               : p,
           ),
         );
       } else {
-        setProducts((prev) => [...prev, { ...data, stock: data.stock ?? 0 }]);
+        setProducts((prev) => [
+          ...prev,
+          { ...data, stock: data.stock ?? 0, minStock: data.minStock ?? 0 },
+        ]);
       }
       closeModal();
     } catch {
@@ -202,7 +228,7 @@ export default function ProductsPage() {
       storeId={storeId}
       title="Produtos"
       actions={
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
@@ -214,6 +240,22 @@ export default function ProductsPage() {
               className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 sm:w-56"
             />
           </div>
+          <Button
+            variant={lowStockFilter ? "primary" : "outline"}
+            onClick={() => {
+              const next = !lowStockFilter;
+              setLowStockFilter(next);
+              setPage(1);
+              const qs = new URLSearchParams(searchParams.toString());
+              if (next) qs.set("lowStock", "true");
+              else qs.delete("lowStock");
+              router.replace(`?${qs.toString()}`, { scroll: false });
+            }}
+            className="gap-2"
+          >
+            <AlertTriangle className="h-4 w-4" />
+            Estoque baixo
+          </Button>
           <Button onClick={openCreateModal} className="gap-2">
             <Plus className="h-4 w-4" />
             Novo produto
@@ -226,90 +268,124 @@ export default function ProductsPage() {
         onClose={closeModal}
         title={editingProduct ? "Editar produto" : "Novo produto"}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Nome"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setSlug(slugify(e.target.value));
-            }}
-            required
-          />
-          <Input
-            label="Slug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            required
-          />
-          <div className="w-full">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Descrição
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900">
+              <Package className="h-5 w-5 text-primary" />
+              Informações básicas
+            </h3>
+            <div className="space-y-4">
+              <Input
+                label="Nome"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setSlug(slugify(e.target.value));
+                }}
+                required
+              />
+              <Input
+                label="Slug"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                required
+              />
+              <div className="w-full">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Descrição
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              {session && (
+                <ImageUpload
+                  label="Imagem do produto"
+                  value={imageUrl}
+                  onChange={setImageUrl}
+                  tenantId={session.tenantId}
+                  placeholder="Enviar imagem"
+                />
+              )}
+            </div>
           </div>
-          {session && (
-            <ImageUpload
-              label="Imagem do produto"
-              value={imageUrl}
-              onChange={setImageUrl}
-              tenantId={session.tenantId}
-              placeholder="Enviar imagem"
-            />
-          )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <MaskedInput
-              label="Preço"
-              mask="currency"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0,00"
-              required
-            />
-            <Input
-              label="Estoque"
-              type="number"
-              min="0"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-            />
+
+          <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900">
+              <DollarSign className="h-5 w-5 text-primary" />
+              Preço e estoque
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <MaskedInput
+                label="Preço"
+                mask="currency"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0,00"
+                required
+              />
+              <Input
+                label="Estoque"
+                type="number"
+                min="0"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+              />
+              <Input
+                label="Estoque mínimo"
+                type="number"
+                min="0"
+                value={minStock}
+                onChange={(e) => setMinStock(e.target.value)}
+                placeholder="0"
+                title="Alerta quando estoque ficar abaixo deste valor"
+              />
+            </div>
           </div>
-          <OptionListField
-            label="Variações"
-            activateLabel="Ativar variações"
-            options={variations}
-            onChange={setVariations}
-            placeholder="Ex: Vermelho, Azul"
-          />
-          <OptionListField
-            label="Tamanhos"
-            activateLabel="Ativar tamanhos"
-            options={sizes}
-            onChange={setSizes}
-            placeholder="Ex: P, M, G"
-          />
-          <div className="w-full">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Categoria
-            </label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="">Nenhuma</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+
+          <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900">
+              <Layers className="h-5 w-5 text-primary" />
+              Variações e categoria
+            </h3>
+            <div className="space-y-4">
+              <OptionListField
+                label="Variações"
+                activateLabel="Ativar variações"
+                options={variations}
+                onChange={setVariations}
+                placeholder="Ex: Vermelho, Azul"
+              />
+              <OptionListField
+                label="Tamanhos"
+                activateLabel="Ativar tamanhos"
+                options={sizes}
+                onChange={setSizes}
+                placeholder="Ex: P, M, G"
+              />
+              <div className="w-full">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Categoria
+                </label>
+                <select
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="">Nenhuma</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
+
           {error && (
             <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">
               {error}
@@ -369,7 +445,18 @@ export default function ProductsPage() {
                 <p className="text-sm text-gray-500">
                   /{p.slug}
                   {p.stock !== undefined && (
-                    <span className="text-gray-400"> • Estoque: {p.stock}</span>
+                    <span className="text-gray-400">
+                      {" "}
+                      • Estoque: {p.stock}
+                      {p.minStock != null &&
+                        p.minStock > 0 &&
+                        p.stock < p.minStock && (
+                          <span className="ml-1.5 inline-flex items-center gap-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">
+                            <AlertTriangle className="h-3 w-3" />
+                            Baixo
+                          </span>
+                        )}
+                    </span>
                   )}
                 </p>
               </div>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/database/prisma";
 import { apiErrorResponse } from "@/lib/api-errors";
 import { tenantIdParamSchema } from "@/lib/params-schemas";
@@ -44,15 +45,15 @@ export async function GET(_request: Request, { params }: Params) {
         },
         _sum: { total: true },
       }),
-      prisma.product.groupBy({
-        by: ["storeId"],
-        where: {
-          storeId: { in: storeIds },
-          tenantId,
-          OR: [{ stock: 0 }, { stock: { lt: 5 } }],
-        },
-        _count: { id: true },
-      }),
+      prisma.$queryRaw<
+        { storeId: string; count: bigint }[]
+      >`
+        SELECT "storeId", COUNT(*) as count FROM "Product"
+        WHERE "storeId" IN (${Prisma.join(storeIds.map((id) => Prisma.sql`${id}`))})
+        AND "tenantId" = ${tenantId}
+        AND "minStock" > 0 AND stock < "minStock"
+        GROUP BY "storeId"
+      `,
     ]);
 
     const statsByStore: Record<
@@ -68,7 +69,9 @@ export async function GET(_request: Request, { params }: Params) {
             revenueByStore.find((r) => r.storeId === s.id)?._sum.total ?? 0
           ),
         lowStockCount:
-          lowStockByStore.find((l) => l.storeId === s.id)?._count.id ?? 0,
+          Number(
+            lowStockByStore.find((l) => l.storeId === s.id)?.count ?? 0
+          ),
       };
     }
 

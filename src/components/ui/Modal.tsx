@@ -39,7 +39,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         aria-hidden="true"
       />
       <div className="relative z-10 w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
-        <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
           <h2 id="modal-title" className="text-lg font-semibold text-gray-900">
             {title}
           </h2>

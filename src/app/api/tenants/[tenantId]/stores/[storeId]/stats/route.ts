@@ -21,7 +21,7 @@ export async function GET(_request: Request, { params }: Params) {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [pendingOrders, ordersThisMonth, lowStockCount] = await Promise.all([
+    const [pendingOrders, ordersThisMonth, lowStockRows] = await Promise.all([
       prisma.order.count({
         where: { storeId, tenantId, status: "pending" },
       }),
@@ -34,14 +34,13 @@ export async function GET(_request: Request, { params }: Params) {
         },
         select: { total: true },
       }),
-      prisma.product.count({
-        where: {
-          storeId,
-          tenantId,
-          OR: [{ stock: 0 }, { stock: { lt: 5 } }],
-        },
-      }),
+      prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) as count FROM "Product"
+        WHERE "storeId" = ${storeId} AND "tenantId" = ${tenantId}
+        AND "minStock" > 0 AND stock < "minStock"
+      `,
     ]);
+    const lowStockCount = Number(lowStockRows[0]?.count ?? 0);
 
     const revenueThisMonth = ordersThisMonth.reduce(
       (sum, o) => sum + Number(o.total),

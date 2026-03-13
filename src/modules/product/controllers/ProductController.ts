@@ -16,7 +16,7 @@ export class ProductController {
   async listByStore(
     storeId: string,
     tenantId: string,
-    opts?: { q?: string; page?: number; limit?: number }
+    opts?: { q?: string; page?: number; limit?: number; lowStock?: boolean }
   ) {
     return this.service.listByStore(storeId, tenantId, opts);
   }

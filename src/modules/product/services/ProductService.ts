@@ -27,7 +27,7 @@ export class ProductService {
   async listByStore(
     storeId: string,
     tenantId: string,
-    opts?: { q?: string; page?: number; limit?: number }
+    opts?: { q?: string; page?: number; limit?: number; lowStock?: boolean }
   ) {
     return this.repository.findManyByStore(storeId, tenantId, opts);
   }

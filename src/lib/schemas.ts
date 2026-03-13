@@ -8,6 +8,10 @@ export const paginationSchema = z.object({
 export const searchSchema = z.object({
   q: z.string().optional(),
   categoryId: z.string().optional(),
+  lowStock: z
+    .string()
+    .optional()
+    .transform((v) => v === "true" || v === "1"),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
