@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@/components/ui";
-import { setSession } from "@/lib/auth";
 
 function slugify(text: string) {
   return text
@@ -39,6 +38,7 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: tenantName, slug: tenantSlug }),
+        credentials: "include",
       });
       const tenantData = await tenantRes.json();
       if (!tenantRes.ok) {
@@ -54,17 +54,13 @@ export default function RegisterPage() {
           password,
           tenantId: tenantData.id,
         }),
+        credentials: "include",
       });
       const userData = await registerRes.json();
       if (!registerRes.ok) {
         setError(userData.error ?? "Erro ao criar conta");
         return;
       }
-      setSession({
-        userId: userData.id,
-        tenantId: tenantData.id,
-        email: userData.email,
-      });
       router.push("/dashboard");
     } catch {
       setError("Erro de conexão");

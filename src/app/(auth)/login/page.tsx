@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@/components/ui";
-import { setSession } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,17 +21,13 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Erro ao fazer login");
         return;
       }
-      setSession({
-        userId: data.userId,
-        tenantId: data.tenantId,
-        email: data.email,
-      });
       router.push("/dashboard");
     } catch {
       setError("Erro de conexão");

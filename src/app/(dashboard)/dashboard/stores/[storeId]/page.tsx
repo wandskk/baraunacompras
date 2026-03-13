@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@/components/ui";
-import { getSession } from "@/lib/auth";
+import { useSession } from "@/hooks/useSession";
 
 type Store = {
   id: string;
@@ -19,7 +19,7 @@ export default function StoreDetailPage() {
   const router = useRouter();
   const params = useParams();
   const storeId = params.storeId as string;
-  const [session, setSession] = useState<ReturnType<typeof getSession>>(null);
+  const { session, loading: sessionLoading } = useSession();
   const [store, setStore] = useState<Store | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -30,14 +30,10 @@ export default function StoreDetailPage() {
   const [saveLoading, setSaveLoading] = useState(false);
 
   useEffect(() => {
-    const s = getSession();
-    setSession(s);
-    if (!s) {
-      router.replace("/login");
-      return;
+    if (session) {
+      fetchStore(session.tenantId);
     }
-    fetchStore(s.tenantId);
-  }, [storeId, router]);
+  }, [storeId, session]);
 
   async function fetchStore(tenantId: string) {
     try {
@@ -84,7 +80,7 @@ export default function StoreDetailPage() {
     }
   }
 
-  if (loading || !session) {
+  if (sessionLoading || loading || !session) {
     return (
       <div className="flex min-h-[200px] items-center justify-center">
         <p className="text-gray-500">Carregando...</p>
