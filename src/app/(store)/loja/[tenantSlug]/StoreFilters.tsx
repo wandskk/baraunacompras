@@ -48,18 +48,19 @@ export function StoreFilters({
   }
 
   return (
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <form onSubmit={handleSearchSubmit} className="flex gap-2">
+    <div className="flex flex-col gap-4 rounded-xl border border-gray-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      <form onSubmit={handleSearchSubmit} className="flex flex-1 gap-2 sm:max-w-sm">
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar produtos..."
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          aria-label="Buscar produtos"
+          className="w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
         <button
           type="submit"
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="shrink-0 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
         >
           Buscar
         </button>
@@ -68,10 +69,10 @@ export function StoreFilters({
         <div className="flex flex-wrap gap-2">
           <Link
             href={buildUrl({ categoryId: undefined })}
-            className={`rounded-full px-3 py-1 text-sm font-medium ${
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               !currentCategoryId
                 ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:opacity-90"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
             }`}
           >
             Todos
@@ -80,10 +81,10 @@ export function StoreFilters({
             <Link
               key={cat.id}
               href={buildUrl({ categoryId: cat.id })}
-              className={`rounded-full px-3 py-1 text-sm font-medium ${
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 currentCategoryId === cat.id
                   ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground hover:opacity-90"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               }`}
             >
               {cat.name}

@@ -67,6 +67,7 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
       if (res.ok) {
         const json = await res.json();
         setData({ cart: json.cart, items: json.items ?? [], total: json.total ?? 0 });
+        window.dispatchEvent(new CustomEvent("cart-updated"));
       }
     } finally {
       setUpdating(null);
@@ -87,6 +88,7 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
       if (res.ok) {
         const json = await res.json();
         setData({ cart: json.cart, items: json.items ?? [], total: json.total ?? 0 });
+        window.dispatchEvent(new CustomEvent("cart-updated"));
       }
     } finally {
       setUpdating(null);

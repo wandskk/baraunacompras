@@ -26,6 +26,7 @@ export function AddToCartButton({ tenantSlug, productId, disabled }: Props) {
       if (res.ok) {
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
+        window.dispatchEvent(new CustomEvent("cart-updated"));
       }
     } finally {
       setLoading(false);

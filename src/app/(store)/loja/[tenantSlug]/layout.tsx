@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { getPublicStore } from "@/lib/store-public";
 import { getSessionCookie, verifySessionToken } from "@/lib/jwt";
+import { StoreNav } from "./StoreNav";
+import { StoreFooter } from "./StoreFooter";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -29,47 +31,25 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
   }
 
   const storeName = data.store.name;
-  const store = data.store as { logoUrl?: string | null };
+  const store = data.store as { logoUrl?: string | null; contactEmail?: string | null; contactPhone?: string | null };
   const themeClass = `theme-${data.store.theme ?? "default"}`;
   return (
-    <div className={`min-h-screen bg-gray-50 ${themeClass}`}>
-      <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <a href={`/loja/${tenantSlug}`} className="flex items-center gap-2">
-            {store.logoUrl ? (
-              <img
-                src={store.logoUrl}
-                alt={storeName}
-                className="h-8 object-contain"
-              />
-            ) : null}
-            <span className="text-lg font-bold text-primary">{storeName}</span>
-          </a>
-          <nav className="flex items-center gap-4">
-            <a
-              href={`/loja/${tenantSlug}`}
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              Início
-            </a>
-            <a
-              href={`/loja/${tenantSlug}/carrinho`}
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
-            >
-              Carrinho
-            </a>
-            {isStoreOwner && (
-              <a
-                href="/dashboard"
-                className="text-sm font-medium text-primary hover:text-primary/80"
-              >
-                Dashboard
-              </a>
-            )}
-          </nav>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+    <div className={`flex min-h-screen flex-col bg-gray-50 ${themeClass}`}>
+      <StoreNav
+        tenantSlug={tenantSlug}
+        storeName={storeName}
+        storeId={data.store.id}
+        logoUrl={store.logoUrl}
+        isStoreOwner={isStoreOwner}
+      />
+      <main className="flex-1 py-6 sm:py-8">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">{children}</div>
+      </main>
+      <StoreFooter
+        storeName={storeName}
+        contactEmail={store.contactEmail}
+        contactPhone={store.contactPhone}
+      />
     </div>
   );
 }
