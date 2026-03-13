@@ -14,7 +14,13 @@ type Props = {
 
 function SearchIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      {...props}
+    >
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.35-4.35" />
     </svg>
@@ -23,7 +29,13 @@ function SearchIcon(props: React.SVGProps<SVGSVGElement>) {
 
 function CartIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      {...props}
+    >
       <circle cx="9" cy="21" r="1" />
       <circle cx="20" cy="21" r="1" />
       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -33,7 +45,13 @@ function CartIcon(props: React.SVGProps<SVGSVGElement>) {
 
 function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      {...props}
+    >
       <line x1="3" y1="12" x2="21" y2="12" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="3" y1="18" x2="21" y2="18" />
@@ -43,7 +61,13 @@ function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
 
 function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      {...props}
+    >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -67,7 +91,10 @@ export function StoreNav({
     fetch(`/api/public/${tenantSlug}/cart`, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : { items: [] }))
       .then((data) => {
-        const count = (data.items ?? []).reduce((s: number, i: { quantity?: number }) => s + (i.quantity ?? 1), 0);
+        const count = (data.items ?? []).reduce(
+          (s: number, i: { quantity?: number }) => s + (i.quantity ?? 1),
+          0,
+        );
         setCartCount(count);
       })
       .catch(() => {});
@@ -104,13 +131,19 @@ export function StoreNav({
           className="flex min-w-0 shrink items-center gap-2 transition-opacity hover:opacity-90"
         >
           {logoUrl ? (
-            <img src={logoUrl} alt={storeName} className="h-8 w-8 shrink-0 object-contain" />
+            <img
+              src={logoUrl}
+              alt={storeName}
+              className="h-8 w-8 shrink-0 object-contain"
+            />
           ) : (
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-lg font-bold text-primary">
               {storeName.charAt(0)}
             </span>
           )}
-          <span className="truncate text-lg font-bold text-primary">{storeName}</span>
+          <span className="truncate text-lg font-bold text-primary">
+            {storeName}
+          </span>
         </Link>
 
         {/* Desktop: Search + Cart */}
@@ -175,7 +208,11 @@ export function StoreNav({
             className="flex items-center justify-center rounded-lg p-2.5 text-gray-600 hover:bg-gray-100"
             aria-label="Menu"
           >
-            {mobileMenuOpen ? <CloseIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
+            {mobileMenuOpen ? (
+              <CloseIcon className="h-5 w-5" />
+            ) : (
+              <MenuIcon className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
@@ -206,7 +243,10 @@ export function StoreNav({
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <nav className="border-t border-gray-100 bg-white p-4 sm:hidden" aria-label="Menu mobile">
+        <nav
+          className="border-t border-gray-100 bg-white p-4 sm:hidden"
+          aria-label="Menu mobile"
+        >
           <div className="flex flex-col gap-1">
             <Link
               href={`/loja/${tenantSlug}`}

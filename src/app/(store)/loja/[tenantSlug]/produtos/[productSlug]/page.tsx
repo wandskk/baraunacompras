@@ -1,19 +1,43 @@
 import Link from "next/link";
-import { getPublicProduct, isProductAvailable } from "@/lib/store-public";
-import { Button } from "@/components/ui";
+import {
+  getPublicProduct,
+  getRelatedProducts,
+  isProductAvailable,
+} from "@/lib/store-public";
 import { AddToCartButton } from "./AddToCartButton";
+import { StoreProductCard } from "../../StoreProductCard";
 
 type PageProps = {
   params: Promise<{ tenantSlug: string; productSlug: string }>;
 };
+
+function ChevronLeftIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      {...props}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  );
+}
 
 export default async function ProductPage({ params }: PageProps) {
   const { tenantSlug, productSlug } = await params;
   const product = await getPublicProduct(tenantSlug, productSlug);
   if (!product) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-[400px] flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center">
         <p className="text-gray-500">Produto não encontrado</p>
+        <Link
+          href={`/loja/${tenantSlug}`}
+          className="mt-4 text-sm font-medium text-primary hover:underline"
+        >
+          Voltar aos produtos
+        </Link>
       </div>
     );
   }
@@ -21,18 +45,30 @@ export default async function ProductPage({ params }: PageProps) {
   const stock = product.stock ?? 0;
   const checkoutUrl = `/loja/${tenantSlug}/checkout?productId=${product.id}`;
   const price = Number(product.price);
+  const relatedProducts = await getRelatedProducts(
+    tenantSlug,
+    product.id,
+    product.categoryId,
+  );
 
   return (
-    <div>
-      <Link
-        href={`/loja/${tenantSlug}`}
-        className="mb-6 inline-block text-sm text-gray-500 hover:text-gray-700"
-      >
-        ← Voltar aos produtos
-      </Link>
-      <article className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-2 lg:gap-12">
-          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <nav aria-label="Navegação">
+        <Link
+          href={`/loja/${tenantSlug}`}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+        >
+          <ChevronLeftIcon className="h-4 w-4" />
+          Voltar aos produtos
+        </Link>
+      </nav>
+
+      {/* Product card */}
+      <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="grid gap-6 p-6 sm:gap-8 sm:p-8 lg:grid-cols-2 lg:gap-12">
+          {/* Image */}
+          <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 lg:aspect-4/5">
             {product.imageUrl ? (
               <img
                 src={product.imageUrl}
@@ -41,35 +77,28 @@ export default async function ProductPage({ params }: PageProps) {
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-gray-400">
-                <svg
-                  className="h-24 w-24"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
+              <div className="flex h-full w-full items-center justify-center bg-secondary">
+                <span className="text-8xl text-secondary-foreground/30">
+                  📦
+                </span>
               </div>
             )}
           </div>
+
+          {/* Details */}
           <div className="flex flex-col">
             {product.category && (
               <Link
                 href={`/loja/${tenantSlug}?categoryId=${product.category.id}`}
-                className="text-sm font-medium text-primary hover:underline"
+                className="text-xs font-medium uppercase tracking-wider text-primary hover:underline"
               >
                 {product.category.name}
               </Link>
             )}
-            <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
               {product.name}
             </h1>
+
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <p className="text-3xl font-bold text-primary">
                 R$ {price.toFixed(2)}
@@ -84,25 +113,35 @@ export default async function ProductPage({ params }: PageProps) {
                 </span>
               )}
             </div>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <AddToCartButton
-                tenantSlug={tenantSlug}
-                productId={product.id}
-                productName={product.name}
-                disabled={!available}
-              />
-              <Link href={checkoutUrl} className="flex-1 sm:flex-initial">
-                <Button variant="outline" fullWidth disabled={!available}>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-stretch">
+              <div className="sm:flex-1 [&_button]:h-11">
+                <AddToCartButton
+                  tenantSlug={tenantSlug}
+                  productId={product.id}
+                  disabled={!available}
+                />
+              </div>
+              {available ? (
+                <Link
+                  href={checkoutUrl}
+                  className="flex h-11 flex-1 items-center justify-center rounded-lg border-2 border-primary px-4 font-medium text-primary transition-opacity hover:bg-primary/10 sm:flex-initial"
+                >
                   Comprar agora
-                </Button>
-              </Link>
+                </Link>
+              ) : (
+                <span className="flex h-11 flex-1 cursor-not-allowed items-center justify-center rounded-lg border-2 border-gray-300 px-4 font-medium text-gray-400 opacity-50 sm:flex-initial">
+                  Comprar agora
+                </span>
+              )}
             </div>
+
             {product.description && (
-              <div className="mt-8 border-t border-gray-200 pt-6">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+              <div className="mt-8 border-t border-gray-100 pt-6">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
                   Descrição
                 </h2>
-                <p className="mt-2 whitespace-pre-line text-gray-600">
+                <p className="mt-3 whitespace-pre-line text-gray-600 leading-relaxed">
                   {product.description}
                 </p>
               </div>
@@ -110,6 +149,49 @@ export default async function ProductPage({ params }: PageProps) {
           </div>
         </div>
       </article>
+
+      {/* Produtos da mesma categoria */}
+      <section className="pt-6 sm:pt-8">
+        {relatedProducts.length > 0 ? (
+          <>
+            <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
+              {product.category
+                ? `Mais em ${product.category.name}`
+                : "Outros produtos"}
+            </h2>
+            <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+              {relatedProducts.map((p) => {
+                const pAvailable = isProductAvailable(p);
+                return (
+                  <StoreProductCard
+                    key={p.id}
+                    tenantSlug={tenantSlug}
+                    product={p}
+                    available={pAvailable}
+                  />
+                );
+              })}
+            </div>
+            <div className="mt-6 flex justify-center">
+              <Link
+                href={`/loja/${tenantSlug}${product.category ? `?categoryId=${product.category.id}` : ""}`}
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Ver mais produtos
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="flex justify-center">
+            <Link
+              href={`/loja/${tenantSlug}`}
+              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              Ver mais produtos
+            </Link>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
