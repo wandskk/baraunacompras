@@ -16,6 +16,7 @@ import {
 import { Button, Input, LoadingSpinner, Modal } from "@/components/ui";
 import { formatCurrency } from "@/lib/format";
 import { slugify } from "@/lib/slugify";
+import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
 
 type Store = {
@@ -88,9 +89,12 @@ export default function DashboardPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setCreateError(data.error ?? "Erro ao criar loja");
+        const msg = data.error ?? "Erro ao criar loja";
+        setCreateError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success("Loja criada com sucesso");
       setStores((prev) => [...prev, data]);
       setStatsByStore((prev) => ({
         ...prev,
@@ -105,6 +109,7 @@ export default function DashboardPage() {
       setNewSlug("");
     } catch {
       setCreateError("Erro de conexão");
+      toast.error("Erro de conexão");
     } finally {
       setCreateLoading(false);
     }

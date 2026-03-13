@@ -1,4 +1,5 @@
 import { Nunito } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -15,7 +16,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={nunito.variable}>
-      <body className={`${nunito.className} min-h-screen antialiased`}>{children}</body>
+      <body className={`${nunito.className} min-h-screen antialiased`}>
+        {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              border: "none",
+              padding: 0,
+              background: "transparent",
+              boxShadow: "none",
+            },
+          }}
+        />
+      </body>
     </html>
   );
 }

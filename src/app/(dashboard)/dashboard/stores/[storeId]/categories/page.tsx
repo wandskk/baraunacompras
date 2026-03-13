@@ -10,6 +10,7 @@ import {
   StoreListPageLayout,
 } from "@/components/dashboard";
 import { slugify } from "@/lib/slugify";
+import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
 
 type Category = {
@@ -62,15 +63,19 @@ export default function CategoriesPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Erro ao criar categoria");
+        const msg = data.error ?? "Erro ao criar categoria";
+        setError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success("Categoria criada com sucesso");
       setCategories((prev) => [...prev, data]);
       setModalOpen(false);
       setName("");
       setSlug("");
     } catch {
       setError("Erro de conexão");
+      toast.error("Erro de conexão");
     } finally {
       setCreateLoading(false);
     }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui";
+import { toast } from "@/lib/toast";
 
 type Product = {
   id: string;
@@ -58,9 +59,10 @@ export function ProductPurchaseSection({
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
         window.dispatchEvent(new CustomEvent("cart-updated"));
+        toast.success("Adicionado ao carrinho");
       } else {
         const data = await res.json();
-        alert(data.error ?? "Erro ao adicionar");
+        toast.error(data.error ?? "Erro ao adicionar ao carrinho");
       }
     } finally {
       setLoading(false);
@@ -84,9 +86,10 @@ export function ProductPurchaseSection({
       });
       const data = await res.json();
       if (res.ok && data.cart?.id) {
+        toast.success("Redirecionando para checkout...");
         window.location.href = `/loja/${tenantSlug}/checkout?cartId=${data.cart.id}`;
       } else if (!res.ok) {
-        alert(data.error ?? "Erro ao adicionar");
+        toast.error(data.error ?? "Erro ao adicionar ao carrinho");
       }
     } finally {
       setLoading(false);

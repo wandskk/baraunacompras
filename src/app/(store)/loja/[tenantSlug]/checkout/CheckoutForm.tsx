@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button, Input } from "@/components/ui";
+import { toast } from "@/lib/toast";
 
 type CheckoutFormProps = {
   tenantId: string;
@@ -45,12 +46,16 @@ export function CheckoutForm({
       );
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Erro ao finalizar compra");
+        const msg = data.error ?? "Erro ao finalizar compra";
+        setError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success("Pedido realizado com sucesso!");
       setSuccess(true);
     } catch {
       setError("Erro de conexão");
+      toast.error("Erro de conexão");
     } finally {
       setLoading(false);
     }

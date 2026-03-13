@@ -30,6 +30,7 @@ import {
   StoreListPageLayout,
 } from "@/components/dashboard";
 import { slugify } from "@/lib/slugify";
+import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
 
 type Product = {
@@ -188,12 +189,17 @@ export default function ProductsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(
+        const msg =
           data.error ??
-            (editingProduct ? "Erro ao atualizar" : "Erro ao criar produto"),
-        );
+          (editingProduct ? "Erro ao atualizar" : "Erro ao criar produto");
+        setError(msg);
+        toast.error(msg);
         return;
       }
+
+      toast.success(
+        editingProduct ? "Produto atualizado com sucesso" : "Produto criado com sucesso",
+      );
 
       if (editingProduct) {
         setProducts((prev) =>
@@ -212,6 +218,7 @@ export default function ProductsPage() {
       closeModal();
     } catch {
       setError("Erro de conexão");
+      toast.error("Erro de conexão");
     } finally {
       setSubmitLoading(false);
     }

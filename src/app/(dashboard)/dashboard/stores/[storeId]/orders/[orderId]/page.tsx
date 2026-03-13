@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/format";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, LoadingSpinner } from "@/components/ui";
+import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
 
 type OrderItem = {
@@ -70,7 +71,15 @@ export default function OrderDetailPage() {
           body: JSON.stringify({ status: newStatus }),
         }
       );
-      if (res.ok) setOrder(await res.json());
+      if (res.ok) {
+        setOrder(await res.json());
+        toast.success(
+          `Status atualizado para ${STATUS_LABELS[newStatus] ?? newStatus}`,
+        );
+      } else {
+        const data = await res.json();
+        toast.error(data.error ?? "Erro ao atualizar status");
+      }
     } finally {
       setStatusLoading(false);
     }

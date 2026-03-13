@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { ImageIcon } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 type ImageUploadProps = {
   label: string;
@@ -47,16 +48,20 @@ export function ImageUpload({
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? "Erro ao enviar");
+        const msg = data.error ?? "Erro ao enviar";
+        setError(msg);
+        toast.error(msg);
         return;
       }
 
       if (data.url) {
         setImgError(false);
         onChange(data.url);
+        toast.success("Imagem enviada com sucesso");
       }
     } catch {
       setError("Erro de conexão");
+      toast.error("Erro de conexão");
     } finally {
       setUploading(false);
       e.target.value = "";

@@ -27,6 +27,7 @@ import { Button, Input, ImageUpload, LoadingSpinner, MaskedInput } from "@/compo
 import { formatCep, formatCurrency, formatPhone } from "@/lib/format";
 import { parseCurrencyToNumber, formatNumberToCurrency } from "@/lib/masks";
 import { fetchAddressByCep } from "@/lib/viacep";
+import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
 
 const PAYMENT_LABELS: Record<string, string> = {
@@ -255,9 +256,12 @@ export default function StoreDetailPage() {
       );
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Erro ao salvar");
+        const msg = data.error ?? "Erro ao salvar";
+        setError(msg);
+        toast.error(msg);
         return;
       }
+      toast.success("Loja atualizada com sucesso");
       setStore(data);
       setEditing(false);
       if (data.theme) {
@@ -270,6 +274,7 @@ export default function StoreDetailPage() {
       router.refresh();
     } catch {
       setError("Erro de conexão");
+      toast.error("Erro de conexão");
     } finally {
       setSaveLoading(false);
     }

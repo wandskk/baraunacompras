@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { Button, LoadingSpinner } from "@/components/ui";
 import { formatCurrency } from "@/lib/format";
+import { toast } from "@/lib/toast";
 
 type CartItem = {
   id: string;
@@ -72,6 +73,9 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
         const json = await res.json();
         setData({ cart: json.cart, items: json.items ?? [], total: json.total ?? 0 });
         window.dispatchEvent(new CustomEvent("cart-updated"));
+        toast.success("Quantidade atualizada");
+      } else {
+        toast.error("Erro ao atualizar quantidade");
       }
     } finally {
       setUpdating(null);
@@ -93,6 +97,9 @@ export function CartContent({ tenantSlug, tenantId, storeId }: Props) {
         const json = await res.json();
         setData({ cart: json.cart, items: json.items ?? [], total: json.total ?? 0 });
         window.dispatchEvent(new CustomEvent("cart-updated"));
+        toast.success("Item removido do carrinho");
+      } else {
+        toast.error("Erro ao remover item");
       }
     } finally {
       setUpdating(null);

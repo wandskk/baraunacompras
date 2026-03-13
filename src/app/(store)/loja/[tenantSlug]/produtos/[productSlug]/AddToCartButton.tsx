@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui";
+import { toast } from "@/lib/toast";
 
 type Props = {
   tenantSlug: string;
@@ -27,7 +28,13 @@ export function AddToCartButton({ tenantSlug, productId, disabled }: Props) {
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);
         window.dispatchEvent(new CustomEvent("cart-updated"));
+        toast.success("Adicionado ao carrinho");
+      } else {
+        const data = await res.json();
+        toast.error(data.error ?? "Erro ao adicionar ao carrinho");
       }
+    } catch {
+      toast.error("Erro de conexão");
     } finally {
       setLoading(false);
     }
