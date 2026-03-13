@@ -25,11 +25,42 @@ export default async function StoreHomePage({ params, searchParams }: PageProps)
     );
   }
   const { store, products, categories, pagination } = data;
+  const storeWithSettings = store as typeof store & {
+    description?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+  };
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">{store.name}</h1>
-        <p className="mt-1 text-gray-500">Confira nossos produtos</p>
+        {storeWithSettings.description ? (
+          <p className="mt-1 text-gray-600">{storeWithSettings.description}</p>
+        ) : (
+          <p className="mt-1 text-gray-500">Confira nossos produtos</p>
+        )}
+        {(storeWithSettings.contactPhone || storeWithSettings.contactEmail) && (
+          <div className="mt-4 flex flex-wrap gap-4">
+            {storeWithSettings.contactPhone && (
+              <a
+                href={`https://wa.me/55${storeWithSettings.contactPhone.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+              >
+                WhatsApp
+              </a>
+            )}
+            {storeWithSettings.contactEmail && (
+              <a
+                href={`mailto:${storeWithSettings.contactEmail}`}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                {storeWithSettings.contactEmail}
+              </a>
+            )}
+          </div>
+        )}
       </div>
       <StoreFilters
         tenantSlug={tenantSlug}

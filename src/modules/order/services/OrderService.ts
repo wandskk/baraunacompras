@@ -1,6 +1,10 @@
 import { OrderRepository } from "../repositories";
 import { CartService } from "@/modules/cart/services";
 import { CustomerService } from "@/modules/customer/services";
+import {
+  sendOrderConfirmation,
+  sendOrderStatusUpdate,
+} from "@/lib/email";
 import type { CreateOrderInput, UpdateOrderInput } from "../schemas";
 
 export class OrderService {
@@ -46,7 +50,7 @@ export class OrderService {
         price,
       };
     });
-    return this.repository.createWithItems(
+    const order = await this.repository.createWithItems(
       {
         tenantId: input.tenantId,
         storeId: input.storeId,
@@ -56,6 +60,8 @@ export class OrderService {
       },
       items
     );
+    sendOrderConfirmation(order).catch(() => {});
+    return order;
   }
 
   async getById(id: string, tenantId: string) {
@@ -75,8 +81,15 @@ export class OrderService {
   }
 
   async update(id: string, tenantId: string, input: UpdateOrderInput) {
-    await this.getById(id, tenantId);
-    return this.repository.update(id, tenantId, input);
+    const existing = await this.getById(id, tenantId);
+    const order = await this.repository.update(id, tenantId, input);
+    if (order && input.status && input.status !== existing.status) {
+      const statusesToNotify = ["confirmed", "shipped", "delivered"];
+      if (statusesToNotify.includes(input.status)) {
+        sendOrderStatusUpdate(order, input.status).catch(() => {});
+      }
+    }
+    return order;
   }
 
   async delete(id: string, tenantId: string) {

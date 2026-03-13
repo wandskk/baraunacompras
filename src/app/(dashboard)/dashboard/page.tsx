@@ -11,14 +11,19 @@ type Store = {
   name: string;
   slug: string;
   tenantId: string;
-  createdAt: string;
   tenant?: { slug: string };
 };
+
+type StatsByStore = Record<
+  string,
+  { pendingOrders: number; revenueThisMonth: number; lowStockCount: number }
+>;
 
 export default function DashboardPage() {
   const router = useRouter();
   const { session, loading: sessionLoading, logout } = useSession();
   const [stores, setStores] = useState<Store[]>([]);
+  const [statsByStore, setStatsByStore] = useState<StatsByStore>({});
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
@@ -34,10 +39,14 @@ export default function DashboardPage() {
 
   async function fetchStores(tenantId: string) {
     try {
-      const res = await fetch(`/api/tenants/${tenantId}/stores`);
+      const res = await fetch(`/api/tenants/${tenantId}/dashboard-summary`);
       if (res.ok) {
         const data = await res.json();
-        setStores(data);
+        setStores(data.stores ?? data);
+        setStatsByStore(data.statsByStore ?? {});
+      } else {
+        const fallback = await fetch(`/api/tenants/${tenantId}/stores`);
+        if (fallback.ok) setStores(await fallback.json());
       }
     } finally {
       setLoading(false);
@@ -80,6 +89,14 @@ export default function DashboardPage() {
         return;
       }
       setStores((prev) => [...prev, data]);
+      setStatsByStore((prev) => ({
+        ...prev,
+        [data.id]: {
+          pendingOrders: 0,
+          revenueThisMonth: 0,
+          lowStockCount: 0,
+        },
+      }));
       setShowCreate(false);
       setNewName("");
       setNewSlug("");
@@ -176,6 +193,29 @@ export default function DashboardPage() {
                 <h3 className="font-semibold text-gray-900">{store.name}</h3>
                 <p className="mt-1 text-sm text-gray-500">{store.slug}</p>
               </Link>
+              {statsByStore[store.id] && (
+                <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                  <span className="text-gray-600">
+                    <strong className="text-primary">
+                      {statsByStore[store.id].pendingOrders}
+                    </strong>{" "}
+                    pedidos pendentes
+                  </span>
+                  <span className="text-gray-600">
+                    R${" "}
+                    <strong>
+                      {statsByStore[store.id].revenueThisMonth.toFixed(2)}
+                    </strong>{" "}
+                    este mês
+                  </span>
+                  {statsByStore[store.id].lowStockCount > 0 && (
+                    <span className="text-amber-600">
+                      <strong>{statsByStore[store.id].lowStockCount}</strong> com
+                      baixo estoque
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="mt-4 flex gap-2">
                 <Link
                   href={`/dashboard/stores/${store.id}`}
@@ -183,6 +223,14 @@ export default function DashboardPage() {
                 >
                   Gerenciar →
                 </Link>
+                {statsByStore[store.id]?.pendingOrders > 0 && (
+                  <Link
+                    href={`/dashboard/stores/${store.id}/orders`}
+                    className="text-sm font-medium text-amber-600 hover:underline"
+                  >
+                    Ver {statsByStore[store.id].pendingOrders} pedido(s) →
+                  </Link>
+                )}
                 {store.tenant && (
                   <a
                     href={`/loja/${store.tenant.slug}`}

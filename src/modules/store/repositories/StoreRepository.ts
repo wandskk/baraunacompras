@@ -4,6 +4,15 @@ type CreateStoreData = {
   name: string;
   slug: string;
   theme?: string;
+  logoUrl?: string | null;
+  faviconUrl?: string | null;
+  description?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  paymentMethods?: string | null;
+  deliveryType?: string | null;
+  deliveryFee?: number | null;
+  deliveryDays?: number | null;
   tenantId: string;
 };
 

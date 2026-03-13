@@ -85,7 +85,11 @@ export class OrderRepository {
     return prisma.order.update({
       where: { id },
       data,
-      include: { store: true, customer: true },
+      include: {
+        store: true,
+        customer: true,
+        items: { include: { product: true } },
+      },
     });
   }
 

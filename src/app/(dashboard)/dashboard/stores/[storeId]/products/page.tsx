@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, ImageUpload } from "@/components/ui";
 import { useSession } from "@/hooks/useSession";
 
 type Product = {
@@ -177,13 +177,15 @@ export default function ProductsPage() {
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <Input
-              label="URL da imagem"
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://..."
-            />
+            {session && (
+              <ImageUpload
+                label="Imagem do produto"
+                value={imageUrl}
+                onChange={setImageUrl}
+                tenantId={session.tenantId}
+                placeholder="Enviar imagem"
+              />
+            )}
             <Input
               label="Preço"
               type="number"

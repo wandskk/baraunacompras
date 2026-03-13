@@ -62,10 +62,11 @@ export default function OrdersPage() {
         ) : (
           <ul className="divide-y divide-gray-200">
             {orders.map((order) => (
-              <li
-                key={order.id}
-                className="flex items-center justify-between px-6 py-4"
-              >
+              <li key={order.id}>
+                <Link
+                  href={`/dashboard/stores/${storeId}/orders/${order.id}`}
+                  className="flex items-center justify-between px-6 py-4 hover:bg-gray-50"
+                >
                 <div>
                   <p className="font-medium text-gray-900">
                     #{order.id.slice(-6).toUpperCase()}
@@ -82,6 +83,7 @@ export default function OrdersPage() {
                     {STATUS_LABELS[order.status] ?? order.status}
                   </span>
                 </div>
+                </Link>
               </li>
             ))}
           </ul>

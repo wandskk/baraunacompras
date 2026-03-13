@@ -16,13 +16,21 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
     );
   }
   const storeName = data.store.name;
+  const store = data.store as { logoUrl?: string | null };
   const themeClass = `theme-${data.store.theme ?? "default"}`;
   return (
     <div className={`min-h-screen bg-gray-50 ${themeClass}`}>
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <a href={`/loja/${tenantSlug}`} className="text-lg font-bold text-primary">
-            {storeName}
+          <a href={`/loja/${tenantSlug}`} className="flex items-center gap-2">
+            {store.logoUrl ? (
+              <img
+                src={store.logoUrl}
+                alt={storeName}
+                className="h-8 object-contain"
+              />
+            ) : null}
+            <span className="text-lg font-bold text-primary">{storeName}</span>
           </a>
           <nav className="flex items-center gap-4">
             <a
