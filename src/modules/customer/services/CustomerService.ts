@@ -16,6 +16,16 @@ export class CustomerService {
     return this.repository.create(input);
   }
 
+  async findOrCreate(input: CreateCustomerInput) {
+    const existing = await this.repository.findByEmail(
+      input.email,
+      input.storeId,
+      input.tenantId
+    );
+    if (existing) return existing;
+    return this.repository.create(input);
+  }
+
   async getById(id: string, tenantId: string) {
     const customer = await this.repository.findById(id, tenantId);
     if (!customer) {

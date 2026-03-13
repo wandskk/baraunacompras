@@ -18,6 +18,7 @@ export class StoreRepository {
   async findById(id: string, tenantId: string) {
     return prisma.store.findFirst({
       where: { id, tenantId },
+      include: { tenant: { select: { slug: true } } },
     });
   }
 
@@ -30,6 +31,7 @@ export class StoreRepository {
   async findManyByTenant(tenantId: string) {
     return prisma.store.findMany({
       where: { tenantId },
+      include: { tenant: { select: { slug: true } } },
     });
   }
 
@@ -39,6 +41,7 @@ export class StoreRepository {
     return prisma.store.update({
       where: { id },
       data,
+      include: { tenant: { select: { slug: true } } },
     });
   }
 

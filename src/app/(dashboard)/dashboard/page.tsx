@@ -12,6 +12,7 @@ type Store = {
   slug: string;
   tenantId: string;
   createdAt: string;
+  tenant?: { slug: string };
 };
 
 export default function DashboardPage() {
@@ -171,17 +172,33 @@ export default function DashboardPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {stores.map((store) => (
-            <Link
+            <div
               key={store.id}
-              href={`/dashboard/stores/${store.id}`}
               className="block rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
             >
-              <h3 className="font-semibold text-gray-900">{store.name}</h3>
-              <p className="mt-1 text-sm text-gray-500">{store.slug}</p>
-              <span className="mt-2 inline-block text-sm font-medium text-primary">
-                Gerenciar →
-              </span>
-            </Link>
+              <Link href={`/dashboard/stores/${store.id}`}>
+                <h3 className="font-semibold text-gray-900">{store.name}</h3>
+                <p className="mt-1 text-sm text-gray-500">{store.slug}</p>
+              </Link>
+              <div className="mt-4 flex gap-2">
+                <Link
+                  href={`/dashboard/stores/${store.id}`}
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Gerenciar →
+                </Link>
+                {store.tenant && (
+                  <a
+                    href={`/loja/${store.tenant.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                  >
+                    Ver loja ↗
+                  </a>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
