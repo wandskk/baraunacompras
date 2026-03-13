@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Plus,
-  LogOut,
   Package,
   TrendingUp,
   AlertTriangle,
@@ -33,8 +31,7 @@ type StatsByStore = Record<
 >;
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const { session, loading: sessionLoading, logout } = useSession();
+  const { session, loading: sessionLoading } = useSession();
   const [stores, setStores] = useState<Store[]>([]);
   const [statsByStore, setStatsByStore] = useState<StatsByStore>({});
   const [loading, setLoading] = useState(true);
@@ -64,11 +61,6 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  async function handleLogout() {
-    await logout();
-    router.replace("/login");
   }
 
   function handleNameChange(value: string) {
@@ -132,23 +124,13 @@ export default function DashboardPage() {
             {session.email}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            Nova loja
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2"
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            Sair
-          </Button>
-        </div>
+        <Button
+          onClick={() => setShowCreate(true)}
+          className="inline-flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4 shrink-0" />
+          Nova loja
+        </Button>
       </div>
 
       {/* Modal Criar Loja */}
