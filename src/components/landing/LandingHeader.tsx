@@ -18,14 +18,20 @@ export function LandingHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#202C59]/10 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="mx-auto flex h-14 min-h-0 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-          <Image
-            src="/logo.png"
-            alt="Baraúna Compras"
-            width={48}
-            height={48}
-            className="h-8 w-8 object-contain sm:h-10 sm:w-10 lg:h-12 lg:w-12"
-          />
+        <Link
+          href="/"
+          className="group flex shrink-0 items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#2F8743]/10 ring-1 ring-[#202C59]/5 transition-colors group-hover:bg-[#2F8743]/15 sm:h-10 sm:w-10 lg:h-11 lg:w-11">
+            <Image
+              src="/logo.png"
+              alt="Baraúna Compras"
+              width={44}
+              height={44}
+              className="h-7 w-7 object-contain sm:h-8 sm:w-8 lg:h-9 lg:w-9"
+              priority
+            />
+          </div>
           <span className="text-base font-bold text-[#2F8743] sm:text-lg lg:text-xl">
             Baraúna
           </span>
