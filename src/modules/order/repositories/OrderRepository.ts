@@ -12,6 +12,8 @@ type OrderItemData = {
   productId: string;
   quantity: number;
   price: number;
+  variation?: string;
+  size?: string;
 };
 
 type UpdateOrderData = {
@@ -48,6 +50,8 @@ export class OrderRepository {
             productId: i.productId,
             quantity: i.quantity,
             price: i.price,
+            variation: i.variation ?? "",
+            size: i.size ?? "",
           })),
         });
       }

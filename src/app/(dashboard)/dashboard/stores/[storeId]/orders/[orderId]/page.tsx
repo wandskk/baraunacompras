@@ -11,6 +11,8 @@ type OrderItem = {
   productId: string;
   quantity: number;
   price: string;
+  variation?: string;
+  size?: string;
   product: { name: string; slug: string };
 };
 
@@ -191,6 +193,11 @@ export default function OrderDetailPage() {
                   <p className="font-medium text-gray-900">{item.product.name}</p>
                   <p className="text-sm text-gray-500">
                     {item.quantity}x R$ {Number(item.price).toFixed(2)}
+                    {(item.variation || item.size) && (
+                      <span className="ml-1">
+                        ({[item.variation, item.size].filter(Boolean).join(" • ")})
+                      </span>
+                    )}
                   </p>
                 </div>
                 <p className="font-medium text-primary">

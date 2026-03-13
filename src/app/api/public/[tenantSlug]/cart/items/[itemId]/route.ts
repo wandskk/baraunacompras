@@ -9,7 +9,7 @@ const CART_COOKIE = "barauna_cart";
 const updateSchema = z.object({ quantity: z.coerce.number().int().min(0) });
 
 type Params = {
-  params: Promise<{ tenantSlug: string; productId: string }>;
+  params: Promise<{ tenantSlug: string; itemId: string }>;
 };
 
 function getCartIdFromCookie(cookieHeader: string | null): string | null {
@@ -26,9 +26,21 @@ async function getStoreData(tenantSlug: string) {
   return data;
 }
 
+function mapItems(cart: { items?: Array<{ id: string; productId: string; product: { price: unknown }; quantity: number; variation?: string; size?: string }> }) {
+  return (cart.items ?? []).map((i) => ({
+    id: i.id,
+    productId: i.productId,
+    product: i.product,
+    quantity: i.quantity,
+    variation: i.variation ?? "",
+    size: i.size ?? "",
+    subtotal: Number(i.product.price) * i.quantity,
+  }));
+}
+
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
-    const { tenantSlug, productId } = await params;
+    const { tenantSlug, itemId } = await params;
     const data = await getStoreData(tenantSlug);
     const cartId = getCartIdFromCookie(request.headers.get("cookie")) ?? request.nextUrl.searchParams.get("cartId");
     if (!cartId) {
@@ -37,15 +49,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const body = await request.json().catch(() => ({}));
     const { quantity } = updateSchema.parse(body);
     const cartService = new CartService();
-    await cartService.getById(cartId, data.tenantId);
-    const cart = await cartService.updateItemQuantity(cartId, data.tenantId, productId, { quantity });
-    const items = (cart.items ?? []).map((i) => ({
-      id: i.id,
-      productId: i.productId,
-      product: i.product,
-      quantity: i.quantity,
-      subtotal: Number(i.product.price) * i.quantity,
-    }));
+    const cart = await cartService.updateItemQuantityById(cartId, data.tenantId, itemId, { quantity });
+    const items = mapItems(cart);
     const total = items.reduce((s, i) => s + i.subtotal, 0);
     return NextResponse.json({ cart: { id: cart.id }, items, total });
   } catch (error) {
@@ -55,21 +60,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
-    const { tenantSlug, productId } = await params;
+    const { tenantSlug, itemId } = await params;
     const data = await getStoreData(tenantSlug);
     const cartId = getCartIdFromCookie(request.headers.get("cookie")) ?? request.nextUrl.searchParams.get("cartId");
     if (!cartId) {
       return NextResponse.json({ error: "Carrinho não encontrado" }, { status: 400 });
     }
     const cartService = new CartService();
-    const cart = await cartService.removeItem(cartId, data.tenantId, productId);
-    const items = (cart.items ?? []).map((i) => ({
-      id: i.id,
-      productId: i.productId,
-      product: i.product,
-      quantity: i.quantity,
-      subtotal: Number(i.product.price) * i.quantity,
-    }));
+    const cart = await cartService.removeItemById(cartId, data.tenantId, itemId);
+    const items = mapItems(cart);
     const total = items.reduce((s, i) => s + i.subtotal, 0);
     return NextResponse.json({ cart: { id: cart.id }, items, total });
   } catch (error) {

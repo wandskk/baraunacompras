@@ -8,6 +8,8 @@ export const createCartSchema = z.object({
 export const addCartItemSchema = z.object({
   productId: z.string().min(1),
   quantity: z.coerce.number().int().min(1).default(1),
+  variation: z.string().optional().default(""),
+  size: z.string().optional().default(""),
 });
 
 export const updateCartItemSchema = z.object({

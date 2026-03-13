@@ -4,7 +4,7 @@ import {
   getRelatedProducts,
   isProductAvailable,
 } from "@/lib/store-public";
-import { AddToCartButton } from "./AddToCartButton";
+import { ProductPurchaseSection } from "./ProductPurchaseSection";
 import { StoreProductCard } from "../../StoreProductCard";
 
 type PageProps = {
@@ -43,7 +43,6 @@ export default async function ProductPage({ params }: PageProps) {
   }
   const available = isProductAvailable(product);
   const stock = product.stock ?? 0;
-  const checkoutUrl = `/loja/${tenantSlug}/checkout?productId=${product.id}`;
   const price = Number(product.price);
   const relatedProducts = await getRelatedProducts(
     tenantSlug,
@@ -114,26 +113,12 @@ export default async function ProductPage({ params }: PageProps) {
               )}
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-stretch">
-              <div className="sm:flex-1 [&_button]:h-11">
-                <AddToCartButton
-                  tenantSlug={tenantSlug}
-                  productId={product.id}
-                  disabled={!available}
-                />
-              </div>
-              {available ? (
-                <Link
-                  href={checkoutUrl}
-                  className="flex h-11 flex-1 items-center justify-center rounded-lg border-2 border-primary px-4 font-medium text-primary transition-opacity hover:bg-primary/10 sm:flex-initial"
-                >
-                  Comprar agora
-                </Link>
-              ) : (
-                <span className="flex h-11 flex-1 cursor-not-allowed items-center justify-center rounded-lg border-2 border-gray-300 px-4 font-medium text-gray-400 opacity-50 sm:flex-initial">
-                  Comprar agora
-                </span>
-              )}
+            <div className="mt-6">
+              <ProductPurchaseSection
+                tenantSlug={tenantSlug}
+                product={product}
+                available={available}
+              />
             </div>
 
             {product.description && (

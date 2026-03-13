@@ -7,6 +7,8 @@ type CreateProductData = {
   imageUrl?: string;
   price: number;
   stock?: number;
+  variations?: string[];
+  sizes?: string[];
   tenantId: string;
   storeId: string;
   categoryId?: string;
@@ -20,6 +22,8 @@ export class ProductRepository {
       data: {
         ...data,
         price: data.price,
+        variations: data.variations ?? [],
+        sizes: data.sizes ?? [],
       },
     });
   }

@@ -48,6 +48,8 @@ export class OrderService {
         productId: item.productId,
         quantity: qty,
         price,
+        variation: (item as { variation?: string }).variation ?? "",
+        size: (item as { size?: string }).size ?? "",
       };
     });
     const order = await this.repository.createWithItems(

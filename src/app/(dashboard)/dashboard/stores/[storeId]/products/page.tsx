@@ -4,10 +4,17 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Search, Plus, Pencil, ShoppingBag } from "lucide-react";
-import { Button, Input, ImageUpload, LoadingSpinner, Modal } from "@/components/ui";
+import {
+  Button,
+  Input,
+  ImageUpload,
+  LoadingSpinner,
+  Modal,
+} from "@/components/ui";
 import {
   DataList,
   DataListItem,
+  OptionListField,
   StoreListPageLayout,
 } from "@/components/dashboard";
 import { slugify } from "@/lib/slugify";
@@ -21,6 +28,8 @@ type Product = {
   description?: string | null;
   imageUrl?: string | null;
   stock?: number;
+  variations?: string[];
+  sizes?: string[];
   categoryId: string | null;
 };
 
@@ -36,6 +45,7 @@ export default function ProductsPage() {
   const { session, loading: sessionLoading } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tenantSlug, setTenantSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -45,6 +55,8 @@ export default function ProductsPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("0");
+  const [variations, setVariations] = useState<string[]>([]);
+  const [sizes, setSizes] = useState<string[]>([]);
   const [categoryId, setCategoryId] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -64,17 +76,22 @@ export default function ProductsPage() {
     searchParams.set("limit", "10");
     Promise.all([
       fetch(
-        `/api/tenants/${session.tenantId}/stores/${storeId}/products?${searchParams}`
+        `/api/tenants/${session.tenantId}/stores/${storeId}/products?${searchParams}`,
       ),
       fetch(`/api/tenants/${session.tenantId}/categories`),
+      fetch(`/api/tenants/${session.tenantId}/stores/${storeId}`),
     ])
-      .then(async ([productsRes, categoriesRes]) => {
+      .then(async ([productsRes, categoriesRes, storeRes]) => {
         if (productsRes.ok) {
           const json = await productsRes.json();
           setProducts(json.products ?? json);
           setPagination(json.pagination ?? null);
         }
         if (categoriesRes.ok) setCategories(await categoriesRes.json());
+        if (storeRes.ok) {
+          const store = await storeRes.json();
+          setTenantSlug(store?.tenant?.slug ?? null);
+        }
       })
       .finally(() => setLoading(false));
   }, [storeId, session, search, page]);
@@ -87,6 +104,8 @@ export default function ProductsPage() {
     setImageUrl("");
     setPrice("");
     setStock("0");
+    setVariations([]);
+    setSizes([]);
     setCategoryId("");
     setError("");
     setModalOpen(true);
@@ -100,6 +119,8 @@ export default function ProductsPage() {
     setImageUrl(product.imageUrl ?? "");
     setPrice(product.price);
     setStock(String(product.stock ?? 0));
+    setVariations(product.variations ?? []);
+    setSizes(product.sizes ?? []);
     setCategoryId(product.categoryId ?? "");
     setError("");
     setModalOpen(true);
@@ -124,6 +145,8 @@ export default function ProductsPage() {
         imageUrl: imageUrl || undefined,
         price: parseFloat(price),
         stock: parseInt(stock, 10) || 0,
+        variations: variations.length > 0 ? variations : undefined,
+        sizes: sizes.length > 0 ? sizes : undefined,
         categoryId: categoryId || undefined,
       };
 
@@ -141,7 +164,7 @@ export default function ProductsPage() {
       if (!res.ok) {
         setError(
           data.error ??
-            (editingProduct ? "Erro ao atualizar" : "Erro ao criar produto")
+            (editingProduct ? "Erro ao atualizar" : "Erro ao criar produto"),
         );
         return;
       }
@@ -149,8 +172,10 @@ export default function ProductsPage() {
       if (editingProduct) {
         setProducts((prev) =>
           prev.map((p) =>
-            p.id === editingProduct.id ? { ...data, stock: data.stock ?? 0 } : p
-          )
+            p.id === editingProduct.id
+              ? { ...data, stock: data.stock ?? 0 }
+              : p,
+          ),
         );
       } else {
         setProducts((prev) => [...prev, { ...data, stock: data.stock ?? 0 }]);
@@ -252,6 +277,20 @@ export default function ProductsPage() {
               onChange={(e) => setStock(e.target.value)}
             />
           </div>
+          <OptionListField
+            label="Variações"
+            activateLabel="Ativar variações"
+            options={variations}
+            onChange={setVariations}
+            placeholder="Ex: Vermelho, Azul"
+          />
+          <OptionListField
+            label="Tamanhos"
+            activateLabel="Ativar tamanhos"
+            options={sizes}
+            onChange={setSizes}
+            placeholder="Ex: P, M, G"
+          />
           <div className="w-full">
             <label className="mb-1 block text-sm font-medium text-gray-700">
               Categoria
@@ -303,7 +342,14 @@ export default function ProductsPage() {
         }
       >
         {products.map((p) => (
-          <DataListItem key={p.id}>
+          <DataListItem
+            key={p.id}
+            href={
+              tenantSlug
+                ? `/loja/${tenantSlug}/produtos/${p.slug}`
+                : undefined
+            }
+          >
             <div className="flex items-center gap-4">
               {p.imageUrl ? (
                 <img
@@ -334,6 +380,7 @@ export default function ProductsPage() {
                 variant="outline"
                 onClick={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   openEditModal(p);
                 }}
                 className="gap-1.5"

@@ -43,6 +43,8 @@ export async function GET(request: NextRequest, { params }: Params) {
         productId: i.productId,
         product: i.product,
         quantity: i.quantity,
+        variation: (i as { variation?: string }).variation ?? "",
+        size: (i as { size?: string }).size ?? "",
         subtotal: Number(i.product.price) * i.quantity,
       }));
       const total = items.reduce((s, i) => s + i.subtotal, 0);
@@ -88,6 +90,8 @@ export async function POST(request: NextRequest, { params }: Params) {
       await cartService.addItem(cartId, data.tenantId, {
         productId: body.productId,
         quantity: body.quantity ?? 1,
+        variation: body.variation ?? "",
+        size: body.size ?? "",
       });
     }
     const cart = await cartService.getById(cartId, data.tenantId);
@@ -96,6 +100,8 @@ export async function POST(request: NextRequest, { params }: Params) {
       productId: i.productId,
       product: i.product,
       quantity: i.quantity,
+      variation: (i as { variation?: string }).variation ?? "",
+      size: (i as { size?: string }).size ?? "",
       subtotal: Number(i.product.price) * i.quantity,
     }));
     const total = items.reduce((s, i) => s + i.subtotal, 0);

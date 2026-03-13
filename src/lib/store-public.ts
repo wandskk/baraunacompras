@@ -9,6 +9,8 @@ export type PublicProduct = {
   imageUrl: string | null;
   price: { toString: () => string };
   stock: number;
+  variations?: string[];
+  sizes?: string[];
   tenantId: string;
   storeId: string;
   categoryId: string | null;
