@@ -1,0 +1,1 @@
+export { TenantRepository } from "./TenantRepository";

@@ -1,0 +1,12 @@
+import { z } from "zod";
+
+export const createStoreSchema = z.object({
+  name: z.string().min(1),
+  slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
+  tenantId: z.string().min(1),
+});
+
+export const updateStoreSchema = createStoreSchema.partial().omit({ tenantId: true });
+
+export type CreateStoreInput = z.infer<typeof createStoreSchema>;
+export type UpdateStoreInput = z.infer<typeof updateStoreSchema>;
