@@ -1,0 +1,1 @@
+export { CustomerController } from "./CustomerController";
