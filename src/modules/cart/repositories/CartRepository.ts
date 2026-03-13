@@ -16,7 +16,7 @@ export class CartRepository {
   async findById(id: string, tenantId: string) {
     return prisma.cart.findFirst({
       where: { id, tenantId },
-      include: { store: true },
+      include: { store: true, items: { include: { product: true } } },
     });
   }
 

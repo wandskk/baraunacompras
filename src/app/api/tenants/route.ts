@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { TenantController } from "@/modules/tenant/controllers";
+import { apiErrorResponse } from "@/lib/api-errors";
 
 export async function POST(request: Request) {
   try {
@@ -8,7 +9,6 @@ export async function POST(request: Request) {
     const tenant = await controller.create(body);
     return NextResponse.json(tenant, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return apiErrorResponse(error);
   }
 }

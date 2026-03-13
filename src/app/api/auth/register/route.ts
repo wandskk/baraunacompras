@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { AuthController } from "@/modules/auth/controllers";
 import { setSessionCookie } from "@/lib/session-cookie";
+import { apiErrorResponse } from "@/lib/api-errors";
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +14,6 @@ export async function POST(request: Request) {
     res.headers.set("Set-Cookie", cookieHeader);
     return res;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return apiErrorResponse(error);
   }
 }

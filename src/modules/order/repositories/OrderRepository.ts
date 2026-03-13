@@ -8,6 +8,12 @@ type CreateOrderData = {
   status: string;
 };
 
+type OrderItemData = {
+  productId: string;
+  quantity: number;
+  price: number;
+};
+
 type UpdateOrderData = {
   status?: string;
   customerId?: string | null;
@@ -20,14 +26,42 @@ export class OrderRepository {
         ...data,
         total: data.total,
       },
-      include: { store: true, customer: true },
+      include: { store: true, customer: true, items: true },
+    });
+  }
+
+  async createWithItems(
+    data: CreateOrderData,
+    items: OrderItemData[]
+  ) {
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          ...data,
+          total: data.total,
+        },
+      });
+      if (items.length > 0) {
+        await tx.orderItem.createMany({
+          data: items.map((i) => ({
+            orderId: order.id,
+            productId: i.productId,
+            quantity: i.quantity,
+            price: i.price,
+          })),
+        });
+      }
+      return tx.order.findUniqueOrThrow({
+        where: { id: order.id },
+        include: { store: true, customer: true, items: { include: { product: true } } },
+      });
     });
   }
 
   async findById(id: string, tenantId: string) {
     return prisma.order.findFirst({
       where: { id, tenantId },
-      include: { store: true, customer: true },
+      include: { store: true, customer: true, items: { include: { product: true } } },
     });
   }
 

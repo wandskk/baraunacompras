@@ -1,5 +1,5 @@
 import { OrderService } from "../services";
-import { createOrderSchema, updateOrderSchema } from "../schemas";
+import { createOrderSchema, updateOrderSchema, checkoutSchema, checkoutFromCartSchema } from "../schemas";
 
 export class OrderController {
   private service = new OrderService();
@@ -7,6 +7,21 @@ export class OrderController {
   async create(body: unknown) {
     const input = createOrderSchema.parse(body);
     return this.service.create(input);
+  }
+
+  async checkoutFromCart(
+    tenantId: string,
+    storeId: string,
+    body: unknown
+  ) {
+    const input = checkoutFromCartSchema.parse(body);
+    return this.service.checkoutFromCart({
+      tenantId,
+      storeId,
+      cartId: input.cartId,
+      email: input.email,
+      name: input.name,
+    });
   }
 
   async getById(id: string, tenantId: string) {

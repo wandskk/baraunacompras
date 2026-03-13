@@ -22,7 +22,7 @@ Guia de desenvolvimento contínuo para tornar o SaaS mais robusto e completo.
 | 7.3 | **Hash de senha** | ✅ bcrypt (compatível com SHA-256 legado) | Alta |
 | 7.4 | **Rate limiting** | Limitar requisições por IP em APIs públicas | Média |
 | 7.5 | **Tratamento de erros** | Handler global e mensagens padronizadas | Média |
-| 7.6 | **Validação server-side** | Garantir Zod em todas as rotas de entrada | Alta |
+| 7.6 | **Validação server-side** | ✅ Zod em rotas + params + apiErrorResponse | Alta |
 
 ---
 
@@ -30,10 +30,10 @@ Guia de desenvolvimento contínuo para tornar o SaaS mais robusto e completo.
 
 | # | Item | Descrição | Prioridade |
 |---|------|-----------|------------|
-| 8.1 | **CartItem (Prisma)** | Modelo `productId`, `quantity`, `cartId` | Alta |
-| 8.2 | **OrderItem (Prisma)** | Modelo `productId`, `quantity`, `price`, `orderId` | Alta |
-| 8.3 | **API Cart** | Add item, remove item, update quantity | Alta |
-| 8.4 | **Checkout** | Montar Order com OrderItems a partir do Cart | Alta |
+| 8.1 | **CartItem (Prisma)** | ✅ Modelo `productId`, `quantity`, `cartId` | Alta |
+| 8.2 | **OrderItem (Prisma)** | ✅ Modelo `productId`, `quantity`, `price`, `orderId` | Alta |
+| 8.3 | **API Cart** | ✅ POST/PATCH/DELETE items em `/cart/[cartId]/items` | Alta |
+| 8.4 | **Checkout** | ✅ `checkoutFromCart` com cartId cria Order + OrderItems | Alta |
 | 8.5 | **UI Carrinho** | Página `/loja/[slug]/carrinho` com itens e totais | Alta |
 | 8.6 | **Persistência do carrinho** | Cookie ou `localStorage` por sessão/visitante | Média |
 
