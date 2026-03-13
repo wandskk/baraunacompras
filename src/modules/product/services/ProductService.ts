@@ -8,7 +8,7 @@ export class ProductService {
     const existing = await this.repository.findBySlug(
       input.slug,
       input.storeId,
-      input.tenantId
+      input.tenantId,
     );
     if (existing) {
       throw new Error("Product with this slug already exists in this store");
@@ -34,7 +34,7 @@ export class ProductService {
       const existing = await this.repository.findBySlug(
         input.slug,
         input.storeId,
-        tenantId
+        tenantId,
       );
       if (existing && existing.id !== id) {
         throw new Error("Product with this slug already exists in this store");
