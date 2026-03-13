@@ -21,6 +21,13 @@ export const createStoreSchema = z.object({
   deliveryType: deliveryTypeEnum.optional().nullable(),
   deliveryFee: z.coerce.number().min(0).optional().nullable(),
   deliveryDays: z.coerce.number().int().min(1).optional().nullable(),
+  addressStreet: z.string().optional().nullable(),
+  addressNumber: z.string().optional().nullable(),
+  addressComplement: z.string().optional().nullable(),
+  addressNeighborhood: z.string().optional().nullable(),
+  addressCity: z.string().optional().nullable(),
+  addressState: z.string().max(2).optional().nullable(),
+  addressZipCode: z.string().optional().nullable(),
   tenantId: z.string().min(1),
 });
 

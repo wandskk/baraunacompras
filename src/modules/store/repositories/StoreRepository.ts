@@ -13,6 +13,13 @@ type CreateStoreData = {
   deliveryType?: string | null;
   deliveryFee?: number | null;
   deliveryDays?: number | null;
+  addressStreet?: string | null;
+  addressNumber?: string | null;
+  addressComplement?: string | null;
+  addressNeighborhood?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressZipCode?: string | null;
   tenantId: string;
 };
 

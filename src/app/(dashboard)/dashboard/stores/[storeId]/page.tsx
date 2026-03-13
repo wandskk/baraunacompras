@@ -20,6 +20,8 @@ import {
   FolderOpen,
   ShoppingBag,
   ClipboardList,
+  MapPin,
+  FileText,
 } from "lucide-react";
 import { Button, Input, ImageUpload, LoadingSpinner } from "@/components/ui";
 import { useSession } from "@/hooks/useSession";
@@ -59,6 +61,13 @@ type Store = {
   deliveryType?: string | null;
   deliveryFee?: number | string | null;
   deliveryDays?: number | null;
+  addressStreet?: string | null;
+  addressNumber?: string | null;
+  addressComplement?: string | null;
+  addressNeighborhood?: string | null;
+  addressCity?: string | null;
+  addressState?: string | null;
+  addressZipCode?: string | null;
   tenantId: string;
   tenant?: { slug: string };
 };
@@ -111,6 +120,13 @@ export default function StoreDetailPage() {
   const [deliveryType, setDeliveryType] = useState("pickup");
   const [deliveryFee, setDeliveryFee] = useState("");
   const [deliveryDays, setDeliveryDays] = useState("");
+  const [addressStreet, setAddressStreet] = useState("");
+  const [addressNumber, setAddressNumber] = useState("");
+  const [addressComplement, setAddressComplement] = useState("");
+  const [addressNeighborhood, setAddressNeighborhood] = useState("");
+  const [addressCity, setAddressCity] = useState("");
+  const [addressState, setAddressState] = useState("");
+  const [addressZipCode, setAddressZipCode] = useState("");
   const [error, setError] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -155,6 +171,13 @@ export default function StoreDetailPage() {
       setDeliveryDays(
         data.deliveryDays != null ? String(data.deliveryDays) : ""
       );
+      setAddressStreet(data.addressStreet ?? "");
+      setAddressNumber(data.addressNumber ?? "");
+      setAddressComplement(data.addressComplement ?? "");
+      setAddressNeighborhood(data.addressNeighborhood ?? "");
+      setAddressCity(data.addressCity ?? "");
+      setAddressState(data.addressState ?? "");
+      setAddressZipCode(data.addressZipCode ?? "");
     } finally {
       setLoading(false);
     }
@@ -181,6 +204,13 @@ export default function StoreDetailPage() {
           deliveryFee !== "" ? parseFloat(deliveryFee) || null : null,
         deliveryDays:
           deliveryDays !== "" ? parseInt(deliveryDays, 10) || null : null,
+        addressStreet: addressStreet || null,
+        addressNumber: addressNumber || null,
+        addressComplement: addressComplement || null,
+        addressNeighborhood: addressNeighborhood || null,
+        addressCity: addressCity || null,
+        addressState: addressState || null,
+        addressZipCode: addressZipCode || null,
       };
       const res = await fetch(
         `/api/tenants/${session.tenantId}/stores/${storeId}`,
@@ -392,6 +422,65 @@ export default function StoreDetailPage() {
 
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <MapPin className="h-5 w-5 text-primary" />
+              Endereço da loja
+            </h2>
+            <div className="space-y-6">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <Input
+                  label="CEP"
+                  value={addressZipCode}
+                  onChange={(e) => setAddressZipCode(e.target.value)}
+                  placeholder="00000-000"
+                />
+                <Input
+                  label="Rua"
+                  value={addressStreet}
+                  onChange={(e) => setAddressStreet(e.target.value)}
+                  placeholder="Rua, Avenida..."
+                />
+              </div>
+              <div className="grid gap-6 sm:grid-cols-3">
+                <Input
+                  label="Número"
+                  value={addressNumber}
+                  onChange={(e) => setAddressNumber(e.target.value)}
+                  placeholder="123"
+                />
+                <Input
+                  label="Complemento"
+                  value={addressComplement}
+                  onChange={(e) => setAddressComplement(e.target.value)}
+                  placeholder="Sala, loja..."
+                />
+                <Input
+                  label="Bairro"
+                  value={addressNeighborhood}
+                  onChange={(e) => setAddressNeighborhood(e.target.value)}
+                  placeholder="Centro"
+                />
+              </div>
+              <div className="grid gap-6 sm:grid-cols-2">
+                <Input
+                  label="Cidade"
+                  value={addressCity}
+                  onChange={(e) => setAddressCity(e.target.value)}
+                  placeholder="São Paulo"
+                />
+                <Input
+                  label="Estado (UF)"
+                  value={addressState}
+                  onChange={(e) =>
+                    setAddressState(e.target.value.toUpperCase().slice(0, 2))
+                  }
+                  placeholder="SP"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900">
               <CreditCard className="h-5 w-5 text-primary" />
               Pagamento e entrega
             </h2>
@@ -578,88 +667,150 @@ export default function StoreDetailPage() {
 
           {/* Informações da loja */}
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            <h2 className="mb-6 text-lg font-semibold text-gray-900">
               Informações
             </h2>
-            <dl className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Tema</dt>
-                <dd className="mt-0.5 text-gray-900">
-                  {THEME_LABELS[store.theme ?? "default"] ?? store.theme}
-                </dd>
+            <div className="space-y-5">
+              {/* Linha 1: Tema, Email, Contato */}
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Palette className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Tema
+                    </p>
+                    <p className="mt-0.5 font-medium text-gray-900">
+                      {THEME_LABELS[store.theme ?? "default"] ?? store.theme}
+                    </p>
+                  </div>
+                </div>
+                {store.contactEmail && (
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Mail className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Email
+                      </p>
+                      <p className="mt-0.5 font-medium text-gray-900">
+                        {store.contactEmail}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {store.contactPhone && (
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Phone className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Contato
+                      </p>
+                      <p className="mt-0.5 font-medium text-gray-900">
+                        {store.contactPhone}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              {/* Descrição */}
               {store.description && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Descrição
-                  </dt>
-                  <dd className="mt-0.5 text-gray-900">{store.description}</dd>
-                </div>
-              )}
-              {store.contactEmail && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Email</dt>
-                    <dd className="mt-0.5 text-gray-900">
-                      {store.contactEmail}
-                    </dd>
+                <div className="flex items-start gap-3 border-t border-gray-100 pt-5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Descrição
+                    </p>
+                    <p className="mt-0.5 text-gray-900">{store.description}</p>
                   </div>
                 </div>
               )}
-              {store.contactPhone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-gray-400" />
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">
-                      Contato
-                    </dt>
-                    <dd className="mt-0.5 text-gray-900">
-                      {store.contactPhone}
-                    </dd>
+
+              {/* Endereço */}
+              {(store.addressStreet ||
+                store.addressCity ||
+                store.addressZipCode) && (
+                <div className="flex items-start gap-3 border-t border-gray-100 pt-5">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <MapPin className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                      Endereço
+                    </p>
+                    <p className="mt-0.5 text-gray-900">
+                      {[
+                        store.addressStreet &&
+                          `${store.addressStreet}${store.addressNumber ? `, ${store.addressNumber}` : ""}${store.addressComplement ? ` - ${store.addressComplement}` : ""}`,
+                        store.addressNeighborhood &&
+                          store.addressNeighborhood,
+                        store.addressCity &&
+                          store.addressState
+                            ? `${store.addressCity} - ${store.addressState}`
+                            : store.addressCity || store.addressState,
+                        store.addressZipCode && store.addressZipCode,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
                   </div>
                 </div>
               )}
-              {store.paymentMethods && (
-                <div className="flex items-center gap-2 sm:col-span-2">
-                  <CreditCard className="h-4 w-4 shrink-0 text-gray-400" />
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">
-                      Formas de pagamento
-                    </dt>
-                    <dd className="mt-0.5 text-gray-900">
-                      {(() => {
-                        try {
-                          return (
-                            JSON.parse(store.paymentMethods) as string[]
-                          ).map((p) => PAYMENT_LABELS[p] ?? p).join(", ");
-                        } catch {
-                          return store.paymentMethods;
-                        }
-                      })()}
-                    </dd>
+
+              {/* Pagamento e Entrega */}
+              <div className="grid gap-5 border-t border-gray-100 pt-5 sm:grid-cols-2">
+                {store.paymentMethods && (
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <CreditCard className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Formas de pagamento
+                      </p>
+                      <p className="mt-0.5 text-gray-900">
+                        {(() => {
+                          try {
+                            return (
+                              JSON.parse(store.paymentMethods) as string[]
+                            ).map((p) => PAYMENT_LABELS[p] ?? p).join(", ");
+                          } catch {
+                            return store.paymentMethods;
+                          }
+                        })()}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-              {(store.deliveryType === "delivery" ||
-                store.deliveryType === "both") && (
-                <div className="flex items-center gap-2 sm:col-span-2">
-                  <Truck className="h-4 w-4 shrink-0 text-gray-400" />
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">
-                      Entrega
-                    </dt>
-                    <dd className="mt-0.5 text-gray-900">
-                      {store.deliveryFee != null
-                        ? `R$ ${Number(store.deliveryFee).toFixed(2)}`
-                        : "A combinar"}{" "}
-                      {store.deliveryDays != null &&
-                        `• ${store.deliveryDays} dia(s)`}
-                    </dd>
+                )}
+                {(store.deliveryType === "delivery" ||
+                  store.deliveryType === "both") && (
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Truck className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                        Entrega
+                      </p>
+                      <p className="mt-0.5 text-gray-900">
+                        {store.deliveryFee != null
+                          ? `R$ ${Number(store.deliveryFee).toFixed(2)}`
+                          : "A combinar"}{" "}
+                        {store.deliveryDays != null &&
+                          `• ${store.deliveryDays} dia(s)`}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </dl>
+                )}
+              </div>
+            </div>
           </div>
         </>
       )}

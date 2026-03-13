@@ -46,6 +46,13 @@ model Store {
   deliveryType    String?  @default("pickup")
   deliveryFee     Decimal? @db.Decimal(10, 2)
   deliveryDays    Int?
+  addressStreet   String?
+  addressNumber   String?
+  addressComplement String?
+  addressNeighborhood String?
+  addressCity     String?
+  addressState    String?
+  addressZipCode  String?
   tenantId        String
   tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
