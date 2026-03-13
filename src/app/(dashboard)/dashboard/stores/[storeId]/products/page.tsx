@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Button, Input, ImageUpload } from "@/components/ui";
+import { Button, Input, ImageUpload, Modal } from "@/components/ui";
 import { useSession } from "@/hooks/useSession";
 
 type Product = {
@@ -24,14 +24,14 @@ type Category = {
 };
 
 export default function ProductsPage() {
-  const router = useRouter();
   const params = useParams();
   const storeId = params.storeId as string;
   const { session, loading: sessionLoading } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
@@ -43,7 +43,7 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<{ page: number; limit: number; total: number } | null>(null);
   const [error, setError] = useState("");
-  const [createLoading, setCreateLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -75,46 +75,84 @@ export default function ProductsPage() {
       .replace(/(^-|-$)/g, "");
   }
 
-  async function handleCreate(e: React.FormEvent) {
+  function openCreateModal() {
+    setEditingProduct(null);
+    setName("");
+    setSlug("");
+    setDescription("");
+    setImageUrl("");
+    setPrice("");
+    setStock("0");
+    setCategoryId("");
+    setError("");
+    setModalOpen(true);
+  }
+
+  function openEditModal(product: Product) {
+    setEditingProduct(product);
+    setName(product.name);
+    setSlug(product.slug);
+    setDescription(product.description ?? "");
+    setImageUrl(product.imageUrl ?? "");
+    setPrice(product.price);
+    setStock(String(product.stock ?? 0));
+    setCategoryId(product.categoryId ?? "");
+    setError("");
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    setModalOpen(false);
+    setEditingProduct(null);
+    setError("");
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!session) return;
     setError("");
-    setCreateLoading(true);
+    setSubmitLoading(true);
     try {
-      const res = await fetch(
-        `/api/tenants/${session.tenantId}/stores/${storeId}/products`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            slug,
-            description: description || undefined,
-            imageUrl: imageUrl || undefined,
-            price: parseFloat(price),
-            stock: parseInt(stock, 10) || 0,
-            categoryId: categoryId || undefined,
-          }),
-        }
-      );
+      const body = {
+        name,
+        slug,
+        description: description || undefined,
+        imageUrl: imageUrl || undefined,
+        price: parseFloat(price),
+        stock: parseInt(stock, 10) || 0,
+        categoryId: categoryId || undefined,
+      };
+
+      const url = editingProduct
+        ? `/api/tenants/${session.tenantId}/stores/${storeId}/products/${editingProduct.id}`
+        : `/api/tenants/${session.tenantId}/stores/${storeId}/products`;
+
+      const res = await fetch(url, {
+        method: editingProduct ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       const data = await res.json();
+
       if (!res.ok) {
-        setError(data.error ?? "Erro ao criar produto");
+        setError(data.error ?? (editingProduct ? "Erro ao atualizar" : "Erro ao criar produto"));
         return;
       }
-      setProducts((prev) => [...prev, { ...data, stock: data.stock ?? 0 }]);
-      setShowCreate(false);
-      setName("");
-      setSlug("");
-      setDescription("");
-      setImageUrl("");
-      setPrice("");
-      setStock("0");
-      setCategoryId("");
+
+      if (editingProduct) {
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === editingProduct.id ? { ...data, stock: data.stock ?? 0 } : p
+          )
+        );
+      } else {
+        setProducts((prev) => [...prev, { ...data, stock: data.stock ?? 0 }]);
+      }
+      closeModal();
     } catch {
       setError("Erro de conexão");
     } finally {
-      setCreateLoading(false);
+      setSubmitLoading(false);
     }
   }
 
@@ -145,12 +183,15 @@ export default function ProductsPage() {
             onKeyDown={(e) => e.key === "Enter" && setPage(1)}
             className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
-          <Button onClick={() => setShowCreate(true)}>Novo produto</Button>
+          <Button onClick={openCreateModal}>Novo produto</Button>
         </div>
       </div>
-      {showCreate && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <form onSubmit={handleCreate} className="space-y-4">
+      <Modal
+        open={modalOpen}
+        onClose={closeModal}
+        title={editingProduct ? "Editar produto" : "Novo produto"}
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Nome"
               value={name}
@@ -225,20 +266,21 @@ export default function ProductsPage() {
               </p>
             )}
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setShowCreate(false)}
-              >
+              <Button type="button" variant="secondary" onClick={closeModal}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={createLoading}>
-                {createLoading ? "Criando..." : "Criar"}
+              <Button type="submit" disabled={submitLoading}>
+                {submitLoading
+                  ? editingProduct
+                    ? "Salvando..."
+                    : "Criando..."
+                  : editingProduct
+                    ? "Salvar"
+                    : "Criar"}
               </Button>
             </div>
           </form>
-        </div>
-      )}
+      </Modal>
       <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
         {products.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
@@ -266,9 +308,17 @@ export default function ProductsPage() {
                     </p>
                   </div>
                 </div>
-                <p className="font-medium text-primary">
-                  R$ {Number(p.price).toFixed(2)}
-                </p>
+                <div className="flex items-center gap-4">
+                  <p className="font-medium text-primary">
+                    R$ {Number(p.price).toFixed(2)}
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => openEditModal(p)}
+                  >
+                    Editar
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

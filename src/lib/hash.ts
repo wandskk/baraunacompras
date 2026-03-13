@@ -2,8 +2,17 @@ import { hash as bcryptHash, compare as bcryptCompare } from "bcryptjs";
 
 const SALT_ROUNDS = 12;
 
+function getPepper(): string {
+  const secret = process.env.JWT_SECRET;
+  return secret || (process.env.NODE_ENV === "production" ? "" : "dev-pepper");
+}
+
+function applyPepper(password: string): string {
+  return `${password}${getPepper()}`;
+}
+
 export async function hashPassword(password: string): Promise<string> {
-  return bcryptHash(password, SALT_ROUNDS);
+  return bcryptHash(applyPepper(password), SALT_ROUNDS);
 }
 
 export async function verifyPassword(
@@ -11,7 +20,7 @@ export async function verifyPassword(
   hashedPassword: string
 ): Promise<boolean> {
   if (hashedPassword.startsWith("$2")) {
-    return bcryptCompare(password, hashedPassword);
+    return bcryptCompare(applyPepper(password), hashedPassword);
   }
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
