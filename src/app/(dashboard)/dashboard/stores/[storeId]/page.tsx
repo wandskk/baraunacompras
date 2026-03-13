@@ -10,6 +10,7 @@ type Store = {
   id: string;
   name: string;
   slug: string;
+  theme?: string;
   tenantId: string;
   tenant?: { slug: string };
 };
@@ -24,6 +25,7 @@ export default function StoreDetailPage() {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [theme, setTheme] = useState("default");
   const [error, setError] = useState("");
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -48,6 +50,7 @@ export default function StoreDetailPage() {
       setStore(data);
       setName(data.name);
       setSlug(data.slug);
+      setTheme(data.theme ?? "default");
     } finally {
       setLoading(false);
     }
@@ -64,7 +67,7 @@ export default function StoreDetailPage() {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, slug }),
+          body: JSON.stringify({ name, slug, theme }),
         }
       );
       const data = await res.json();
@@ -135,6 +138,21 @@ export default function StoreDetailPage() {
               onChange={(e) => setSlug(e.target.value)}
               required
             />
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Tema
+              </label>
+              <select
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="default">Azul (padrão)</option>
+                <option value="purple">Roxo</option>
+                <option value="green">Verde</option>
+                <option value="amber">Âmbar</option>
+              </select>
+            </div>
             {error && (
               <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">
                 {error}
@@ -148,6 +166,16 @@ export default function StoreDetailPage() {
           <div className="mt-6 space-y-2">
             <p>
               <span className="font-medium text-gray-500">Slug:</span> {store.slug}
+            </p>
+            <p>
+              <span className="font-medium text-gray-500">Tema:</span>{" "}
+              {store.theme === "purple"
+                ? "Roxo"
+                : store.theme === "green"
+                  ? "Verde"
+                  : store.theme === "amber"
+                    ? "Âmbar"
+                    : "Azul"}
             </p>
             {store.tenant && (
               <a

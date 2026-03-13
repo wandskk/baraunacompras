@@ -3,6 +3,7 @@ import { prisma } from "@/database/prisma";
 type CreateStoreData = {
   name: string;
   slug: string;
+  theme?: string;
   tenantId: string;
 };
 

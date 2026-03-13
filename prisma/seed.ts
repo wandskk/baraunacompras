@@ -31,6 +31,7 @@ async function main() {
     create: {
       name: "Loja Teste",
       slug: "loja-teste",
+      theme: "default",
       tenantId: tenant.id,
     },
   });

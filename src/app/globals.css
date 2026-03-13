@@ -9,6 +9,42 @@
   --color-accent-foreground: oklch(1 0 0);
 }
 
+.theme-default {
+  --color-primary: oklch(0.55 0.22 262);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.96 0.01 262);
+  --color-secondary-foreground: oklch(0.45 0.02 262);
+  --color-accent: oklch(0.55 0.18 145);
+  --color-accent-foreground: oklch(1 0 0);
+}
+
+.theme-purple {
+  --color-primary: oklch(0.55 0.25 300);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.96 0.02 300);
+  --color-secondary-foreground: oklch(0.45 0.05 300);
+  --color-accent: oklch(0.6 0.2 280);
+  --color-accent-foreground: oklch(1 0 0);
+}
+
+.theme-green {
+  --color-primary: oklch(0.5 0.18 145);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.95 0.03 145);
+  --color-secondary-foreground: oklch(0.4 0.05 145);
+  --color-accent: oklch(0.55 0.2 200);
+  --color-accent-foreground: oklch(1 0 0);
+}
+
+.theme-amber {
+  --color-primary: oklch(0.6 0.18 75);
+  --color-primary-foreground: oklch(0.2 0.02 75);
+  --color-secondary: oklch(0.97 0.02 75);
+  --color-secondary-foreground: oklch(0.4 0.05 75);
+  --color-accent: oklch(0.65 0.15 45);
+  --color-accent-foreground: oklch(0.2 0.02 45);
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 antialiased;

@@ -1,5 +1,5 @@
 import { UserRepository } from "../repositories";
-import { hashPassword, verifyPassword } from "@/lib/hash";
+import { hashPassword, verifyPassword, isLegacyHash } from "@/lib/hash";
 import type { RegisterInput, LoginInput } from "../schemas";
 import type { AuthSession } from "../types";
 
@@ -29,6 +29,10 @@ export class AuthService {
     const isValid = await verifyPassword(input.password, user.password);
     if (!isValid) {
       throw new Error("Invalid credentials");
+    }
+    if (user.password && isLegacyHash(user.password)) {
+      const newHash = await hashPassword(input.password);
+      await this.repository.updatePassword(user.id, newHash);
     }
     return {
       userId: user.id,
