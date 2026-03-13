@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getPublicStoreWithProducts } from "@/lib/store-public";
 import { isProductAvailable } from "@/lib/store-public";
 import { StoreFilters } from "./StoreFilters";
+import { ProductCardActions } from "./ProductCardActions";
 
 type PageProps = {
   params: Promise<{ tenantSlug: string }>;
@@ -79,52 +80,54 @@ export default async function StoreHomePage({ params, searchParams }: PageProps)
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {products.map((product) => {
                 const available = isProductAvailable(product);
+                const productUrl = `/loja/${tenantSlug}/produtos/${product.slug}`;
+                const checkoutUrl = `/loja/${tenantSlug}/checkout?productId=${product.id}`;
                 return (
-                  <Link
+                  <div
                     key={product.id}
-                    href={`/loja/${tenantSlug}/produtos/${product.slug}`}
-                    className={`block overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md ${!available ? "opacity-75" : ""}`}
+                    className={`overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md ${!available ? "opacity-75" : ""}`}
                   >
-                    {product.imageUrl && (
-                      <div className="aspect-video w-full overflow-hidden bg-gray-100">
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="p-6">
-                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                      {product.category && (
-                        <p className="mt-1 text-sm text-gray-500">
-                          {product.category.name}
-                        </p>
+                    <Link href={productUrl} className="block">
+                      {product.imageUrl && (
+                        <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
                       )}
-                      {product.description && (
-                        <p className="mt-2 line-clamp-2 text-sm text-gray-600">
-                          {product.description}
-                        </p>
-                      )}
-                      <div className="mt-2 flex items-center justify-between">
-                        <p className="text-lg font-bold text-primary">
-                          R$ {Number(product.price).toFixed(2)}
-                        </p>
-                        {!available && (
-                          <span className="text-xs text-gray-500">Indisponível</span>
+                      <div className="p-6">
+                        <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                        {product.category && (
+                          <p className="mt-1 text-sm text-gray-500">
+                            {product.category.name}
+                          </p>
                         )}
+                        {product.description && (
+                          <p className="mt-2 line-clamp-2 text-sm text-gray-600">
+                            {product.description}
+                          </p>
+                        )}
+                        <div className="mt-2 flex items-center justify-between">
+                          <p className="text-lg font-bold text-primary">
+                            R$ {Number(product.price).toFixed(2)}
+                          </p>
+                          {!available && (
+                            <span className="text-xs text-gray-500">Indisponível</span>
+                          )}
+                        </div>
                       </div>
-                      <span
-                        className={`mt-4 block w-full rounded-lg py-2 text-center font-medium transition-opacity hover:opacity-90 ${
-                          available
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-gray-200 text-gray-500"
-                        }`}
-                      >
-                        Ver produto
-                      </span>
+                    </Link>
+                    <div className="px-6 pb-6">
+                      <ProductCardActions
+                        tenantSlug={tenantSlug}
+                        productId={product.id}
+                        checkoutUrl={checkoutUrl}
+                        available={available}
+                      />
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
