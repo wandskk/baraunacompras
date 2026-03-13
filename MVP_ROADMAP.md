@@ -139,13 +139,13 @@ src/
 
 ## Pontos de atenção (schema atual)
 
-1. **Product** usa `price` como `Decimal` – Zod usa `number`; pode precisar `z.coerce.number()` ou `z.number()` com transform
+1. **Product** – `z.coerce.number()` aplicado para price
 2. **Cart** não tem `CartItem` – carrinho pode precisar de itens (produto + quantidade)
 3. **Order** não tem `OrderItem` – pedido pode precisar de itens (produto + quantidade + preço)
-4. **Customer** – não há módulo customer completo (repositories, services, controllers)
+4. **Customer** – módulo completo implementado
 
 Para MVP mínimo, pode-se começar com Order/Cart sem itens e evoluir depois.
 
 ---
 
-**Próxima etapa sugerida:** Fase 1 – Instalar Tailwind e configurar tema base.
+**Próxima etapa sugerida:** Fase 4 – Frontend Admin (Auth UI, Dashboard, gestão de lojas).

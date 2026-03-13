@@ -4,7 +4,7 @@ export const createOrderSchema = z.object({
   tenantId: z.string().min(1),
   storeId: z.string().min(1),
   customerId: z.string().optional(),
-  total: z.number().nonnegative(),
+  total: z.coerce.number().nonnegative(),
   status: z.enum(["pending", "confirmed", "shipped", "delivered", "cancelled"]).default("pending"),
 });
 
