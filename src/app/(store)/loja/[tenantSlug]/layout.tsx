@@ -16,8 +16,9 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
     );
   }
   const storeName = data.store.name;
+  const themeClass = `theme-${data.store.theme ?? "default"}`;
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen bg-gray-50 ${themeClass}`}>
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <a href={`/loja/${tenantSlug}`} className="text-lg font-bold text-primary">

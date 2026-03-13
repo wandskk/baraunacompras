@@ -19,9 +19,16 @@ export class UserRepository {
     });
   }
 
-  async findById(id: string, tenantId: string) {
+  async   findById(id: string, tenantId: string) {
     return prisma.user.findFirst({
       where: { id, tenantId },
+    });
+  }
+
+  async updatePassword(id: string, password: string) {
+    return prisma.user.update({
+      where: { id },
+      data: { password },
     });
   }
 }
