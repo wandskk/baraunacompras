@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+import { useParams } from "next/navigation";
+import { ChevronRight, ClipboardList } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui";
+import {
+  DataList,
+  DataListItem,
+  StoreListPageLayout,
+} from "@/components/dashboard";
 import { useSession } from "@/hooks/useSession";
 
 type Order = {
@@ -22,8 +27,15 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "Cancelado",
 };
 
+const STATUS_COLORS: Record<string, string> = {
+  pending: "bg-amber-100 text-amber-800",
+  confirmed: "bg-blue-100 text-blue-800",
+  shipped: "bg-indigo-100 text-indigo-800",
+  delivered: "bg-emerald-100 text-emerald-800",
+  cancelled: "bg-gray-100 text-gray-600",
+};
+
 export default function OrdersPage() {
-  const router = useRouter();
   const params = useParams();
   const storeId = params.storeId as string;
   const { session, loading: sessionLoading } = useSession();
@@ -39,53 +51,56 @@ export default function OrdersPage() {
   }, [storeId, session]);
 
   if (sessionLoading || loading || !session) {
-    return <LoadingSpinner message="Carregando pedidos..." minHeight="200px" />;
+    return (
+      <LoadingSpinner message="Carregando pedidos..." minHeight="200px" />
+    );
   }
 
   return (
-    <div>
-      <Link
-        href={`/dashboard/stores/${storeId}`}
-        className="mb-4 inline-block text-sm text-gray-500 hover:text-gray-700"
+    <StoreListPageLayout storeId={storeId} title="Pedidos">
+      <DataList
+        empty={orders.length === 0}
+        emptyMessage="Nenhum pedido registrado."
+        emptyIcon={ClipboardList}
       >
-        ← Voltar à loja
-      </Link>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Pedidos</h1>
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        {orders.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            Nenhum pedido ainda.
-          </div>
-        ) : (
-          <ul className="divide-y divide-gray-200">
-            {orders.map((order) => (
-              <li key={order.id}>
-                <Link
-                  href={`/dashboard/stores/${storeId}/orders/${order.id}`}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-gray-50"
-                >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    #{order.id.slice(-6).toUpperCase()}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString("pt-BR")}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium text-primary">
-                    R$ {Number(order.total).toFixed(2)}
-                  </p>
-                  <span className="inline-block rounded-full bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-                    {STATUS_LABELS[order.status] ?? order.status}
-                  </span>
-                </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+        {orders.map((order) => (
+          <DataListItem
+            key={order.id}
+            href={`/dashboard/stores/${storeId}/orders/${order.id}`}
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <ClipboardList className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">
+                  #{order.id.slice(-6).toUpperCase()}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {new Date(order.createdAt).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <p className="font-semibold text-primary">
+                R$ {Number(order.total).toFixed(2)}
+              </p>
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                  STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {STATUS_LABELS[order.status] ?? order.status}
+              </span>
+              <ChevronRight className="h-4 w-4 text-gray-400" />
+            </div>
+          </DataListItem>
+        ))}
+      </DataList>
+    </StoreListPageLayout>
   );
 }

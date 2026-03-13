@@ -1,9 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+import { useParams } from "next/navigation";
+import { FolderOpen, Plus } from "lucide-react";
 import { Button, Input, LoadingSpinner } from "@/components/ui";
+import {
+  DataList,
+  DataListItem,
+  StoreListPageLayout,
+} from "@/components/dashboard";
+import { slugify } from "@/lib/slugify";
 import { useSession } from "@/hooks/useSession";
 
 type Category = {
@@ -14,7 +20,6 @@ type Category = {
 };
 
 export default function CategoriesPage() {
-  const router = useRouter();
   const params = useParams();
   const storeId = params.storeId as string;
   const { session, loading: sessionLoading } = useSession();
@@ -42,15 +47,6 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  function slugify(text: string) {
-    return text
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -81,23 +77,24 @@ export default function CategoriesPage() {
   }
 
   if (sessionLoading || loading || !session) {
-    return <LoadingSpinner message="Carregando categorias..." minHeight="200px" />;
+    return (
+      <LoadingSpinner message="Carregando categorias..." minHeight="200px" />
+    );
   }
 
   return (
-    <div>
-      <Link
-        href={`/dashboard/stores/${storeId}`}
-        className="mb-4 inline-block text-sm text-gray-500 hover:text-gray-700"
-      >
-        ← Voltar à loja
-      </Link>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Categorias</h1>
-        <Button onClick={() => setShowCreate(true)}>Nova categoria</Button>
-      </div>
+    <StoreListPageLayout
+      storeId={storeId}
+      title="Categorias"
+      actions={
+        <Button onClick={() => setShowCreate(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Nova categoria
+        </Button>
+      }
+    >
       {showCreate && (
-        <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <form onSubmit={handleCreate} className="space-y-4">
             <Input
               label="Nome"
@@ -134,27 +131,34 @@ export default function CategoriesPage() {
           </form>
         </div>
       )}
-      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-        {categories.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            Nenhuma categoria ainda.
-          </div>
-        ) : (
-          <ul className="divide-y divide-gray-200">
-            {categories.map((cat) => (
-              <li
-                key={cat.id}
-                className="flex items-center justify-between px-6 py-4"
-              >
-                <div>
-                  <p className="font-medium text-gray-900">{cat.name}</p>
-                  <p className="text-sm text-gray-500">{cat.slug}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+
+      <DataList
+        empty={categories.length === 0}
+        emptyMessage="Nenhuma categoria cadastrada."
+        emptyIcon={FolderOpen}
+        emptyAction={
+          !showCreate && (
+            <Button onClick={() => setShowCreate(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Criar primeira categoria
+            </Button>
+          )
+        }
+      >
+        {categories.map((cat) => (
+          <DataListItem key={cat.id}>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <FolderOpen className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">{cat.name}</p>
+                <p className="text-sm text-gray-500">/{cat.slug}</p>
+              </div>
+            </div>
+          </DataListItem>
+        ))}
+      </DataList>
+    </StoreListPageLayout>
   );
 }

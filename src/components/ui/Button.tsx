@@ -21,7 +21,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`rounded-lg px-4 py-2 font-medium transition-opacity disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-opacity disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
       disabled={disabled}
       {...props}
     />

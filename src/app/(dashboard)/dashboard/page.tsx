@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Button, Input, LoadingSpinner, Modal } from "@/components/ui";
+import { slugify } from "@/lib/slugify";
 import { useSession } from "@/hooks/useSession";
 
 type Store = {
@@ -66,15 +67,6 @@ export default function DashboardPage() {
   async function handleLogout() {
     await logout();
     router.replace("/login");
-  }
-
-  function slugify(text: string) {
-    return text
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
   }
 
   function handleNameChange(value: string) {
