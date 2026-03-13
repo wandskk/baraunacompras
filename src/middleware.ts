@@ -1,19 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSessionFromCookie, verifySessionToken } from "@/lib/jwt";
-
-const PUBLIC_PATHS = ["/login", "/register", "/loja"];
-const PUBLIC_API_PREFIXES = ["/api/auth", "/api/public"];
-
-function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-}
-
-function isPublicApi(pathname: string): boolean {
-  if (PUBLIC_API_PREFIXES.some((p) => pathname.startsWith(p))) return true;
-  if (pathname === "/api/tenants" && pathname.split("/").length <= 4) return true;
-  return false;
-}
+import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 function requiresAuth(pathname: string): boolean {
   if (pathname.startsWith("/dashboard")) return true;
@@ -22,8 +10,21 @@ function requiresAuth(pathname: string): boolean {
   return false;
 }
 
+function requiresRateLimit(pathname: string): boolean {
+  return (
+    pathname.startsWith("/api/auth/login") ||
+    pathname.startsWith("/api/auth/register") ||
+    pathname.startsWith("/api/public")
+  );
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (requiresRateLimit(pathname)) {
+    const { ok } = checkRateLimit(request);
+    if (!ok) return rateLimitResponse();
+  }
 
   if (!requiresAuth(pathname)) {
     return NextResponse.next();
@@ -53,5 +54,11 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/tenants/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/api/tenants/:path*",
+    "/api/auth/login",
+    "/api/auth/register",
+    "/api/public/:path*",
+  ],
 };
