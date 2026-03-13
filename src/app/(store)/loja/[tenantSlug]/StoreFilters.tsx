@@ -27,17 +27,17 @@ export function StoreFilters({
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(currentSearch ?? "");
 
-  function buildUrl(updates: { q?: string; categoryId?: string; page?: number }) {
+  function buildUrl(updates: { q?: string; categoryId?: string | null; page?: number }) {
     const params = new URLSearchParams(searchParams.toString());
-    if (updates.q !== undefined) {
+    if ("q" in updates) {
       if (updates.q) params.set("q", updates.q);
       else params.delete("q");
     }
-    if (updates.categoryId !== undefined) {
+    if ("categoryId" in updates) {
       if (updates.categoryId) params.set("categoryId", updates.categoryId);
       else params.delete("categoryId");
     }
-    if (updates.page !== undefined) params.set("page", String(updates.page));
+    if ("page" in updates) params.set("page", String(updates.page));
     const qs = params.toString();
     return `/loja/${tenantSlug}${qs ? `?${qs}` : ""}`;
   }
