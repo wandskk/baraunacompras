@@ -1,7 +1,10 @@
 export default function HomePage() {
   return (
-    <main>
-      <h1>Store SaaS</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center p-8">
+      <h1 className="text-3xl font-bold text-primary">Barauna Compras</h1>
+      <p className="mt-2 text-secondary-foreground">
+        SaaS para lojas locais
+      </p>
     </main>
   );
 }

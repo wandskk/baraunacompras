@@ -4,9 +4,11 @@ Stack:
 
 Next.js
 TypeScript
-Sass
+Tailwind CSS
 
 Rules:
+
+Use Tailwind for all styling. CSS variables for theme colors (primary, secondary, accent) so clients can customize their store appearance later.
 
 Components must remain presentational.
 
