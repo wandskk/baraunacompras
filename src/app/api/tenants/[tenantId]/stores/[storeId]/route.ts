@@ -1,41 +1,46 @@
 import { NextResponse } from "next/server";
 import { StoreController } from "@/modules/store/controllers";
+import { apiErrorResponse } from "@/lib/api-errors";
+import { storeParamsSchema } from "@/lib/params-schemas";
 
 type Params = { params: Promise<{ tenantId: string; storeId: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
   try {
-    const { tenantId, storeId } = await params;
+    const rawParams = await params;
+    storeParamsSchema.parse(rawParams);
+    const { tenantId, storeId } = rawParams;
     const controller = new StoreController();
     const store = await controller.getById(storeId, tenantId);
     return NextResponse.json(store);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 404 });
+    return apiErrorResponse(error);
   }
 }
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    const { tenantId, storeId } = await params;
+    const rawParams = await params;
+    storeParamsSchema.parse(rawParams);
+    const { tenantId, storeId } = rawParams;
     const body = await request.json();
     const controller = new StoreController();
     const store = await controller.update(storeId, tenantId, body);
     return NextResponse.json(store);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return apiErrorResponse(error);
   }
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
   try {
-    const { tenantId, storeId } = await params;
+    const rawParams = await params;
+    storeParamsSchema.parse(rawParams);
+    const { tenantId, storeId } = rawParams;
     const controller = new StoreController();
     await controller.delete(storeId, tenantId);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 404 });
+    return apiErrorResponse(error);
   }
 }

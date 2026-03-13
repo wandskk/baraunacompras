@@ -13,5 +13,20 @@ export const updateOrderSchema = z.object({
   customerId: z.string().optional().nullable(),
 });
 
+export const checkoutSchema = z.object({
+  email: z.string().email(),
+  name: z.string().optional(),
+  productId: z.string().min(1),
+  quantity: z.coerce.number().int().min(1).default(1),
+  total: z.coerce.number().positive(),
+});
+
+export const checkoutFromCartSchema = z.object({
+  email: z.string().email(),
+  name: z.string().optional(),
+  cartId: z.string().min(1),
+});
+
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type UpdateOrderInput = z.infer<typeof updateOrderSchema>;
+export type CheckoutInput = z.infer<typeof checkoutSchema>;

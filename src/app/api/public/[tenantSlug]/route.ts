@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { getPublicStoreWithProducts } from "@/lib/store-public";
+import { apiErrorResponse } from "@/lib/api-errors";
+import { tenantSlugParamSchema } from "@/lib/params-schemas";
 
 type Params = { params: Promise<{ tenantSlug: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
   try {
-    const { tenantSlug } = await params;
+    const rawParams = await params;
+    tenantSlugParamSchema.parse(rawParams);
+    const { tenantSlug } = rawParams;
     const data = await getPublicStoreWithProducts(tenantSlug);
     if (!data) {
       return NextResponse.json({ error: "Store not found" }, { status: 404 });
@@ -20,7 +24,6 @@ export async function GET(_request: Request, { params }: Params) {
       categories: data.categories,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return apiErrorResponse(error);
   }
 }
