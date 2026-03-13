@@ -6,6 +6,7 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 function requiresAuth(pathname: string): boolean {
   if (pathname.startsWith("/dashboard")) return true;
   if (pathname === "/api/tenants") return false;
+  if (/^\/api\/tenants\/[^/]+\/stores\/[^/]+\/checkout$/.test(pathname)) return false;
   if (pathname.startsWith("/api/tenants/")) return true;
   return false;
 }

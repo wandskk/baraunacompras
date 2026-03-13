@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getPublicProduct } from "@/lib/store-public";
 import { Button } from "@/components/ui";
+import { AddToCartButton } from "./AddToCartButton";
 
 type PageProps = {
   params: Promise<{ tenantSlug: string; productSlug: string }>;
@@ -37,9 +38,18 @@ export default async function ProductPage({ params }: PageProps) {
             <p className="mt-4 text-3xl font-bold text-primary">
               R$ {Number(product.price).toFixed(2)}
             </p>
-            <Link href={checkoutUrl} className="mt-6 block">
-              <Button fullWidth>Comprar</Button>
-            </Link>
+            <div className="mt-6 flex gap-3">
+              <AddToCartButton
+                tenantSlug={tenantSlug}
+                productId={product.id}
+                productName={product.name}
+              />
+              <Link href={checkoutUrl} className="flex-1">
+                <Button variant="outline" fullWidth>
+                  Comprar agora
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

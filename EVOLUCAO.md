@@ -34,8 +34,8 @@ Guia de desenvolvimento contínuo para tornar o SaaS mais robusto e completo.
 | 8.2 | **OrderItem (Prisma)** | ✅ Modelo `productId`, `quantity`, `price`, `orderId` | Alta |
 | 8.3 | **API Cart** | ✅ POST/PATCH/DELETE items em `/cart/[cartId]/items` | Alta |
 | 8.4 | **Checkout** | ✅ `checkoutFromCart` com cartId cria Order + OrderItems | Alta |
-| 8.5 | **UI Carrinho** | Página `/loja/[slug]/carrinho` com itens e totais | Alta |
-| 8.6 | **Persistência do carrinho** | Cookie ou `localStorage` por sessão/visitante | Média |
+| 8.5 | **UI Carrinho** | ✅ `/loja/[tenantSlug]/carrinho` com itens, +/- qty, checkout | Alta |
+| 8.6 | **Persistência do carrinho** | ✅ Cookie `barauna_cart` (30 dias) em APIs públicas | Média |
 
 ---
 

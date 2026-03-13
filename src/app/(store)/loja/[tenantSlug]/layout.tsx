@@ -31,6 +31,12 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
             >
               Início
             </a>
+            <a
+              href={`/loja/${tenantSlug}/carrinho`}
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Carrinho
+            </a>
           </nav>
         </div>
       </header>

@@ -6,16 +6,19 @@ import { Button, Input } from "@/components/ui";
 type CheckoutFormProps = {
   tenantId: string;
   storeId: string;
-  productId: string;
-  productName: string;
-  total: number;
+  productId?: string;
+  productName?: string;
+  total?: number;
+  cartId?: string;
 };
 
 export function CheckoutForm({
   tenantId,
   storeId,
   productId,
+  productName,
   total,
+  cartId,
 }: CheckoutFormProps) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -28,17 +31,16 @@ export function CheckoutForm({
     setError("");
     setLoading(true);
     try {
+      const body = cartId
+        ? { email, name: name || undefined, cartId }
+        : { email, name: name || undefined, productId, total };
       const res = await fetch(
         `/api/tenants/${tenantId}/stores/${storeId}/checkout`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            name: name || undefined,
-            productId,
-            total,
-          }),
+          body: JSON.stringify(body),
+          credentials: "include",
         }
       );
       const data = await res.json();
