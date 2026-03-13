@@ -1,10 +1,12 @@
+import { DashboardThemeWrapper } from "@/components/DashboardThemeWrapper";
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardThemeWrapper>
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
           <a href="/dashboard" className="text-lg font-bold text-primary">
@@ -21,6 +23,6 @@ export default function DashboardLayout({
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
-    </div>
+    </DashboardThemeWrapper>
   );
 }

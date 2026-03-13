@@ -144,6 +144,14 @@ export default function StoreDetailPage() {
       }
       setStore(data);
       setEditing(false);
+      if (data.theme) {
+        window.dispatchEvent(
+          new CustomEvent("store-theme-changed", {
+            detail: { theme: data.theme },
+          })
+        );
+      }
+      router.refresh();
     } catch {
       setError("Erro de conexão");
     } finally {
