@@ -89,7 +89,7 @@ export default async function ProductPage({ params }: PageProps) {
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             ) : (
@@ -154,7 +154,7 @@ export default async function ProductPage({ params }: PageProps) {
                 <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-500">
                   Descrição
                 </h2>
-                <p className="mt-3 whitespace-pre-line text-gray-600 leading-relaxed">
+                <p className="mt-3 text-sm font-medium whitespace-pre-line text-gray-700 leading-relaxed">
                   {product.description}
                 </p>
               </div>
