@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Button, Input } from "@/components/ui";
-import { ArrowLeft, LogIn } from "lucide-react";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,39 +39,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#202C59]/10 bg-white shadow-xl">
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#2F8743]/10 via-transparent to-transparent" />
-
-      <div className="relative p-8">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#202C59] transition-colors hover:text-[#2F8743]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar à página inicial
-        </Link>
-
-        <div className="mt-6 flex flex-col items-center">
-          <Image
-            src="/logo-nova.png"
-            alt="Baraúna Compras"
-            width={160}
-            height={48}
-            className="h-14 w-auto object-contain"
-          />
-        </div>
-
-        <div className="mt-8 flex items-center justify-center gap-2 rounded-full bg-[#2F8743]/10 px-4 py-2">
-          <LogIn className="h-4 w-4 text-[#2F8743]" />
-          <span className="text-sm font-medium text-[#2F8743]">Entrar na plataforma</span>
-        </div>
-
-        <h1 className="mt-6 text-2xl font-bold text-[#202C59]">Bem-vindo de volta</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Acesse sua conta para gerenciar suas lojas e pedidos
-        </p>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <AuthCard
+      title="Bem-vindo de volta"
+      subtitle="Acesse sua conta para gerenciar suas lojas e pedidos."
+      badge={{ icon: <LogIn className="h-4 w-4" />, label: "Entrar na plataforma" }}
+      footerText="Não tem conta?"
+      footerLinkText="Criar conta"
+      footerLinkHref="/register"
+      compact
+    >
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+        <div className="space-y-3 sm:space-y-4">
           <Input
             label="Email"
             type="email"
@@ -79,30 +57,53 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
+            placeholder="seu@email.com"
           />
-          <Input
-            label="Senha"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-          {error && (
-            <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">{error}</p>
-          )}
-          <Button type="submit" fullWidth disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
-          </Button>
-        </form>
+          <div>
+            <div className="mb-1 flex items-center justify-between">
+              <label
+                htmlFor="senha"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Senha
+              </label>
+              <Link
+                href="/#contato"
+                className="text-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-1 rounded"
+              >
+                Esqueceu a senha?
+              </Link>
+            </div>
+            <Input
+              id="senha"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              placeholder="Sua senha"
+            />
+          </div>
+        </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Não tem conta?{" "}
-          <Link href="/register" className="font-medium text-[#2F8743] hover:underline">
-            Criar conta
-          </Link>
-        </p>
-      </div>
-    </div>
+        {error && (
+          <div
+            className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 border border-red-100"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          fullWidth
+          disabled={loading}
+          className="h-12 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98]"
+        >
+          {loading ? "Entrando..." : "Entrar"}
+        </Button>
+      </form>
+    </AuthCard>
   );
 }

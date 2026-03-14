@@ -2,14 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import { Button, Input } from "@/components/ui";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { AuthFormSection } from "@/components/auth/AuthFormSection";
 import { slugify } from "@/lib/slugify";
-import { ArrowLeft, Store, UserPlus } from "lucide-react";
+import { Store, UserPlus, ArrowRight, ArrowLeft } from "lucide-react";
+
+const STEPS = [
+  {
+    id: "org",
+    title: "Sua organização",
+    subtitle: "Cadastre sua loja na plataforma.",
+    badge: { icon: <Store className="h-4 w-4" />, label: "Etapa 1" },
+  },
+  {
+    id: "dados",
+    title: "Seus dados",
+    subtitle: "Crie seu acesso para gerenciar a loja.",
+    badge: { icon: <UserPlus className="h-4 w-4" />, label: "Etapa 2" },
+  },
+] as const;
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [step, setStep] = useState(1);
   const [tenantName, setTenantName] = useState("");
   const [tenantSlug, setTenantSlug] = useState("");
   const [email, setEmail] = useState("");
@@ -21,6 +37,19 @@ export default function RegisterPage() {
   function handleTenantNameChange(value: string) {
     setTenantName(value);
     setTenantSlug(slugify(value));
+  }
+
+  function handleNext(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    const form = e.currentTarget as HTMLFormElement;
+    if (!form.reportValidity()) return;
+    setStep(2);
+  }
+
+  function handleBack() {
+    setError("");
+    setStep(1);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,110 +92,134 @@ export default function RegisterPage() {
     }
   }
 
+  const currentStep = STEPS[step - 1];
+
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#202C59]/10 bg-white shadow-xl">
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#2266B0]/10 via-transparent to-transparent" />
-
-      <div className="relative p-8">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#202C59] transition-colors hover:text-[#2F8743]"
+    <AuthCard
+      title={currentStep.title}
+      subtitle={currentStep.subtitle}
+      badge={currentStep.badge}
+      footerText="Já tem conta?"
+      footerLinkText="Entrar"
+      footerLinkHref="/login"
+      compact
+      steps={{ current: step, total: STEPS.length }}
+    >
+      <form
+        onSubmit={step === 2 ? handleSubmit : handleNext}
+        className="flex min-h-0 flex-col"
+      >
+        <div
+          className={`space-y-4 transition-opacity duration-300 ${
+            step === 1 ? "block" : "hidden"
+          }`}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Voltar à página inicial
-        </Link>
-
-        <div className="mt-6 flex flex-col items-center">
-          <Image
-            src="/logo-nova.png"
-            alt="Baraúna Compras"
-            width={160}
-            height={48}
-            className="h-14 w-auto object-contain"
-          />
+          <AuthFormSection
+            title="Dados da loja"
+            icon={<Store className="h-4 w-4" />}
+          >
+            <Input
+              label="Nome da organização"
+              value={tenantName}
+              onChange={(e) => handleTenantNameChange(e.target.value)}
+              required
+              placeholder="Minha Loja"
+              autoComplete="organization"
+            />
+            <Input
+              label="Slug (URL da loja)"
+              value={tenantSlug}
+              onChange={(e) => setTenantSlug(e.target.value)}
+              required
+              placeholder="minha-loja"
+            />
+          </AuthFormSection>
         </div>
 
-        <div className="mt-8 flex items-center justify-center gap-2 rounded-full bg-[#2266B0]/10 px-4 py-2">
-          <UserPlus className="h-4 w-4 text-[#2266B0]" />
-          <span className="text-sm font-medium text-[#2266B0]">Criar conta</span>
+        <div
+          className={`space-y-4 transition-opacity duration-300 ${
+            step === 2 ? "block" : "hidden"
+          }`}
+        >
+          <AuthFormSection
+            title="Dados de acesso"
+            icon={<UserPlus className="h-4 w-4" />}
+          >
+            <Input
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={step === 1}
+              autoComplete="email"
+              placeholder="seu@email.com"
+            />
+            <Input
+              label="Nome (opcional)"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={step === 1}
+              autoComplete="name"
+              placeholder="Seu nome"
+            />
+            <Input
+              label="Senha"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              disabled={step === 1}
+              autoComplete="new-password"
+              placeholder="Mínimo 6 caracteres"
+            />
+          </AuthFormSection>
         </div>
 
-        <h1 className="mt-6 text-2xl font-bold text-[#202C59]">Comece a vender</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Crie sua organização e cadastre sua loja na plataforma
-        </p>
-
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div className="rounded-lg border border-[#202C59]/10 bg-gray-50/50 p-3">
-            <p className="mb-3 flex items-center gap-2 text-sm font-medium text-[#202C59]">
-              <Store className="h-4 w-4 text-[#2F8743]" />
-              Sua organização
-            </p>
-            <div className="space-y-3">
-              <Input
-                label="Nome da organização"
-                value={tenantName}
-                onChange={(e) => handleTenantNameChange(e.target.value)}
-                required
-                placeholder="Minha Loja"
-              />
-              <Input
-                label="Slug (URL da loja)"
-                value={tenantSlug}
-                onChange={(e) => setTenantSlug(e.target.value)}
-                required
-                placeholder="minha-loja"
-              />
-            </div>
+        {error && (
+          <div
+            className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 border border-red-100"
+            role="alert"
+          >
+            {error}
           </div>
+        )}
 
-          <div className="rounded-lg border border-[#202C59]/10 bg-gray-50/50 p-3">
-            <p className="mb-3 flex items-center gap-2 text-sm font-medium text-[#202C59]">
-              <UserPlus className="h-4 w-4 text-[#2F8743]" />
-              Seus dados
-            </p>
-            <div className="space-y-3">
-              <Input
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-              <Input
-                label="Nome (opcional)"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoComplete="name"
-              />
-              <Input
-                label="Senha"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                autoComplete="new-password"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">{error}</p>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row-reverse sm:gap-3">
+          {step === 1 ? (
+            <Button
+              type="submit"
+              fullWidth
+              className="h-11 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98] sm:flex-1"
+            >
+              Próximo
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <>
+              <Button
+                type="submit"
+                fullWidth
+                disabled={loading}
+                className="h-11 flex-1 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:shadow-primary/30 active:scale-[0.98]"
+              >
+                {loading ? "Criando conta..." : "Criar conta"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+                disabled={loading}
+                className="h-11 rounded-xl sm:shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+            </>
           )}
-          <Button type="submit" fullWidth disabled={loading}>
-            {loading ? "Criando conta..." : "Criar conta"}
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Já tem conta?{" "}
-          <Link href="/login" className="font-medium text-[#2F8743] hover:underline">
-            Entrar
-          </Link>
-        </p>
-      </div>
-    </div>
+        </div>
+      </form>
+    </AuthCard>
   );
 }
