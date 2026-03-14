@@ -204,6 +204,10 @@ async function main() {
     },
   });
 
+  // Imagens via placehold.co (CDN confiável)
+  const img = (text: string) =>
+    `https://placehold.co/400x300/2F8743/white?text=${encodeURIComponent(text)}`;
+
   // 20 produtos variados
   const productsToSeed = [
     {
@@ -214,6 +218,7 @@ async function main() {
       price: 2999.99,
       stock: 5,
       description: "Notebook para trabalho e estudo.",
+      imageUrl: img("Notebook"),
     },
     {
       store: storeTeste,
@@ -223,6 +228,7 @@ async function main() {
       price: 89.9,
       stock: 15,
       description: "Fone com cancelamento de ruído.",
+      imageUrl: img("Fone Bluetooth"),
     },
     {
       store: storeTeste,
@@ -231,6 +237,7 @@ async function main() {
       slug: "carregador-celular",
       price: 45.0,
       stock: 30,
+      imageUrl: img("Carregador"),
     },
     {
       store: mercearia,
@@ -240,6 +247,7 @@ async function main() {
       price: 24.9,
       stock: 50,
       description: "Arroz branco de boa qualidade.",
+      imageUrl: img("Arroz"),
     },
     {
       store: mercearia,
@@ -248,6 +256,7 @@ async function main() {
       slug: "feijao-1kg",
       price: 8.5,
       stock: 40,
+      imageUrl: img("Feijão"),
     },
     {
       store: mercearia,
@@ -256,6 +265,7 @@ async function main() {
       slug: "oleo-soja-900ml",
       price: 7.99,
       stock: 60,
+      imageUrl: img("Óleo"),
     },
     {
       store: mercearia,
@@ -264,6 +274,7 @@ async function main() {
       slug: "cafe-torrado-500g",
       price: 18.9,
       stock: 25,
+      imageUrl: img("Café"),
     },
     {
       store: farmacia,
@@ -272,6 +283,7 @@ async function main() {
       slug: "sabonete-liquido",
       price: 12.9,
       stock: 35,
+      imageUrl: img("Sabonete"),
     },
     {
       store: farmacia,
@@ -280,6 +292,7 @@ async function main() {
       slug: "shampoo-anticaspa",
       price: 28.5,
       stock: 20,
+      imageUrl: img("Shampoo"),
     },
     {
       store: farmacia,
@@ -289,6 +302,7 @@ async function main() {
       price: 8.99,
       stock: 45,
       description: "Analgésico e antitérmico.",
+      imageUrl: img("Paracetamol"),
     },
     {
       store: padaria,
@@ -297,6 +311,7 @@ async function main() {
       slug: "pao-frances-1kg",
       price: 12.0,
       stock: 20,
+      imageUrl: img("Pão"),
     },
     {
       store: padaria,
@@ -305,6 +320,7 @@ async function main() {
       slug: "bolo-chocolate-fatia",
       price: 6.5,
       stock: 15,
+      imageUrl: img("Bolo"),
     },
     {
       store: acai,
@@ -313,6 +329,7 @@ async function main() {
       slug: "acai-500ml",
       price: 15.0,
       stock: 30,
+      imageUrl: img("Açaí"),
     },
     {
       store: acai,
@@ -321,6 +338,7 @@ async function main() {
       slug: "tapioca-doce",
       price: 10.0,
       stock: 25,
+      imageUrl: img("Tapioca"),
     },
     {
       store: bebidas,
@@ -329,6 +347,7 @@ async function main() {
       slug: "refrigerante-2l",
       price: 9.9,
       stock: 80,
+      imageUrl: img("Refrigerante"),
     },
     {
       store: bebidas,
@@ -337,6 +356,7 @@ async function main() {
       slug: "cerveja-pack-6",
       price: 24.9,
       stock: 40,
+      imageUrl: img("Cerveja"),
     },
     {
       store: moda,
@@ -346,6 +366,7 @@ async function main() {
       price: 39.9,
       stock: 50,
       description: "Camiseta 100% algodão.",
+      imageUrl: img("Camiseta"),
     },
     {
       store: moda,
@@ -354,6 +375,7 @@ async function main() {
       slug: "chinelo-havaianas",
       price: 49.9,
       stock: 30,
+      imageUrl: img("Chinelo"),
     },
     {
       store: material,
@@ -363,6 +385,7 @@ async function main() {
       price: 189.0,
       stock: 10,
       description: "Tinta para pintura de paredes.",
+      imageUrl: img("Tinta"),
     },
     {
       store: material,
@@ -371,6 +394,7 @@ async function main() {
       slug: "cimento-50kg",
       price: 32.9,
       stock: 100,
+      imageUrl: img("Cimento"),
     },
   ];
 
@@ -388,6 +412,7 @@ async function main() {
         price: p.price,
         stock: p.stock,
         description: p.description ?? null,
+        imageUrl: p.imageUrl ?? null,
         categoryId: p.category.id,
       },
       create: {
@@ -396,6 +421,7 @@ async function main() {
         price: p.price,
         stock: p.stock,
         description: p.description ?? null,
+        imageUrl: p.imageUrl ?? null,
         tenantId: tenant.id,
         storeId: p.store.id,
         categoryId: p.category.id,
