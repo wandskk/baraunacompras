@@ -12,6 +12,7 @@ import {
   Package,
   DollarSign,
   Layers,
+  Tag,
 } from "lucide-react";
 import {
   Button,
@@ -30,6 +31,7 @@ import {
   StoreListPageLayout,
 } from "@/components/dashboard";
 import { slugify } from "@/lib/slugify";
+import { getEffectivePrice, isProductOnPromotion } from "@/lib/product-price";
 import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
 
@@ -38,6 +40,8 @@ type Product = {
   name: string;
   slug: string;
   price: string;
+  promotionalPrice?: string | null;
+  promotionEndsAt?: string | null;
   description?: string | null;
   imageUrl?: string | null;
   stock?: number;
@@ -71,6 +75,8 @@ export default function ProductsPage() {
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [price, setPrice] = useState("");
+  const [promotionalPrice, setPromotionalPrice] = useState("");
+  const [promotionEndsAt, setPromotionEndsAt] = useState("");
   const [stock, setStock] = useState("0");
   const [minStock, setMinStock] = useState("0");
   const [variations, setVariations] = useState<string[]>([]);
@@ -85,6 +91,7 @@ export default function ProductsPage() {
     total: number;
   } | null>(null);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
 
   useEffect(() => {
@@ -122,11 +129,15 @@ export default function ProductsPage() {
 
   function openCreateModal() {
     setEditingProduct(null);
+    setError("");
+    setFieldErrors({});
     setName("");
     setSlug("");
     setDescription("");
     setImageUrl("");
     setPrice("");
+    setPromotionalPrice("");
+    setPromotionEndsAt("");
     setStock("0");
     setMinStock("0");
     setVariations([]);
@@ -138,17 +149,20 @@ export default function ProductsPage() {
 
   function openEditModal(product: Product) {
     setEditingProduct(product);
+    setError("");
+    setFieldErrors({});
     setName(product.name);
     setSlug(product.slug);
     setDescription(product.description ?? "");
     setImageUrl(product.imageUrl ?? "");
     setPrice(product.price ? formatNumberToCurrency(Number(product.price)) : "");
+    setPromotionalPrice(product.promotionalPrice ? formatNumberToCurrency(Number(product.promotionalPrice)) : "");
+    setPromotionEndsAt(product.promotionEndsAt ? product.promotionEndsAt.slice(0, 10) : "");
     setStock(String(product.stock ?? 0));
     setMinStock(String(product.minStock ?? 0));
     setVariations(product.variations ?? []);
     setSizes(product.sizes ?? []);
     setCategoryId(product.categoryId ?? "");
-    setError("");
     setModalOpen(true);
   }
 
@@ -156,20 +170,36 @@ export default function ProductsPage() {
     setModalOpen(false);
     setEditingProduct(null);
     setError("");
+    setFieldErrors({});
+  }
+
+  function clearFieldError(field: string) {
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!session) return;
     setError("");
+    setFieldErrors({});
     setSubmitLoading(true);
     try {
+      const promoPriceNum = promotionalPrice.trim() ? parseCurrencyToNumber(promotionalPrice) || parseFloat(promotionalPrice) : null;
+      const promoEndsAt = promotionEndsAt.trim()
+        ? new Date(`${promotionEndsAt}T23:59:59`)
+        : null;
       const body = {
         name,
         slug,
         description: description || undefined,
         imageUrl: imageUrl || undefined,
         price: parseCurrencyToNumber(price) || parseFloat(price) || 0,
+        promotionalPrice: promoPriceNum ?? null,
+        promotionEndsAt: promoEndsAt?.toISOString() ?? null,
         stock: parseInt(stock, 10) || 0,
         minStock: parseInt(minStock, 10) || 0,
         variations: variations.length > 0 ? variations : undefined,
@@ -194,6 +224,15 @@ export default function ProductsPage() {
           (editingProduct ? "Erro ao atualizar" : "Erro ao criar produto");
         setError(msg);
         toast.error(msg);
+        if (data.details && Array.isArray(data.details)) {
+          const errors: Record<string, string> = {};
+          for (const d of data.details) {
+            if (d.path && d.message) {
+              errors[d.path] = d.message;
+            }
+          }
+          setFieldErrors(errors);
+        }
         return;
       }
 
@@ -286,13 +325,19 @@ export default function ProductsPage() {
                 onChange={(e) => {
                   setName(e.target.value);
                   setSlug(slugify(e.target.value));
+                  clearFieldError("name");
                 }}
+                error={fieldErrors.name}
                 required
               />
               <Input
                 label="Slug"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value)}
+                onChange={(e) => {
+                  setSlug(e.target.value);
+                  clearFieldError("slug");
+                }}
+                error={fieldErrors.slug}
                 required
               />
               <div className="w-full">
@@ -301,10 +346,16 @@ export default function ProductsPage() {
                 </label>
                 <textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    clearFieldError("description");
+                  }}
                   rows={3}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className={`w-full rounded-lg border px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-offset-0 ${fieldErrors.description ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "border-gray-300 focus:border-primary focus:ring-primary/20"}`}
                 />
+                {fieldErrors.description && (
+                  <p className="mt-1 text-sm text-red-500">{fieldErrors.description}</p>
+                )}
               </div>
               {session && (
                 <ImageUpload
@@ -320,6 +371,53 @@ export default function ProductsPage() {
 
           <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
             <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900">
+              <Tag className="h-5 w-5 text-amber-600" />
+              Promoção
+            </h3>
+            <p className="mb-4 text-sm text-gray-600">
+              Ative uma promoção com preço especial e data de expiração.
+            </p>
+            <div className="mb-4 grid gap-4 sm:grid-cols-2">
+              <MaskedInput
+                label="Preço promocional"
+                mask="currency"
+                value={promotionalPrice}
+                onChange={(e) => {
+                  setPromotionalPrice(e.target.value);
+                  clearFieldError("promotionalPrice");
+                }}
+                placeholder="Deixe vazio para desativar"
+                error={fieldErrors.promotionalPrice}
+              />
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Data de expiração
+                </label>
+                <input
+                  type="date"
+                  value={promotionEndsAt}
+                  min={(() => {
+                    const n = new Date();
+                    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+                  })()}
+                  onChange={(e) => {
+                    setPromotionEndsAt(e.target.value);
+                    clearFieldError("promotionEndsAt");
+                  }}
+                  className={`w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-offset-0 ${fieldErrors.promotionEndsAt ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "border-gray-300 focus:border-primary focus:ring-primary/20"}`}
+                />
+                {fieldErrors.promotionEndsAt && (
+                  <p className="mt-1 text-sm text-red-500">{fieldErrors.promotionEndsAt}</p>
+                )}
+                <p className="mt-0.5 text-xs text-gray-500">
+                  Válida até 23:59:59 do dia selecionado
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+            <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-gray-900">
               <DollarSign className="h-5 w-5 text-primary" />
               Preço e estoque
             </h3>
@@ -328,8 +426,12 @@ export default function ProductsPage() {
                 label="Preço"
                 mask="currency"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  clearFieldError("price");
+                }}
                 placeholder="0,00"
+                error={fieldErrors.price}
                 required
               />
               <Input
@@ -337,16 +439,24 @@ export default function ProductsPage() {
                 type="number"
                 min="0"
                 value={stock}
-                onChange={(e) => setStock(e.target.value)}
+                onChange={(e) => {
+                  setStock(e.target.value);
+                  clearFieldError("stock");
+                }}
+                error={fieldErrors.stock}
               />
               <Input
                 label="Estoque mínimo"
                 type="number"
                 min="0"
                 value={minStock}
-                onChange={(e) => setMinStock(e.target.value)}
+                onChange={(e) => {
+                  setMinStock(e.target.value);
+                  clearFieldError("minStock");
+                }}
                 placeholder="0"
                 title="Alerta quando estoque ficar abaixo deste valor"
+                error={fieldErrors.minStock}
               />
             </div>
           </div>
@@ -377,8 +487,11 @@ export default function ProductsPage() {
                 </label>
                 <select
                   value={categoryId}
-                  onChange={(e) => setCategoryId(e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    clearFieldError("categoryId");
+                  }}
+                  className={`w-full rounded-lg border px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-offset-0 ${fieldErrors.categoryId ? "border-red-500 focus:border-red-500 focus:ring-red-500/20" : "border-gray-300 focus:border-primary focus:ring-primary/20"}`}
                 >
                   <option value="">Nenhuma</option>
                   {categories.map((c) => (
@@ -387,11 +500,14 @@ export default function ProductsPage() {
                     </option>
                   ))}
                 </select>
+                {fieldErrors.categoryId && (
+                  <p className="mt-1 text-sm text-red-500">{fieldErrors.categoryId}</p>
+                )}
               </div>
             </div>
           </div>
 
-          {error && (
+          {error && Object.keys(fieldErrors).length === 0 && (
             <p className="rounded-lg bg-red-50 p-2 text-sm text-red-600">
               {error}
             </p>
@@ -424,7 +540,10 @@ export default function ProductsPage() {
           </Button>
         }
       >
-        {products.map((p) => (
+        {products.map((p) => {
+          const onPromo = isProductOnPromotion(p);
+          const displayPrice = getEffectivePrice(p);
+          return (
           <DataListItem
             key={p.id}
             href={
@@ -432,6 +551,7 @@ export default function ProductsPage() {
                 ? `/loja/${storeSegment}/produtos/${p.slug}`
                 : undefined
             }
+            variant={onPromo ? "promotion" : "default"}
           >
             <div className="flex items-center gap-4">
               {p.imageUrl ? (
@@ -467,8 +587,18 @@ export default function ProductsPage() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {onPromo && (
+                <span className="rounded bg-amber-200/80 px-2 py-0.5 text-xs font-bold text-amber-900">
+                  PROMO
+                </span>
+              )}
               <p className="font-semibold text-primary">
-                {formatCurrency(Number(p.price))}
+                {formatCurrency(displayPrice)}
+                {onPromo && p.price && Number(p.price) > displayPrice && (
+                  <span className="ml-1.5 text-sm font-normal text-gray-500 line-through">
+                    {formatCurrency(Number(p.price))}
+                  </span>
+                )}
               </p>
               <Button
                 variant="outline"
@@ -485,7 +615,8 @@ export default function ProductsPage() {
               </Button>
             </div>
           </DataListItem>
-        ))}
+          );
+        })}
       </DataList>
 
       {pagination && pagination.total > pagination.limit && (

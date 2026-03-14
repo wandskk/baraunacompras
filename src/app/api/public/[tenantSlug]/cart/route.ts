@@ -3,6 +3,7 @@ import { getPublicStore } from "@/lib/store-public";
 import { CartService } from "@/modules/cart/services";
 import { apiErrorResponse } from "@/lib/api-errors";
 import { tenantSlugParamSchema } from "@/lib/params-schemas";
+import { getEffectivePrice } from "@/lib/product-price";
 
 const CART_COOKIE = "barauna_cart";
 const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
@@ -38,15 +39,18 @@ export async function GET(request: NextRequest, { params }: Params) {
       if (cart.storeId !== data.store.id) {
         return NextResponse.json({ cart: null, items: [] });
       }
-      const items = (cart.items ?? []).map((i) => ({
-        id: i.id,
-        productId: i.productId,
-        product: i.product,
-        quantity: i.quantity,
-        variation: (i as { variation?: string }).variation ?? "",
-        size: (i as { size?: string }).size ?? "",
-        subtotal: Number(i.product.price) * i.quantity,
-      }));
+      const items = (cart.items ?? []).map((i) => {
+        const price = getEffectivePrice(i.product);
+        return {
+          id: i.id,
+          productId: i.productId,
+          product: i.product,
+          quantity: i.quantity,
+          variation: (i as { variation?: string }).variation ?? "",
+          size: (i as { size?: string }).size ?? "",
+          subtotal: price * i.quantity,
+        };
+      });
       const total = items.reduce((s, i) => s + i.subtotal, 0);
       return NextResponse.json({ cart: { id: cart.id }, items, total });
     } catch {
@@ -95,15 +99,18 @@ export async function POST(request: NextRequest, { params }: Params) {
       });
     }
     const cart = await cartService.getById(cartId, data.tenantId);
-    const items = (cart.items ?? []).map((i) => ({
-      id: i.id,
-      productId: i.productId,
-      product: i.product,
-      quantity: i.quantity,
-      variation: (i as { variation?: string }).variation ?? "",
-      size: (i as { size?: string }).size ?? "",
-      subtotal: Number(i.product.price) * i.quantity,
-    }));
+    const items = (cart.items ?? []).map((i) => {
+      const price = getEffectivePrice(i.product);
+      return {
+        id: i.id,
+        productId: i.productId,
+        product: i.product,
+        quantity: i.quantity,
+        variation: (i as { variation?: string }).variation ?? "",
+        size: (i as { size?: string }).size ?? "",
+        subtotal: price * i.quantity,
+      };
+    });
     const total = items.reduce((s, i) => s + i.subtotal, 0);
     const res = NextResponse.json({ cart: { id: cart.id }, items, total }, { status: 201 });
     res.headers.set("Set-Cookie", setCartCookie(cartId));

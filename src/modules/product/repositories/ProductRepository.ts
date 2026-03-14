@@ -6,6 +6,8 @@ type CreateProductData = {
   description?: string;
   imageUrl?: string;
   price: number;
+  promotionalPrice?: number | null;
+  promotionEndsAt?: Date | null;
   stock?: number;
   minStock?: number;
   variations?: string[];
@@ -23,6 +25,8 @@ export class ProductRepository {
       data: {
         ...data,
         price: data.price,
+        promotionalPrice: data.promotionalPrice ?? undefined,
+        promotionEndsAt: data.promotionEndsAt ?? undefined,
         variations: data.variations ?? [],
         sizes: data.sizes ?? [],
       },

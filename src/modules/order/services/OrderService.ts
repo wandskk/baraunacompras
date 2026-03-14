@@ -1,6 +1,7 @@
 import { prisma } from "@/database/prisma";
 import { OrderRepository } from "../repositories";
 import { CartService } from "@/modules/cart/services";
+import { getEffectivePrice } from "@/lib/product-price";
 import { CustomerService } from "@/modules/customer/services";
 import {
   sendOrderConfirmation,
@@ -74,7 +75,7 @@ export class OrderService {
     });
     let total = 0;
     const items = cart.items.map((item) => {
-      const price = Number(item.product.price);
+      const price = getEffectivePrice(item.product);
       const qty = item.quantity;
       total += price * qty;
       return {

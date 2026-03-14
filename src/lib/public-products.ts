@@ -1,4 +1,5 @@
 import { prisma } from "@/database/prisma";
+import { getEffectivePrice, isProductOnPromotion } from "./product-price";
 
 export type PublicProductItem = {
   id: string;
@@ -7,6 +8,8 @@ export type PublicProductItem = {
   description: string | null;
   imageUrl: string | null;
   price: string;
+  originalPrice?: string | null;
+  isPromotion: boolean;
   storeName: string;
   tenantSlug: string;
   storeSlug: string;
@@ -62,17 +65,23 @@ export async function getPublicProducts(
     ]);
 
     return {
-      products: products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        slug: p.slug,
-        description: p.description,
-        imageUrl: p.imageUrl,
-        price: p.price.toString(),
-        storeName: p.store.name,
-        tenantSlug: p.store.tenant.slug,
-        storeSlug: p.store.slug,
-      })),
+      products: products.map((p) => {
+        const onPromo = isProductOnPromotion(p);
+        const effectivePrice = getEffectivePrice(p);
+        return {
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          description: p.description,
+          imageUrl: p.imageUrl,
+          price: String(effectivePrice),
+          originalPrice: onPromo ? p.price.toString() : null,
+          isPromotion: onPromo,
+          storeName: p.store.name,
+          tenantSlug: p.store.tenant.slug,
+          storeSlug: p.store.slug,
+        };
+      }),
       pagination: { page, limit, total },
     };
   } catch {

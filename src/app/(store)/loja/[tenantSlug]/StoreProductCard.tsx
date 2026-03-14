@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { formatCurrency } from "@/lib/format";
+import { getEffectivePrice, isProductOnPromotion } from "@/lib/product-price";
 import { AddToCartButton } from "./produtos/[productSlug]/AddToCartButton";
 
 type Product = {
@@ -11,6 +12,8 @@ type Product = {
   description?: string | null;
   imageUrl?: string | null;
   price: { toString: () => string } | string | number;
+  promotionalPrice?: { toString: () => string } | string | number | null;
+  promotionEndsAt?: Date | string | null;
   category?: { name: string } | null;
 };
 
@@ -22,13 +25,21 @@ type Props = {
 
 export function StoreProductCard({ tenantSlug, product, available }: Props) {
   const productUrl = `/loja/${tenantSlug}/produtos/${product.slug}`;
-  const price = Number(product.price);
+  const price = getEffectivePrice(product);
+  const onPromo = isProductOnPromotion(product);
+  const originalPrice = onPromo ? Number(product.price) : null;
 
   return (
     <article
-      className={`font-product group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md ${!available ? "opacity-70" : ""}`}
+      className={`font-product group flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md ${onPromo ? "border-amber-400/70 bg-amber-50/50 hover:border-amber-500/80" : "border-gray-200 bg-white"} ${!available ? "opacity-70" : ""}`}
     >
       <Link href={productUrl} className="flex flex-1 flex-col">
+        <div className="relative">
+        {onPromo && (
+          <span className="absolute left-2 top-2 z-10 rounded-md bg-amber-500 px-2 py-0.5 text-xs font-bold text-black shadow-sm">
+            PROMO
+          </span>
+        )}
         {product.imageUrl ? (
           <div className="aspect-square overflow-hidden bg-gray-100">
             <img
@@ -38,14 +49,20 @@ export function StoreProductCard({ tenantSlug, product, available }: Props) {
             />
           </div>
         ) : (
-          <div className="flex aspect-square items-center justify-center bg-secondary">
+          <div className={`flex aspect-square items-center justify-center ${onPromo ? "bg-amber-100/50" : "bg-secondary"}`}>
             <span className="text-4xl text-secondary-foreground/40">📦</span>
           </div>
         )}
+        </div>
         <div className="flex flex-1 flex-col p-3 sm:p-4">
           <h3 className="font-semibold text-gray-900 line-clamp-2">{product.name}</h3>
-          <p className="mt-1 text-lg font-bold text-primary">
+          <p className={`mt-1 text-lg font-bold ${onPromo ? "text-amber-800" : "text-primary"}`}>
             {formatCurrency(price)}
+            {originalPrice != null && originalPrice > price && (
+              <span className="ml-1.5 text-sm font-normal text-gray-500 line-through">
+                {formatCurrency(originalPrice)}
+              </span>
+            )}
           </p>
           {!available && (
             <span className="mt-1 text-xs text-gray-500">Indisponível</span>

@@ -84,19 +84,21 @@ model Category {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String
-  description String?  @db.Text
-  imageUrl    String?
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
-  minStock    Int      @default(0)
-  variations  String[] @default([])
-  sizes       String[] @default([])
-  tenantId    String
-  storeId     String
-  categoryId  String?
+  id               String    @id @default(cuid())
+  name             String
+  slug             String
+  description      String?   @db.Text
+  imageUrl         String?
+  price            Decimal   @db.Decimal(10, 2)
+  promotionalPrice Decimal?  @db.Decimal(10, 2)
+  promotionEndsAt  DateTime?
+  stock            Int       @default(0)
+  minStock         Int       @default(0)
+  variations       String[]  @default([])
+  sizes            String[]  @default([])
+  tenantId         String
+  storeId          String
+  categoryId       String?
   store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())

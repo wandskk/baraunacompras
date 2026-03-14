@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
+import { getEffectivePrice, isProductOnPromotion } from "@/lib/product-price";
 import {
   getPublicProduct,
   getPublicStore,
@@ -60,7 +61,9 @@ export default async function ProductPage({ params }: PageProps) {
     ? `https://wa.me/55${whatsappPhone}?text=${encodeURIComponent(`Olá! Tenho dúvidas sobre o produto: ${product.name}`)}`
     : null;
   const stock = product.stock ?? 0;
-  const price = Number(product.price);
+  const price = getEffectivePrice(product);
+  const onPromo = isProductOnPromotion(product);
+  const originalPrice = onPromo ? Number(product.price) : null;
   const relatedProducts = await getRelatedProducts(
     tenantSlug,
     product.id,
@@ -81,10 +84,15 @@ export default async function ProductPage({ params }: PageProps) {
       </nav>
 
       {/* Product card */}
-      <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <article className={`overflow-hidden rounded-2xl border shadow-sm ${onPromo ? "border-amber-400/70 bg-amber-50/30" : "border-gray-200 bg-white"}`}>
         <div className="grid gap-6 p-6 sm:gap-8 sm:p-8 lg:grid-cols-2 lg:gap-12">
           {/* Image */}
           <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 lg:aspect-4/5">
+            {onPromo && (
+              <span className="absolute left-4 top-4 z-10 rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-bold text-black shadow-md">
+                PROMO
+              </span>
+            )}
             {product.imageUrl ? (
               <img
                 src={product.imageUrl}
@@ -116,9 +124,16 @@ export default async function ProductPage({ params }: PageProps) {
             </h1>
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              <p className="text-3xl font-bold text-primary">
-                {formatCurrency(price)}
-              </p>
+              <div>
+                <p className={`text-3xl font-bold ${onPromo ? "text-amber-800" : "text-primary"}`}>
+                  {formatCurrency(price)}
+                </p>
+                {originalPrice != null && originalPrice > price && (
+                  <p className="mt-0.5 text-lg text-gray-500 line-through">
+                    De {formatCurrency(originalPrice)}
+                  </p>
+                )}
+              </div>
               {available ? (
                 <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
                   Em estoque{stock > 1 ? ` (${stock} unidades)` : ""}

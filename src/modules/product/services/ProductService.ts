@@ -1,3 +1,4 @@
+import { FieldValidationError } from "@/lib/api-errors";
 import { ProductRepository } from "../repositories";
 import type { CreateProductInput, UpdateProductInput } from "../schemas";
 
@@ -33,7 +34,7 @@ export class ProductService {
   }
 
   async update(id: string, tenantId: string, input: UpdateProductInput) {
-    await this.getById(id, tenantId);
+    const product = await this.getById(id, tenantId);
     if (input.slug && input.storeId) {
       const existing = await this.repository.findBySlug(
         input.slug,
@@ -42,6 +43,17 @@ export class ProductService {
       );
       if (existing && existing.id !== id) {
         throw new Error("Product with this slug already exists in this store");
+      }
+    }
+    const promoPrice = input.promotionalPrice;
+    if (promoPrice != null && promoPrice > 0) {
+      const effectivePrice =
+        input.price ?? Number(product.price);
+      if (promoPrice >= effectivePrice) {
+        throw new FieldValidationError(
+          "Preço promocional deve ser menor que o preço normal",
+          "promotionalPrice",
+        );
       }
     }
     return this.repository.update(id, tenantId, input);

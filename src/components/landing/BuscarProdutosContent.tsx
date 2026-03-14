@@ -231,10 +231,15 @@ export function BuscarProdutosContent({
               {products.map((item) => (
               <Link
                 key={item.id}
-                href={`/loja/${item.tenantSlug}/produtos/${item.slug}`}
-                className="font-product group flex flex-col overflow-hidden rounded-xl border border-navy/10 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md hover:shadow-primary/5"
+                href={`/loja/${item.storeSlug}/produtos/${item.slug}`}
+                className={`font-product group flex flex-col overflow-hidden rounded-xl border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${item.isPromotion ? "border-amber-400/70 bg-amber-50/50 hover:border-amber-500/80" : "border-navy/10 bg-white hover:border-primary/25 hover:shadow-primary/5"}`}
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+                  {item.isPromotion && (
+                    <span className="absolute left-1.5 top-1.5 z-10 rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-black shadow-sm">
+                      PROMO
+                    </span>
+                  )}
                   {item.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -243,8 +248,8 @@ export function BuscarProdutosContent({
                       className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-primary/5">
-                      <Package className="h-10 w-10 text-primary/30 sm:h-12 sm:w-12" />
+                    <div className={`flex h-full w-full items-center justify-center ${item.isPromotion ? "bg-amber-100/50" : "bg-primary/5"}`}>
+                      <Package className={`h-10 w-10 sm:h-12 sm:w-12 ${item.isPromotion ? "text-amber-600/50" : "text-primary/30"}`} />
                     </div>
                   )}
                   <span className="absolute bottom-1.5 left-1.5 right-1.5 truncate rounded-md bg-white/95 px-2 py-1 text-[10px] font-medium text-gray-600 shadow-sm sm:text-xs">
@@ -252,11 +257,16 @@ export function BuscarProdutosContent({
                   </span>
                 </div>
                 <div className="flex flex-1 flex-col p-2 sm:p-2.5">
-                  <h3 className="line-clamp-2 min-h-0 flex-1 text-xs font-semibold leading-tight text-navy sm:text-sm group-hover:text-primary">
+                  <h3 className={`line-clamp-2 min-h-0 flex-1 text-xs font-semibold leading-tight sm:text-sm ${item.isPromotion ? "text-amber-900 group-hover:text-amber-800" : "text-navy group-hover:text-primary"}`}>
                     {item.name}
                   </h3>
-                  <p className="mt-auto pt-1.5 text-sm font-bold text-primary sm:text-base">
+                  <p className={`mt-auto pt-1.5 text-sm font-bold sm:text-base ${item.isPromotion ? "text-amber-800" : "text-primary"}`}>
                     {formatPrice(item.price)}
+                    {item.originalPrice && (
+                      <span className="ml-1 text-xs font-normal text-gray-500 line-through">
+                        {formatPrice(item.originalPrice)}
+                      </span>
+                    )}
                   </p>
                 </div>
               </Link>

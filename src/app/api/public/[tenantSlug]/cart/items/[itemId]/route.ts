@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPublicStore } from "@/lib/store-public";
 import { CartService } from "@/modules/cart/services";
 import { apiErrorResponse } from "@/lib/api-errors";
+import { getEffectivePrice } from "@/lib/product-price";
 import { z } from "zod";
 
 const CART_COOKIE = "barauna_cart";
@@ -26,16 +27,19 @@ async function getStoreData(tenantSlug: string) {
   return data;
 }
 
-function mapItems(cart: { items?: Array<{ id: string; productId: string; product: { price: unknown }; quantity: number; variation?: string; size?: string }> }) {
-  return (cart.items ?? []).map((i) => ({
-    id: i.id,
-    productId: i.productId,
-    product: i.product,
-    quantity: i.quantity,
-    variation: i.variation ?? "",
-    size: i.size ?? "",
-    subtotal: Number(i.product.price) * i.quantity,
-  }));
+function mapItems(cart: { items?: Array<{ id: string; productId: string; product: { price: unknown; promotionalPrice?: unknown; promotionEndsAt?: unknown }; quantity: number; variation?: string; size?: string }> }) {
+  return (cart.items ?? []).map((i) => {
+    const price = getEffectivePrice(i.product);
+    return {
+      id: i.id,
+      productId: i.productId,
+      product: i.product,
+      quantity: i.quantity,
+      variation: i.variation ?? "",
+      size: i.size ?? "",
+      subtotal: price * i.quantity,
+    };
+  });
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {

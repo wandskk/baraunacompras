@@ -11,8 +11,19 @@ export type ApiErrorCode =
 export type ApiErrorResponse = {
   code: ApiErrorCode;
   error: string;
-  details?: unknown;
+  details?: Array<{ path: string; message: string }>;
 };
+
+/** Erro de validação com campo específico para exibir no formulário */
+export class FieldValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly field: string,
+  ) {
+    super(message);
+    this.name = "FieldValidationError";
+  }
+}
 
 export function toErrorResponse(error: unknown): { status: number; json: ApiErrorResponse } {
   if (error instanceof ZodError) {
@@ -27,6 +38,16 @@ export function toErrorResponse(error: unknown): { status: number; json: ApiErro
         code: "VALIDATION_ERROR",
         error: firstMessage,
         details: issues,
+      },
+    };
+  }
+  if (error instanceof FieldValidationError) {
+    return {
+      status: 400,
+      json: {
+        code: "VALIDATION_ERROR",
+        error: error.message,
+        details: [{ path: error.field, message: error.message }],
       },
     };
   }

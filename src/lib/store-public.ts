@@ -8,6 +8,8 @@ export type PublicProduct = {
   description: string | null;
   imageUrl: string | null;
   price: { toString: () => string };
+  promotionalPrice?: { toString: () => string } | null;
+  promotionEndsAt?: Date | null;
   stock: number;
   variations?: string[];
   sizes?: string[];
