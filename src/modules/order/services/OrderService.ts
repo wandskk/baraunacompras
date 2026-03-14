@@ -1,3 +1,4 @@
+import { prisma } from "@/database/prisma";
 import { OrderRepository } from "../repositories";
 import { CartService } from "@/modules/cart/services";
 import { CustomerService } from "@/modules/customer/services";
@@ -25,6 +26,16 @@ export class OrderService {
     cartId: string;
     email: string;
     name?: string;
+    deliveryType?: "pickup" | "delivery";
+    deliveryAddress?: {
+      zipCode: string;
+      street: string;
+      number: string;
+      complement?: string;
+      neighborhood: string;
+      city: string;
+      state: string;
+    };
   }) {
     const cart = await this.cartService.getById(input.cartId, input.tenantId);
     if (cart.storeId !== input.storeId) {
@@ -32,6 +43,25 @@ export class OrderService {
     }
     if (!cart.items || cart.items.length === 0) {
       throw new Error("Cart is empty");
+    }
+    const store = await prisma.store.findUnique({
+      where: { id: input.storeId },
+    });
+    if (!store) throw new Error("Store not found");
+    const storeDeliveryType = (store.deliveryType as "pickup" | "delivery" | "both") ?? "pickup";
+    const deliveryType = input.deliveryType ?? "pickup";
+    if (storeDeliveryType === "pickup" && deliveryType === "delivery") {
+      throw new Error("Esta loja não oferece entrega");
+    }
+    if (storeDeliveryType === "delivery" && deliveryType === "pickup") {
+      throw new Error("Esta loja não oferece retirada");
+    }
+    let deliveryFee = 0;
+    if (deliveryType === "delivery" && store.deliveryFee != null) {
+      deliveryFee = Number(store.deliveryFee);
+      if (!input.deliveryAddress) {
+        throw new Error("Endereço de entrega é obrigatório");
+      }
     }
     const customer = await this.customerService.findOrCreate({
       email: input.email,
@@ -52,6 +82,7 @@ export class OrderService {
         size: (item as { size?: string }).size ?? "",
       };
     });
+    total += deliveryFee;
     const order = await this.repository.createWithItems(
       {
         tenantId: input.tenantId,
@@ -59,9 +90,19 @@ export class OrderService {
         customerId: customer.id,
         total,
         status: "pending",
+        deliveryType,
+        deliveryFee: deliveryFee > 0 ? deliveryFee : undefined,
+        deliveryStreet: input.deliveryAddress?.street,
+        deliveryNumber: input.deliveryAddress?.number,
+        deliveryComplement: input.deliveryAddress?.complement,
+        deliveryNeighborhood: input.deliveryAddress?.neighborhood,
+        deliveryCity: input.deliveryAddress?.city,
+        deliveryState: input.deliveryAddress?.state,
+        deliveryZipCode: input.deliveryAddress?.zipCode.replace(/\D/g, ""),
       },
       items
     );
+    await this.cartService.delete(input.cartId, input.tenantId);
     sendOrderConfirmation(order).catch(() => {});
     return order;
   }

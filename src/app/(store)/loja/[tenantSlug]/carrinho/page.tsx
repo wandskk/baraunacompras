@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { getPublicStore } from "@/lib/store-public";
 import { CartContent } from "./CartContent";
 
@@ -20,14 +21,17 @@ export default async function CartPage({ params }: PageProps) {
     );
   }
   return (
-    <div>
+    <div className="min-h-[60vh]">
       <Link
         href={`/loja/${tenantSlug}`}
-        className="mb-4 inline-block text-sm text-gray-500 hover:text-gray-700"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition-colors hover:text-primary"
       >
-        ← Continuar comprando
+        <ChevronLeft className="h-4 w-4 shrink-0" />
+        Continuar comprando
       </Link>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Carrinho</h1>
+      <h1 className="mb-6 text-2xl font-bold tracking-tight text-navy sm:text-3xl">
+        Carrinho
+      </h1>
       <CartContent
         tenantSlug={tenantSlug}
         tenantId={data.tenantId}

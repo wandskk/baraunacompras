@@ -8,10 +8,8 @@ export function formatCurrency(value: number | string): string {
 
 export function formatCep(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 5) {
-    return digits.replace(/(\d{5})/, "$1-");
-  }
-  return digits.replace(/(\d{5})(\d{0,3})/, "$1-$2");
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
 export function formatPhone(value: string): string {

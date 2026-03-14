@@ -1,5 +1,6 @@
 import { Nunito, DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
+import { NavigationLoading } from "@/components/NavigationLoading";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={`${nunito.variable} ${dmSans.variable}`}>
       <body className={`${nunito.className} min-h-screen antialiased`}>
         {children}
+        <NavigationLoading />
         <Toaster
           position="top-right"
           toastOptions={{

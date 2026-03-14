@@ -6,6 +6,15 @@ export const createOrderSchema = z.object({
   customerId: z.string().optional(),
   total: z.coerce.number().nonnegative(),
   status: z.enum(["pending", "confirmed", "shipped", "delivered", "cancelled"]).default("pending"),
+  deliveryType: z.enum(["pickup", "delivery"]).optional(),
+  deliveryFee: z.number().optional(),
+  deliveryStreet: z.string().optional(),
+  deliveryNumber: z.string().optional(),
+  deliveryComplement: z.string().optional(),
+  deliveryNeighborhood: z.string().optional(),
+  deliveryCity: z.string().optional(),
+  deliveryState: z.string().optional(),
+  deliveryZipCode: z.string().optional(),
 });
 
 export const updateOrderSchema = z.object({
@@ -13,19 +22,43 @@ export const updateOrderSchema = z.object({
   customerId: z.string().optional().nullable(),
 });
 
-export const checkoutSchema = z.object({
-  email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
-  name: z.string().optional(),
-  productId: z.string().min(1),
-  quantity: z.coerce.number().int().min(1).default(1),
-  total: z.coerce.number().positive("Total inválido"),
+const deliveryAddressSchema = z.object({
+  zipCode: z.string().min(8, "CEP inválido"),
+  street: z.string().min(1, "Rua é obrigatória"),
+  number: z.string().min(1, "Número é obrigatório"),
+  complement: z.string().optional(),
+  neighborhood: z.string().min(1, "Bairro é obrigatório"),
+  city: z.string().min(1, "Cidade é obrigatória"),
+  state: z.string().length(2, "UF deve ter 2 caracteres"),
 });
 
-export const checkoutFromCartSchema = z.object({
-  email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
-  name: z.string().optional(),
-  cartId: z.string().min(1),
-});
+export const checkoutSchema = z
+  .object({
+    email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
+    name: z.string().optional(),
+    productId: z.string().min(1),
+    quantity: z.coerce.number().int().min(1).default(1),
+    total: z.coerce.number().positive("Total inválido"),
+    deliveryType: z.enum(["pickup", "delivery"]).default("pickup"),
+    deliveryAddress: deliveryAddressSchema.optional(),
+  })
+  .refine((data) => data.deliveryType !== "delivery" || data.deliveryAddress, {
+    message: "Endereço é obrigatório para entrega",
+    path: ["deliveryAddress"],
+  });
+
+export const checkoutFromCartSchema = z
+  .object({
+    email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
+    name: z.string().optional(),
+    cartId: z.string().min(1),
+    deliveryType: z.enum(["pickup", "delivery"]).default("pickup"),
+    deliveryAddress: deliveryAddressSchema.optional(),
+  })
+  .refine((data) => data.deliveryType !== "delivery" || data.deliveryAddress, {
+    message: "Endereço é obrigatório para entrega",
+    path: ["deliveryAddress"],
+  });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 export type UpdateOrderInput = z.infer<typeof updateOrderSchema>;

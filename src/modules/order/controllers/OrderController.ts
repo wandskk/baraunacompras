@@ -21,6 +21,8 @@ export class OrderController {
       cartId: input.cartId,
       email: input.email,
       name: input.name,
+      deliveryType: input.deliveryType,
+      deliveryAddress: input.deliveryAddress,
     });
   }
 

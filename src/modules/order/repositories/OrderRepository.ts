@@ -6,6 +6,15 @@ type CreateOrderData = {
   customerId?: string;
   total: number;
   status: string;
+  deliveryType?: string;
+  deliveryFee?: number;
+  deliveryStreet?: string;
+  deliveryNumber?: string;
+  deliveryComplement?: string;
+  deliveryNeighborhood?: string;
+  deliveryCity?: string;
+  deliveryState?: string;
+  deliveryZipCode?: string;
 };
 
 type OrderItemData = {

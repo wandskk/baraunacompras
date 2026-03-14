@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatCurrency } from "@/lib/format";
+import { MapPin, Store } from "lucide-react";
+import { formatCurrency, formatCep } from "@/lib/format";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button, LoadingSpinner } from "@/components/ui";
@@ -32,6 +33,15 @@ type Order = {
   store: { name: string };
   customer: Customer;
   items: OrderItem[];
+  deliveryType?: string;
+  deliveryFee?: string | number;
+  deliveryStreet?: string | null;
+  deliveryNumber?: string | null;
+  deliveryComplement?: string | null;
+  deliveryNeighborhood?: string | null;
+  deliveryCity?: string | null;
+  deliveryState?: string | null;
+  deliveryZipCode?: string | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -188,6 +198,44 @@ export default function OrderDetailPage() {
             </div>
           ) : (
             <p className="text-gray-500">Cliente não identificado</p>
+          )}
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Entrega</h2>
+          {order.deliveryType === "delivery" &&
+          (order.deliveryStreet ||
+            order.deliveryCity ||
+            order.deliveryZipCode) ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-gray-600">
+                <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                <span className="font-medium text-gray-900">Endereço de entrega</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {[
+                  order.deliveryStreet &&
+                    `${order.deliveryStreet}${order.deliveryNumber ? `, ${order.deliveryNumber}` : ""}${order.deliveryComplement ? ` - ${order.deliveryComplement}` : ""}`,
+                  order.deliveryNeighborhood,
+                  order.deliveryCity &&
+                    order.deliveryState &&
+                    `${order.deliveryCity} - ${order.deliveryState}`,
+                  order.deliveryZipCode && formatCep(order.deliveryZipCode),
+                ]
+                  .filter(Boolean)
+                  .join(", ")}
+              </p>
+              {order.deliveryFee != null && Number(order.deliveryFee) > 0 && (
+                <p className="text-sm text-gray-500">
+                  Taxa de entrega: {formatCurrency(order.deliveryFee)}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-gray-600">
+              <Store className="h-4 w-4 shrink-0 text-primary" />
+              <span>Retirar na loja</span>
+            </div>
           )}
         </div>
 

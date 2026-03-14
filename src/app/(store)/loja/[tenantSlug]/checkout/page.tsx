@@ -56,9 +56,14 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
             </p>
           )}
           <CheckoutForm
+            tenantSlug={tenantSlug}
             tenantId={data.tenantId}
             storeId={data.store.id}
             cartId={cartId}
+            storeDeliveryType={(data.store as { deliveryType?: string }).deliveryType ?? "pickup"}
+            storeDeliveryFee={(data.store as { deliveryFee?: number | string }).deliveryFee != null ? Number((data.store as { deliveryFee: number | string }).deliveryFee) : undefined}
+            storeDeliveryDays={(data.store as { deliveryDays?: number }).deliveryDays ?? undefined}
+            storeAddress={data.store as { addressStreet?: string; addressNumber?: string; addressComplement?: string; addressNeighborhood?: string; addressCity?: string; addressState?: string; addressZipCode?: string }}
           />
         </div>
       </div>
@@ -104,11 +109,16 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
           </p>
         </div>
         <CheckoutForm
+          tenantSlug={tenantSlug}
           tenantId={data.tenantId}
           storeId={data.store.id}
           productId={product.id}
           productName={product.name}
           total={price}
+          storeDeliveryType={(data.store as { deliveryType?: string }).deliveryType ?? "pickup"}
+          storeDeliveryFee={(data.store as { deliveryFee?: number | string }).deliveryFee != null ? Number((data.store as { deliveryFee: number | string }).deliveryFee) : undefined}
+          storeDeliveryDays={(data.store as { deliveryDays?: number }).deliveryDays ?? undefined}
+          storeAddress={data.store as { addressStreet?: string; addressNumber?: string; addressComplement?: string; addressNeighborhood?: string; addressCity?: string; addressState?: string; addressZipCode?: string }}
         />
       </div>
     </div>

@@ -24,6 +24,7 @@ import {
   FileText,
 } from "lucide-react";
 import { Button, Input, ImageUpload, LoadingSpinner, MaskedInput } from "@/components/ui";
+import { AddressCityStateSelect } from "@/components/AddressCityStateSelect";
 import { formatCep, formatCurrency, formatPhone } from "@/lib/format";
 import { parseCurrencyToNumber, formatNumberToCurrency } from "@/lib/masks";
 import { fetchAddressByCep } from "@/lib/viacep";
@@ -594,22 +595,14 @@ export default function StoreDetailPage() {
                   placeholder="Centro"
                 />
               </div>
-              <div className="grid gap-6 sm:grid-cols-2">
-                <Input
-                  label="Cidade"
-                  value={addressCity}
-                  onChange={(e) => setAddressCity(e.target.value)}
-                  placeholder="São Paulo"
-                />
-                <Input
-                  label="Estado (UF)"
-                  value={addressState}
-                  onChange={(e) =>
-                    setAddressState(e.target.value.toUpperCase().slice(0, 2))
-                  }
-                  placeholder="SP"
-                />
-              </div>
+              <AddressCityStateSelect
+                state={addressState}
+                city={addressCity}
+                onStateChange={(uf) => setAddressState(uf)}
+                onCityChange={setAddressCity}
+                stateLabel="Estado (UF)"
+                cityLabel="Cidade"
+              />
             </div>
           </div>
 
