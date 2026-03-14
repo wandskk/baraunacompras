@@ -26,6 +26,13 @@ import {
 } from "@/components/dashboard";
 import { formatCurrency, formatPhone } from "@/lib/format";
 import { PAYMENT_LABELS } from "@/lib/payment-labels";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_ACTION_LABELS,
+  DELIVERY_TYPE_LABELS,
+  getShippedActionLabel,
+  getShippedStatusLabel,
+} from "@/lib/order-labels";
 import { useSession } from "@/hooks/useSession";
 import { toast } from "@/lib/toast";
 import {
@@ -56,14 +63,6 @@ type Order = {
   customer: { name: string | null; email: string; phone?: string | null } | null;
   _count?: { items: number };
   items?: OrderItem[];
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Pendente",
-  confirmed: "Confirmado",
-  shipped: "Enviado",
-  delivered: "Entregue",
-  cancelled: "Cancelado",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -98,15 +97,26 @@ function OrderRowSkeleton() {
   );
 }
 
-function getDeliveryLabel(order: Order): { type: "entrega" | "retirada"; detail?: string } {
+function getDeliveryLabel(order: Order): {
+  type: "delivery" | "pickup";
+  label: string;
+  detail?: string;
+} {
   if (order.deliveryType === "delivery" && (order.deliveryCity || order.deliveryStreet)) {
     const detail =
       order.deliveryCity && order.deliveryState
         ? `${order.deliveryCity}-${order.deliveryState}`
         : order.deliveryStreet?.slice(0, 30);
-    return { type: "entrega", detail };
+    return {
+      type: "delivery",
+      label: DELIVERY_TYPE_LABELS.delivery,
+      detail,
+    };
   }
-  return { type: "retirada" };
+  return {
+    type: "pickup",
+    label: DELIVERY_TYPE_LABELS.pickup,
+  };
 }
 
 function OrderRowDropdown({
@@ -166,7 +176,13 @@ function OrderRowDropdown({
         }
       );
       if (res.ok) {
-        toast.success(`Status: ${STATUS_LABELS[newStatus] ?? newStatus}`);
+        toast.success(
+          `Status: ${
+            newStatus === "shipped"
+              ? getShippedStatusLabel(order.deliveryType)
+              : ORDER_STATUS_LABELS[newStatus] ?? newStatus
+          }`,
+        );
         onStatusChange();
       } else {
         const data = await res.json();
@@ -220,7 +236,7 @@ function OrderRowDropdown({
                     onClick={() => handleAction("confirmed")}
                   >
                     <Check className="h-4 w-4 text-emerald-600" />
-                    Confirmar
+                    {ORDER_ACTION_LABELS.confirmed}
                   </button>
                 )}
                 {order.status === "confirmed" && (
@@ -229,8 +245,12 @@ function OrderRowDropdown({
                     className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                     onClick={() => handleAction("shipped")}
                   >
-                    <Truck className="h-4 w-4 text-indigo-600" />
-                    Marcar enviado
+                    {order.deliveryType === "pickup" ? (
+                      <Store className="h-4 w-4 text-indigo-600" />
+                    ) : (
+                      <Truck className="h-4 w-4 text-indigo-600" />
+                    )}
+                    {getShippedActionLabel(order.deliveryType)}
                   </button>
                 )}
                 {order.status === "shipped" && (
@@ -240,7 +260,7 @@ function OrderRowDropdown({
                     onClick={() => handleAction("delivered")}
                   >
                     <Package className="h-4 w-4 text-blue-600" />
-                    Marcar entregue
+                    {ORDER_ACTION_LABELS.delivered}
                   </button>
                 )}
                 <button
@@ -249,7 +269,7 @@ function OrderRowDropdown({
                   onClick={() => handleAction("cancelled")}
                 >
                   <X className="h-4 w-4" />
-                  Cancelar pedido
+                  {ORDER_ACTION_LABELS.cancelled}
                 </button>
               </>
             )}
@@ -375,12 +395,12 @@ export default function OrdersPage() {
 
   return (
     <StoreListPageLayout storeId={storeId} title="Pedidos">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[180px] sm:max-w-[240px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+      <div className="mb-3 flex flex-wrap items-center gap-2 sm:mb-4 sm:gap-3">
+        <div className="relative flex-1 min-w-[140px] sm:max-w-[240px]">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400 sm:left-3 sm:h-4 sm:w-4" />
           <input
             type="search"
-            placeholder="Código ou nome do cliente (mín. 3 caracteres)..."
+            placeholder="Código ou cliente..."
             value={searchInput}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => {
@@ -396,27 +416,27 @@ export default function OrdersPage() {
                 }
               }
             }}
-            className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full rounded-lg border border-gray-300 py-1.5 pl-8 pr-2 text-xs outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary sm:py-2 sm:pl-9 sm:pr-3 sm:text-sm"
             aria-label="Buscar por código ou cliente"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setFilter("status", e.target.value)}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:px-3 sm:py-2 sm:text-sm"
           aria-label="Filtrar por status"
         >
           <option value="">Todos os status</option>
           {VALID_STATUSES.map((s) => (
             <option key={s} value={s}>
-              {STATUS_LABELS[s] ?? s}
+              {ORDER_STATUS_LABELS[s] ?? s}
             </option>
           ))}
         </select>
         <select
           value={orderFilter}
           onChange={(e) => setFilter("order", e.target.value)}
-          className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:px-3 sm:py-2 sm:text-sm"
           aria-label="Ordenar por data"
         >
           {ORDER_OPTIONS.map((o) => (
@@ -426,27 +446,27 @@ export default function OrdersPage() {
           ))}
         </select>
         {pagination && pagination.total > 0 && (
-          <div className="ml-auto flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2 py-1.5 shadow-sm">
+          <div className="ml-auto flex items-center gap-0.5 rounded-lg border border-gray-300 bg-white px-1.5 py-1 shadow-sm sm:gap-1 sm:px-2 sm:py-1.5">
             <button
               type="button"
               onClick={() => setPage(page - 1)}
               disabled={page <= 1}
-              className="rounded p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50"
+              className="rounded p-1 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50 sm:p-1.5"
               aria-label="Página anterior"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
-            <span className="min-w-[2rem] px-2 text-center text-sm text-gray-600">
+            <span className="min-w-[1.5rem] px-1 text-center text-xs text-gray-600 sm:min-w-[2rem] sm:px-2 sm:text-sm">
               {page}
             </span>
             <button
               type="button"
               onClick={() => setPage(page + 1)}
               disabled={page >= totalPages}
-              className="rounded p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50"
+              className="rounded p-1 text-gray-600 sm:p-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50"
               aria-label="Próxima página"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
           </div>
         )}
@@ -463,45 +483,46 @@ export default function OrdersPage() {
           return (
             <li
               key={order.id}
-              className={`flex flex-col gap-3 px-6 py-4 transition-colors hover:bg-gray-50 ${
+              className={`flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-gray-50 sm:gap-3 sm:px-6 sm:py-4 ${
                 order.status === "cancelled" ? "opacity-60 bg-red-50" : ""
               }`}
             >
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-3 sm:gap-4">
                 <Link
                   href={`/dashboard/stores/${storeId}/orders/${order.id}`}
-                  className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4"
+                  className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4"
                 >
-                  <div className="flex items-start gap-4 sm:shrink-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <ClipboardList className="h-5 w-5" />
+                  <div className="flex items-start gap-3 sm:shrink-0 sm:gap-4">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-10 sm:w-10">
+                      <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium text-gray-900">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <p className="text-sm font-medium text-gray-900 sm:text-base">
                           #{order.id.slice(-6).toUpperCase()}
                         </p>
                         <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                            delivery.type === "entrega"
+                          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium sm:gap-1 sm:px-2 sm:text-xs ${
+                            delivery.type === "delivery"
                               ? "bg-blue-100 text-blue-800"
                               : "bg-amber-100 text-amber-800"
                           }`}
                         >
-                          {delivery.type === "entrega" ? (
-                            <MapPin className="h-3 w-3" />
+                          {delivery.type === "delivery" ? (
+                            <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                           ) : (
-                            <Store className="h-3 w-3" />
+                            <Store className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                           )}
-                          {delivery.type === "entrega" ? "Entrega" : "Retirada"}
+                          {delivery.label}
                           {delivery.detail && (
                             <span className="text-blue-600/80">
+                              {" "}
                               · {delivery.detail}
                             </span>
                           )}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-xs text-gray-500 sm:text-sm">
                         {new Date(order.createdAt).toLocaleDateString("pt-BR", {
                           day: "2-digit",
                           month: "short",
@@ -511,11 +532,11 @@ export default function OrdersPage() {
                         })}
                       </p>
                       {order.customer && (
-                        <p className="mt-0.5 text-sm text-gray-600">
+                        <p className="mt-0.5 text-xs text-gray-600 sm:text-sm">
                           {order.customer.name || order.customer.email}
                         </p>
                       )}
-                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-gray-500 sm:mt-1 sm:gap-2 sm:text-xs">
                         {order.paymentMethod && (
                           <span>
                             Pagamento: {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
@@ -529,10 +550,10 @@ export default function OrdersPage() {
                               href={`https://wa.me/55${order.customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Sou da loja ${order.store?.name ?? ""}, estou em contato sobre seu pedido #${order.id.slice(-6).toUpperCase()}.`)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-green-600 hover:text-green-700"
+                              className="inline-flex items-center gap-0.5 text-green-600 hover:text-green-700 sm:gap-1"
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <MessageCircle className="h-3.5 w-3.5" />
+                              <MessageCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                               WhatsApp
                             </a>
                           </>
@@ -540,18 +561,20 @@ export default function OrdersPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-1 items-center justify-end gap-3 sm:gap-4">
-                    <p className="font-semibold text-primary">
+                  <div className="flex flex-1 items-center justify-end gap-2 sm:gap-4">
+                    <p className="text-sm font-semibold text-primary sm:text-base">
                       {formatCurrency(Number(order.total))}
                     </p>
                     <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium sm:px-2.5 sm:py-1 sm:text-xs ${
                         STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
                       }`}
                     >
-                      {STATUS_LABELS[order.status] ?? order.status}
+                      {order.status === "shipped"
+                        ? getShippedStatusLabel(order.deliveryType)
+                        : ORDER_STATUS_LABELS[order.status] ?? order.status}
                     </span>
-                    <ChevronRight className="h-4 w-4 shrink-0 text-gray-400" />
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gray-400 sm:h-4 sm:w-4" />
                   </div>
                 </Link>
                 <OrderRowDropdown
@@ -562,11 +585,11 @@ export default function OrdersPage() {
                 />
               </div>
               {order.items && order.items.length > 0 && (
-                <div className="ml-14 border-t border-gray-100 pt-2 sm:ml-[4.5rem]">
-                  <p className="mb-1.5 text-xs font-medium text-gray-500">
-                    Itens do pedido
+                <div className="ml-11 border-t border-gray-100 pt-1.5 sm:ml-[4.5rem] sm:pt-2">
+                  <p className="mb-1 text-[10px] font-medium text-gray-500 sm:mb-1.5 sm:text-xs">
+                    Itens
                   </p>
-                  <ul className="space-y-1 text-sm">
+                  <ul className="space-y-0.5 text-xs sm:space-y-1 sm:text-sm">
                     {order.items.map((item) => (
                       <li
                         key={item.id}
@@ -589,28 +612,28 @@ export default function OrdersPage() {
       </DataList>
 
       {pagination && pagination.total > 0 && (
-        <div className="mt-4 flex justify-end">
-          <div className="flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-2 py-1.5 shadow-sm">
+        <div className="mt-3 flex justify-end sm:mt-4">
+          <div className="flex items-center gap-0.5 rounded-lg border border-gray-300 bg-white px-1.5 py-1 shadow-sm sm:gap-1 sm:px-2 sm:py-1.5">
             <button
               type="button"
               onClick={() => setPage(page - 1)}
               disabled={page <= 1}
-              className="rounded p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50"
+              className="rounded p-1 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50 sm:p-1.5"
               aria-label="Página anterior"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
-            <span className="min-w-[2rem] px-2 text-center text-sm text-gray-600">
+            <span className="min-w-[1.5rem] px-1 text-center text-xs text-gray-600 sm:min-w-[2rem] sm:px-2 sm:text-sm">
               {page}
             </span>
             <button
               type="button"
               onClick={() => setPage(page + 1)}
               disabled={page >= totalPages}
-              className="rounded p-1.5 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50"
+              className="rounded p-1 text-gray-600 sm:p-1.5 transition-colors hover:bg-gray-100 hover:text-gray-900 disabled:pointer-events-none disabled:opacity-50"
               aria-label="Próxima página"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </button>
           </div>
         </div>
