@@ -20,24 +20,16 @@ export function LandingHeader() {
       <div className="mx-auto flex h-14 min-h-0 max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="group flex shrink-0 items-center gap-2 sm:gap-2.5 transition-opacity hover:opacity-90"
+          className="group flex shrink-0 items-center transition-opacity hover:opacity-90"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#2F8743]/10 ring-1 ring-[#202C59]/5 transition-colors group-hover:bg-[#2F8743]/15 sm:h-10 sm:w-10 lg:h-11 lg:w-11">
-            <Image
-              src="/logo.png"
-              alt="Baraúna Compras"
-              width={44}
-              height={44}
-              className="h-7 w-7 object-contain sm:h-8 sm:w-8 lg:h-9 lg:w-9"
-              priority
-            />
-          </div>
-          <span className="text-base font-bold text-[#2F8743] sm:text-lg lg:text-xl">
-            Baraúna
-          </span>
-          <span className="text-base font-bold text-[#202C59] sm:text-lg lg:text-xl">
-            Compras
-          </span>
+          <Image
+            src="/logo-nova.png"
+            alt="Baraúna Compras"
+            width={160}
+            height={48}
+            className="h-9 w-auto object-contain sm:h-10 lg:h-11"
+            priority
+          />
         </Link>
 
         <nav className="hidden shrink-0 items-center gap-3 lg:flex xl:gap-6">

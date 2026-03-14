@@ -37,7 +37,7 @@ export function LandingHero() {
             </div>
           </div>
           <div className="relative flex justify-center">
-            <div className="relative h-64 w-64 sm:h-80 sm:w-80 lg:h-96 lg:w-96">
+            <div className="relative h-56 w-80 sm:h-72 sm:w-[28rem] lg:h-96 lg:w-[32rem]">
               <Image
                 src="/logo.png"
                 alt="Baraúna Compras - Sacola de compras com cursor"

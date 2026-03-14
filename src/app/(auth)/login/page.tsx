@@ -53,16 +53,12 @@ export default function LoginPage() {
 
         <div className="mt-6 flex flex-col items-center">
           <Image
-            src="/logo.png"
+            src="/logo-nova.png"
             alt="Baraúna Compras"
-            width={64}
-            height={64}
-            className="h-16 w-16 object-contain"
+            width={160}
+            height={48}
+            className="h-14 w-auto object-contain"
           />
-          <div className="mt-4 flex items-center gap-2 text-center">
-            <span className="font-bold text-[#2F8743]">Baraúna</span>
-            <span className="font-bold text-[#202C59]">Compras</span>
-          </div>
         </div>
 
         <div className="mt-8 flex items-center justify-center gap-2 rounded-full bg-[#2F8743]/10 px-4 py-2">

@@ -300,20 +300,19 @@ export default function StoreDetailPage() {
 
   return (
     <div className="space-y-8">
-      {/* Breadcrumb e header */}
-      <div>
-        <Link
-          href="/dashboard"
-          className="mb-4 inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-700"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Voltar às lojas
-        </Link>
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-700"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Voltar às lojas
+      </Link>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
             {store.logoUrl ? (
-              <div className="flex h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <div className="flex h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
                 <img
                   src={store.logoUrl}
                   alt={store.name}
@@ -321,12 +320,12 @@ export default function StoreDetailPage() {
                 />
               </div>
             ) : (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-100">
-                <ShoppingBag className="h-8 w-8 text-gray-400" />
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-primary/5">
+                <ShoppingBag className="h-7 w-7 text-primary" />
               </div>
             )}
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
                 {store.name}
               </h1>
               <p className="mt-0.5 text-sm text-gray-500">/{store.slug}</p>
@@ -343,10 +342,9 @@ export default function StoreDetailPage() {
               )}
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             {!editing ? (
               <Button
-                variant="outline"
                 onClick={() => setEditing(true)}
                 className="inline-flex items-center gap-2"
               >
@@ -365,10 +363,66 @@ export default function StoreDetailPage() {
             )}
           </div>
         </div>
+
+        {!editing && stats && (
+          <div className="mt-6 grid gap-4 border-t border-gray-100 pt-6 sm:grid-cols-3">
+            <Link
+              href={`/dashboard/stores/${storeId}/orders`}
+              className="group flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50/50 p-4 transition-all hover:border-primary/30 hover:bg-primary/5"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                <Package className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  Pedidos pendentes
+                </p>
+                <p className="text-xs text-gray-500">
+                  Aguardando processamento
+                </p>
+              </div>
+              <span className="text-xl font-bold tabular-nums text-amber-600">
+                {stats.pendingOrders}
+              </span>
+            </Link>
+            <div className="flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50/50 p-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  Receita este mês
+                </p>
+                <p className="text-xs text-gray-500">Total acumulado</p>
+              </div>
+              <span className="text-xl font-bold tabular-nums text-primary">
+                {formatCurrency(stats.revenueThisMonth)}
+              </span>
+            </div>
+            <Link
+              href={`/dashboard/stores/${storeId}/products?lowStock=true`}
+              className="group flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50/50 p-4 transition-all hover:border-primary/30 hover:bg-primary/5"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                <AlertTriangle className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  Estoque baixo
+                </p>
+                <p className="text-xs text-gray-500">
+                  Produtos com alerta
+                </p>
+              </div>
+              <span className="text-xl font-bold tabular-nums text-red-600">
+                {stats.lowStockCount}
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {editing ? (
-        /* Formulário de edição */
         <form onSubmit={handleSave} className="space-y-8">
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-6 flex items-center gap-2 text-lg font-semibold text-gray-900">
@@ -643,79 +697,7 @@ export default function StoreDetailPage() {
           </Button>
         </form>
       ) : (
-        /* Modo visualização */
         <>
-          {/* Cards de métricas */}
-          {stats && (
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Link
-                href={`/dashboard/stores/${storeId}/orders`}
-                className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:border-amber-200 hover:shadow-md"
-              >
-                <div className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/80 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100">
-                      <Package className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Pedidos pendentes
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Aguardando processamento
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-2xl font-bold text-amber-700">
-                    {stats.pendingOrders}
-                  </span>
-                </div>
-              </Link>
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50/80 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                      <TrendingUp className="h-5 w-5 text-emerald-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Receita este mês
-                      </p>
-                      <p className="text-xs text-gray-500">Total acumulado</p>
-                    </div>
-                  </div>
-                  <span className="text-xl font-bold text-emerald-700">
-                    {formatCurrency(stats.revenueThisMonth)}
-                  </span>
-                </div>
-              </div>
-              <Link
-                href={`/dashboard/stores/${storeId}/products?lowStock=true`}
-                className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:border-red-200 hover:shadow-md"
-              >
-                <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50/80 p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        Estoque baixo
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Produtos com alerta
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-2xl font-bold text-red-700">
-                    {stats.lowStockCount}
-                  </span>
-                </div>
-              </Link>
-            </div>
-          )}
-
-          {/* Links rápidos */}
           <div>
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               Ações rápidas

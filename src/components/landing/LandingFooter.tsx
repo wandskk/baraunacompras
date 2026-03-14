@@ -21,18 +21,14 @@ export function LandingFooter() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center">
               <Image
-                src="/logo.png"
+                src="/logo-nova.png"
                 alt="Baraúna Compras"
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
+                width={140}
+                height={42}
+                className="h-10 w-auto object-contain"
               />
-              <div>
-                <span className="block font-bold text-[#2F8743]">Baraúna</span>
-                <span className="block font-bold text-white">Compras</span>
-              </div>
             </Link>
             <p className="mt-4 text-sm text-white/80">
               Compras locais na palma da mão. Conectando Baraúna ao comércio

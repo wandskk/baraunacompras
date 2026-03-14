@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui";
@@ -18,8 +19,17 @@ export function DashboardHeader() {
   return (
     <header className="border-b border-gray-200 bg-white">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link href="/dashboard" className="text-lg font-bold text-primary">
-          Barauna Compras
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 transition-opacity hover:opacity-90"
+        >
+          <Image
+            src="/logo-nova.png"
+            alt="Baraúna Compras"
+            width={120}
+            height={36}
+            className="h-8 w-auto object-contain"
+          />
         </Link>
         <nav className="flex items-center gap-4">
           <Link
