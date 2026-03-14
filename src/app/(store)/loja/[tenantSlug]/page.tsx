@@ -29,6 +29,7 @@ export default async function StoreHomePage({ params, searchParams }: PageProps)
   const { store, products, categories, pagination } = data;
   const storeWithSettings = store as typeof store & {
     description?: string | null;
+    bannerUrl?: string | null;
     contactEmail?: string | null;
     contactPhone?: string | null;
   };
@@ -40,6 +41,7 @@ export default async function StoreHomePage({ params, searchParams }: PageProps)
         tenantSlug={tenantSlug}
         storeName={store.name}
         description={storeWithSettings.description}
+        bannerUrl={storeWithSettings.bannerUrl}
       />
 
       {/* Categories - horizontal scroll */}

@@ -8,6 +8,7 @@ export type PublicStoreItem = {
     name: string;
     slug: string;
     logoUrl: string | null;
+    bannerUrl: string | null;
     description: string | null;
   };
 };
@@ -35,6 +36,7 @@ export async function getPublicStores(): Promise<PublicStoreItem[]> {
         name: s.name,
         slug: s.slug,
         logoUrl: s.logoUrl,
+        bannerUrl: s.bannerUrl,
         description: s.description,
       },
     }));

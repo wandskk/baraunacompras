@@ -8,7 +8,6 @@ type Props = {
   tenantSlug: string;
   storeName: string;
   storeId: string;
-  logoUrl?: string | null;
   isStoreOwner?: boolean;
 };
 
@@ -78,7 +77,6 @@ export function StoreNav({
   tenantSlug,
   storeName,
   storeId,
-  logoUrl,
   isStoreOwner,
 }: Props) {
   const router = useRouter();
@@ -130,17 +128,9 @@ export function StoreNav({
           href={`/loja/${tenantSlug}`}
           className="flex min-w-0 shrink items-center gap-2 transition-opacity hover:opacity-90"
         >
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt={storeName}
-              className="h-8 w-8 shrink-0 object-contain"
-            />
-          ) : (
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-lg font-bold text-primary">
-              {storeName.charAt(0)}
-            </span>
-          )}
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-lg font-bold text-primary">
+            {storeName.charAt(0)}
+          </span>
           <span className="truncate text-lg font-bold text-primary">
             {storeName}
           </span>

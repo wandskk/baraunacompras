@@ -57,6 +57,7 @@ type Store = {
   slug: string;
   theme?: string;
   logoUrl?: string | null;
+  bannerUrl?: string | null;
   faviconUrl?: string | null;
   description?: string | null;
   contactEmail?: string | null;
@@ -116,7 +117,7 @@ export default function StoreDetailPage() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [theme, setTheme] = useState("default");
-  const [logoUrl, setLogoUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
   const [faviconUrl, setFaviconUrl] = useState("");
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -160,7 +161,7 @@ export default function StoreDetailPage() {
       setName(data.name);
       setSlug(data.slug);
       setTheme(data.theme ?? "default");
-      setLogoUrl(data.logoUrl ?? "");
+      setBannerUrl(data.bannerUrl ?? "");
       setFaviconUrl(data.faviconUrl ?? "");
       setDescription(data.description ?? "");
       setContactEmail(data.contactEmail ?? "");
@@ -228,7 +229,7 @@ export default function StoreDetailPage() {
         name,
         slug,
         theme,
-        logoUrl: logoUrl || null,
+        bannerUrl: bannerUrl || null,
         faviconUrl: faviconUrl || null,
         description: description || null,
         contactEmail: contactEmail || null,
@@ -313,12 +314,12 @@ export default function StoreDetailPage() {
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
-            {store.logoUrl ? (
+            {store.bannerUrl ? (
               <div className="flex h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
                 <img
-                  src={store.logoUrl}
+                  src={store.bannerUrl}
                   alt={store.name}
-                  className="h-full w-full object-contain p-1"
+                  className="h-full w-full object-cover"
                 />
               </div>
             ) : (
@@ -469,11 +470,11 @@ export default function StoreDetailPage() {
               {session && (
                 <div className="grid gap-6 sm:grid-cols-2">
                   <ImageUpload
-                    label="Logo"
-                    value={logoUrl}
-                    onChange={setLogoUrl}
+                    label="Banner"
+                    value={bannerUrl}
+                    onChange={setBannerUrl}
                     tenantId={session.tenantId}
-                    placeholder="Enviar logo"
+                    placeholder="Enviar banner (imagem da seção hero)"
                   />
                   <ImageUpload
                     label="Favicon"

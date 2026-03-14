@@ -5,6 +5,7 @@ type CreateStoreData = {
   slug: string;
   theme?: string;
   logoUrl?: string | null;
+  bannerUrl?: string | null;
   faviconUrl?: string | null;
   description?: string | null;
   contactEmail?: string | null;

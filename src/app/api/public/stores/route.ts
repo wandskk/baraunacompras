@@ -24,6 +24,7 @@ export async function GET() {
         name: s.name,
         slug: s.slug,
         logoUrl: s.logoUrl,
+        bannerUrl: s.bannerUrl,
         description: s.description,
       },
     }));

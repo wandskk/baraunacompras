@@ -23,6 +23,7 @@ export const createStoreSchema = z.object({
   slug: z.string().min(1, "Slug é obrigatório").regex(/^[a-z0-9-]+$/, "Slug inválido"),
   theme: themeEnum.optional().default("default"),
   logoUrl: z.string().url().optional().nullable(),
+  bannerUrl: z.string().url().optional().nullable(),
   faviconUrl: z.string().url().optional().nullable(),
   description: z.string().optional().nullable(),
   contactEmail: z.string().email("Email inválido").optional().nullable(),

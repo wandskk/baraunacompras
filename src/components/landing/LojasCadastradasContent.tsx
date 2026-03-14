@@ -115,10 +115,10 @@ export function LojasCadastradasContent({ stores, ctaSlot }: Props) {
                 className="group flex items-center gap-3 rounded-xl border border-navy/10 bg-white/90 p-3 shadow-md shadow-navy/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 sm:gap-4 sm:rounded-2xl sm:p-5"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 ring-2 ring-primary/5 sm:h-16 sm:w-16 sm:rounded-xl">
-                  {item.store.logoUrl ? (
+                  {item.store.bannerUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={item.store.logoUrl}
+                      src={item.store.bannerUrl}
                       alt={item.store.name}
                       className="h-full w-full object-cover"
                     />

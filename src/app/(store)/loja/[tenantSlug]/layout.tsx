@@ -33,7 +33,7 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
 
   const storeName = data.store.name;
   const store = data.store as {
-    logoUrl?: string | null;
+    bannerUrl?: string | null;
     contactEmail?: string | null;
     contactPhone?: string | null;
     contactPhoneIsWhatsApp?: boolean;
@@ -52,7 +52,6 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
         tenantSlug={tenantSlug}
         storeName={storeName}
         storeId={data.store.id}
-        logoUrl={store.logoUrl}
         isStoreOwner={isStoreOwner}
       />
       <main className="flex-1 py-6 sm:py-8">

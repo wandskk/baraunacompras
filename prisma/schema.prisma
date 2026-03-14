@@ -38,6 +38,7 @@ model Store {
   slug          String   @unique
   theme         String   @default("default")
   logoUrl         String?
+  bannerUrl       String?
   faviconUrl      String?
   description     String?  @db.Text
   contactEmail    String?
