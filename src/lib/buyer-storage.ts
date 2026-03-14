@@ -15,6 +15,7 @@ export type BuyerAddress = {
 export type BuyerData = {
   email: string;
   name?: string;
+  phone?: string;
   address?: BuyerAddress;
 };
 
@@ -30,6 +31,7 @@ export function getBuyerData(): BuyerData | null {
     return {
       email: data.email,
       name: data.name ?? undefined,
+      phone: data.phone ?? undefined,
       address: data.address ?? undefined,
     };
   } catch {

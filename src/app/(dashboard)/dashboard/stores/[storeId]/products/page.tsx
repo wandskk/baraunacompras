@@ -17,7 +17,7 @@ import {
   Button,
   Input,
   ImageUpload,
-  LoadingSpinner,
+  PageLoadingOverlay,
   MaskedInput,
   Modal,
 } from "@/components/ui";
@@ -225,9 +225,7 @@ export default function ProductsPage() {
   }
 
   if (sessionLoading || loading || !session) {
-    return (
-      <LoadingSpinner message="Carregando produtos..." minHeight="200px" />
-    );
+    return <PageLoadingOverlay show message="Carregando produtos..." />;
   }
 
   return (

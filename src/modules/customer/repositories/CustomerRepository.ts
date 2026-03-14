@@ -3,6 +3,7 @@ import { prisma } from "@/database/prisma";
 type CreateCustomerData = {
   email: string;
   name?: string;
+  phone?: string;
   tenantId: string;
   storeId: string;
 };

@@ -6,6 +6,7 @@ type CreateOrderData = {
   customerId?: string;
   total: number;
   status: string;
+  paymentMethod?: string;
   deliveryType?: string;
   deliveryFee?: number;
   deliveryStreet?: string;
@@ -82,6 +83,7 @@ export class OrderRepository {
     return prisma.order.findMany({
       where: { storeId, tenantId },
       include: {
+        store: { select: { name: true } },
         customer: true,
         _count: { select: { items: true } },
         items: { include: { product: { select: { name: true } } } },

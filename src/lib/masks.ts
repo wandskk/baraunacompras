@@ -11,6 +11,7 @@ export function applyMask(value: string, mask: MaskType): string {
       const d = digits.slice(0, 11);
       if (d.length <= 2) return d ? `(${d}` : "";
       if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+      if (d.length === 7) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
       return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
     }
     case "currency": {

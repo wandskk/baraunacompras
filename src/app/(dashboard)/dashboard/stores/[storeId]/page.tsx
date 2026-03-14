@@ -23,7 +23,7 @@ import {
   MapPin,
   FileText,
 } from "lucide-react";
-import { Button, Input, ImageUpload, LoadingSpinner, MaskedInput } from "@/components/ui";
+import { Button, Input, ImageUpload, MaskedInput, PageLoadingOverlay } from "@/components/ui";
 import { AddressCityStateSelect } from "@/components/AddressCityStateSelect";
 import { formatCep, formatCurrency, formatPhone } from "@/lib/format";
 import { parseCurrencyToNumber, formatNumberToCurrency } from "@/lib/masks";
@@ -35,8 +35,7 @@ const PAYMENT_LABELS: Record<string, string> = {
   pix: "PIX",
   credit: "Cartão de crédito",
   boleto: "Boleto",
-  cash: "Dinheiro na entrega",
-  pickup: "Pagamento na retirada",
+  cash: "Dinheiro",
 };
 
 const DELIVERY_LABELS: Record<string, string> = {
@@ -171,7 +170,9 @@ export default function StoreDetailPage() {
       setContactPhoneIsWhatsApp(data.contactPhoneIsWhatsApp ?? false);
       try {
         setPaymentMethods(
-          data.paymentMethods ? JSON.parse(data.paymentMethods) : []
+          data.paymentMethods
+            ? (JSON.parse(data.paymentMethods) as string[]).filter((p) => p !== "pickup")
+            : []
         );
       } catch {
         setPaymentMethods([]);
@@ -282,7 +283,7 @@ export default function StoreDetailPage() {
   }
 
   if (sessionLoading || loading || !session) {
-    return <LoadingSpinner message="Carregando loja..." minHeight="200px" />;
+    return <PageLoadingOverlay show message="Carregando loja..." />;
   }
 
   if (!store) {

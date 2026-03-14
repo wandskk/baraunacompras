@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin, Store, MessageCircle } from "lucide-react";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, MaskedInput } from "@/components/ui";
 import { AddressCityStateSelect } from "@/components/AddressCityStateSelect";
 import { toast } from "@/lib/toast";
 import {
@@ -11,7 +11,8 @@ import {
   setBuyerData,
   type BuyerAddress,
 } from "@/lib/buyer-storage";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatPhone } from "@/lib/format";
+import { PAYMENT_LABELS } from "@/lib/payment-labels";
 
 type StoreAddress = {
   addressStreet?: string;
@@ -31,6 +32,7 @@ type CheckoutFormProps = {
   productName?: string;
   total?: number;
   cartId?: string;
+  storePaymentMethods?: string[];
   storeDeliveryType?: "pickup" | "delivery" | "both";
   storeDeliveryFee?: number;
   storeDeliveryDays?: number;
@@ -61,6 +63,7 @@ export function CheckoutForm({
   productId,
   total: productTotal,
   cartId,
+  storePaymentMethods = [],
   storeDeliveryType = "pickup",
   storeDeliveryFee = 0,
   storeDeliveryDays,
@@ -71,6 +74,10 @@ export function CheckoutForm({
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState(
+    () => storePaymentMethods[0] ?? "pix"
+  );
   const [deliveryOption, setDeliveryOption] = useState<"pickup" | "delivery">(
     storeDeliveryType === "delivery" ? "delivery" : "pickup",
   );
@@ -101,6 +108,8 @@ export function CheckoutForm({
   const total = subtotal + deliveryFee;
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const phoneDigits = phone.replace(/\D/g, "");
+  const isPhoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 11;
   const isDeliveryAddressValid =
     zipCode.replace(/\D/g, "").length === 8 &&
     street.trim() !== "" &&
@@ -108,8 +117,12 @@ export function CheckoutForm({
     neighborhood.trim() !== "" &&
     state.trim().length === 2 &&
     city.trim() !== "";
+  const isPaymentMethodValid =
+    storePaymentMethods.length === 0 || storePaymentMethods.includes(paymentMethod);
   const isFormValid =
     isEmailValid &&
+    isPhoneValid &&
+    isPaymentMethodValid &&
     (deliveryOption === "pickup" ||
       (deliveryOption === "delivery" && isDeliveryAddressValid));
 
@@ -118,6 +131,7 @@ export function CheckoutForm({
     if (saved) {
       setEmail(saved.email);
       if (saved.name) setName(saved.name);
+      if (saved.phone) setPhone(formatPhone(saved.phone));
       if (saved.address) {
         setZipCode(saved.address.zipCode);
         setStreet(saved.address.street);
@@ -189,6 +203,8 @@ export function CheckoutForm({
         ? {
             email,
             name: name || undefined,
+            phone: phoneDigits,
+            paymentMethod,
             cartId,
             deliveryType: deliveryOption,
             deliveryAddress:
@@ -207,6 +223,8 @@ export function CheckoutForm({
         : {
             email,
             name: name || undefined,
+            phone: phoneDigits,
+            paymentMethod,
             productId,
             total: productTotal,
             deliveryType: deliveryOption,
@@ -244,10 +262,12 @@ export function CheckoutForm({
       const buyerData: {
         email: string;
         name?: string;
+        phone?: string;
         address?: BuyerAddress;
       } = {
         email,
         name: name || undefined,
+        phone: phoneDigits || existing?.phone,
         address: existing?.address,
       };
       if (
@@ -386,6 +406,42 @@ export function CheckoutForm({
             placeholder="Opcional"
             className="h-12 text-base"
           />
+          <MaskedInput
+            label="Celular"
+            mask="phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="(00) 00000-0000"
+            className="h-12 text-base"
+            autoComplete="tel"
+          />
+          {storePaymentMethods.length > 0 && (
+            <div>
+              <p className="mb-2 text-sm font-medium text-navy">
+                Forma de pagamento
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {storePaymentMethods.map((value) => (
+                  <label
+                    key={value}
+                    className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 transition-all hover:bg-gray-50 has-[input:checked]:border-primary has-[input:checked]:bg-primary/5"
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={value}
+                      checked={paymentMethod === value}
+                      onChange={() => setPaymentMethod(value)}
+                      className="border-gray-300 text-primary focus:ring-primary/20"
+                    />
+                    <span className="text-sm font-medium">
+                      {PAYMENT_LABELS[value] ?? value}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

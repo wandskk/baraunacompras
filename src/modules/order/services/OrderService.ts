@@ -26,6 +26,8 @@ export class OrderService {
     cartId: string;
     email: string;
     name?: string;
+    phone?: string;
+    paymentMethod?: string;
     deliveryType?: "pickup" | "delivery";
     deliveryAddress?: {
       zipCode: string;
@@ -66,6 +68,7 @@ export class OrderService {
     const customer = await this.customerService.findOrCreate({
       email: input.email,
       name: input.name,
+      phone: input.phone || undefined,
       tenantId: input.tenantId,
       storeId: input.storeId,
     });
@@ -90,6 +93,7 @@ export class OrderService {
         customerId: customer.id,
         total,
         status: "pending",
+        paymentMethod: input.paymentMethod ?? "pix",
         deliveryType,
         deliveryFee: deliveryFee > 0 ? deliveryFee : undefined,
         deliveryStreet: input.deliveryAddress?.street,

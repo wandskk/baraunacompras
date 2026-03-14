@@ -33,33 +33,12 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
         </Link>
         <div className="mx-auto max-w-lg rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <h1 className="text-xl font-bold text-gray-900">Finalizar compra</h1>
-          {(data.store as { paymentMethods?: string }).paymentMethods && (
-            <p className="mt-2 text-sm text-gray-600">
-              Formas de pagamento:{" "}
-              {(
-                JSON.parse(
-                  (data.store as { paymentMethods: string }).paymentMethods
-                ) as string[]
-              )
-                .map((p) =>
-                  p === "pix"
-                    ? "PIX"
-                    : p === "credit"
-                      ? "Cartão"
-                      : p === "boleto"
-                        ? "Boleto"
-                        : p === "cash"
-                          ? "Dinheiro"
-                          : "Retirada"
-                )
-                .join(", ")}
-            </p>
-          )}
           <CheckoutForm
             tenantSlug={tenantSlug}
             tenantId={data.tenantId}
             storeId={data.store.id}
             cartId={cartId}
+            storePaymentMethods={(data.store as { paymentMethods?: string }).paymentMethods ? (JSON.parse((data.store as { paymentMethods: string }).paymentMethods) as string[]) : []}
             storeDeliveryType={(data.store as { deliveryType?: string }).deliveryType ?? "pickup"}
             storeDeliveryFee={(data.store as { deliveryFee?: number | string }).deliveryFee != null ? Number((data.store as { deliveryFee: number | string }).deliveryFee) : undefined}
             storeDeliveryDays={(data.store as { deliveryDays?: number }).deliveryDays ?? undefined}
@@ -117,6 +96,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
           productId={product.id}
           productName={product.name}
           total={price}
+          storePaymentMethods={(data.store as { paymentMethods?: string }).paymentMethods ? (JSON.parse((data.store as { paymentMethods: string }).paymentMethods) as string[]) : []}
           storeDeliveryType={(data.store as { deliveryType?: string }).deliveryType ?? "pickup"}
           storeDeliveryFee={(data.store as { deliveryFee?: number | string }).deliveryFee != null ? Number((data.store as { deliveryFee: number | string }).deliveryFee) : undefined}
           storeDeliveryDays={(data.store as { deliveryDays?: number }).deliveryDays ?? undefined}

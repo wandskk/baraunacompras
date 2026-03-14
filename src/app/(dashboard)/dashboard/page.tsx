@@ -11,7 +11,7 @@ import {
   ExternalLink,
   ChevronRight,
 } from "lucide-react";
-import { Button, Input, LoadingSpinner, Modal } from "@/components/ui";
+import { Button, Input, Modal, PageLoadingOverlay } from "@/components/ui";
 import { formatCurrency } from "@/lib/format";
 import { slugify } from "@/lib/slugify";
 import { toast } from "@/lib/toast";
@@ -108,7 +108,7 @@ export default function DashboardPage() {
   }
 
   if (sessionLoading || loading || !session) {
-    return <LoadingSpinner message="Carregando suas lojas..." />;
+    return <PageLoadingOverlay show message="Carregando suas lojas..." />;
   }
 
   return (

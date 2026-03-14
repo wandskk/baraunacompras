@@ -54,6 +54,7 @@ export async function POST(request: Request, { params }: Params) {
     const customer = await customerService.findOrCreate({
       email: input.email,
       name: input.name,
+      phone: input.phone || undefined,
       tenantId,
       storeId,
     });
@@ -63,6 +64,7 @@ export async function POST(request: Request, { params }: Params) {
       customerId: customer.id,
       total,
       status: "pending",
+      paymentMethod: input.paymentMethod ?? "pix",
       ...deliveryData,
     });
     return NextResponse.json(order, { status: 201 });

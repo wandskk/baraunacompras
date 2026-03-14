@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { FolderOpen, Plus } from "lucide-react";
-import { Button, Input, LoadingSpinner, Modal } from "@/components/ui";
+import { Button, Input, Modal, PageLoadingOverlay } from "@/components/ui";
 import {
   DataList,
   DataListItem,
@@ -82,9 +82,7 @@ export default function CategoriesPage() {
   }
 
   if (sessionLoading || loading || !session) {
-    return (
-      <LoadingSpinner message="Carregando categorias..." minHeight="200px" />
-    );
+    return <PageLoadingOverlay show message="Carregando categorias..." />;
   }
 
   return (

@@ -115,6 +115,7 @@ model Customer {
   id       String  @id @default(cuid())
   email   String
   name    String?
+  phone   String?
   tenantId String
   storeId String
   store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
@@ -136,6 +137,7 @@ model Order {
   customer   Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
   status     String      @default("pending")
   total      Decimal     @db.Decimal(10, 2)
+  paymentMethod String?  @default("pickup")
   deliveryType  String   @default("pickup")
   deliveryFee   Decimal? @db.Decimal(10, 2)
   deliveryStreet String?

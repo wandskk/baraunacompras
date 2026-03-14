@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const themeEnum = z.enum(["default", "purple", "green", "amber"]);
-const paymentMethodEnum = z.enum(["pix", "credit", "boleto", "cash", "pickup"]);
+const paymentMethodEnum = z.enum(["pix", "credit", "boleto", "cash"]);
 const deliveryTypeEnum = z.enum(["pickup", "delivery", "both"]);
 
 const cepSchema = z

@@ -22,7 +22,13 @@ export class CustomerService {
       input.storeId,
       input.tenantId
     );
-    if (existing) return existing;
+    if (existing) {
+      if (input.phone && !existing.phone) {
+        await this.repository.update(existing.id, input.tenantId, { phone: input.phone });
+        return this.repository.findById(existing.id, input.tenantId) ?? existing;
+      }
+      return existing;
+    }
     return this.repository.create(input);
   }
 

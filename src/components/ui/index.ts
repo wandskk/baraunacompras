@@ -3,5 +3,6 @@ export { ToastContent } from "./ToastContent";
 export { Input } from "./Input";
 export { ImageUpload } from "./ImageUpload";
 export { LoadingSpinner } from "./LoadingSpinner";
+export { PageLoadingOverlay } from "./PageLoadingOverlay";
 export { MaskedInput } from "./MaskedInput";
 export { Modal } from "./Modal";

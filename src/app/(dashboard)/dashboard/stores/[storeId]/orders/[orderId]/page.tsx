@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapPin, Store } from "lucide-react";
-import { formatCurrency, formatCep } from "@/lib/format";
+import { MapPin, Store, MessageCircle } from "lucide-react";
+import { formatCurrency, formatCep, formatPhone } from "@/lib/format";
+import { PAYMENT_LABELS } from "@/lib/payment-labels";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Button, LoadingSpinner } from "@/components/ui";
+import { Button, PageLoadingOverlay } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
 import {
@@ -27,6 +28,7 @@ type Customer = {
   id: string;
   email: string;
   name: string | null;
+  phone: string | null;
 } | null;
 
 type Order = {
@@ -37,6 +39,7 @@ type Order = {
   store: { name: string };
   customer: Customer;
   items: OrderItem[];
+  paymentMethod?: string | null;
   deliveryType?: string;
   deliveryFee?: string | number;
   deliveryStreet?: string | null;
@@ -112,7 +115,7 @@ export default function OrderDetailPage() {
   }, [storeId, orderId, session]);
 
   if (sessionLoading || loading || !session) {
-    return <LoadingSpinner message="Carregando pedido..." minHeight="200px" />;
+    return <PageLoadingOverlay show message="Carregando pedido..." />;
   }
 
   if (!order) {
@@ -196,15 +199,40 @@ export default function OrderDetailPage() {
         <div className="rounded-xl border border-gray-200 bg-white p-6">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">Cliente</h2>
           {order.customer ? (
-            <div className="space-y-1">
+            <div className="space-y-2">
               <p className="font-medium text-gray-900">
                 {order.customer.name || "—"}
               </p>
               <p className="text-sm text-gray-600">{order.customer.email}</p>
+              {order.customer.phone && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm text-gray-600">
+                    {formatPhone(order.customer.phone)}
+                  </p>
+                  <a
+                    href={`https://wa.me/55${order.customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Sou da loja ${order.store.name}, estou em contato sobre seu pedido #${order.id.slice(-6).toUpperCase()}.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-700"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    WhatsApp
+                  </a>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-gray-500">Cliente não identificado</p>
           )}
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-6">
+          <h2 className="mb-4 text-lg font-semibold text-gray-900">Pagamento</h2>
+          <p className="text-gray-600">
+            {order.paymentMethod
+              ? PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod
+              : "Não informado"}
+          </p>
         </div>
 
         <div className="rounded-xl border border-gray-200 bg-white p-6">

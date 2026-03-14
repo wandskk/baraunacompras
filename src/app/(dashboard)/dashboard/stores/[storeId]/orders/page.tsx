@@ -14,14 +14,16 @@ import {
   Truck,
   Package,
   X,
+  MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { LoadingSpinner } from "@/components/ui";
+import { PageLoadingOverlay } from "@/components/ui";
 import {
   DataList,
   StoreListPageLayout,
 } from "@/components/dashboard";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatPhone } from "@/lib/format";
+import { PAYMENT_LABELS } from "@/lib/payment-labels";
 import { useSession } from "@/hooks/useSession";
 import { toast } from "@/lib/toast";
 import {
@@ -41,13 +43,15 @@ type Order = {
   status: string;
   total: string;
   createdAt: string;
+  paymentMethod?: string | null;
   deliveryType?: string;
   deliveryStreet?: string | null;
   deliveryNumber?: string | null;
   deliveryCity?: string | null;
   deliveryState?: string | null;
   deliveryZipCode?: string | null;
-  customer: { name: string | null; email: string } | null;
+  store?: { name: string };
+  customer: { name: string | null; email: string; phone?: string | null } | null;
   _count?: { items: number };
   items?: OrderItem[];
 };
@@ -247,9 +251,7 @@ export default function OrdersPage() {
   }, [storeId, session, refresh]);
 
   if (sessionLoading || loading || !session) {
-    return (
-      <LoadingSpinner message="Carregando pedidos..." minHeight="200px" />
-    );
+    return <PageLoadingOverlay show message="Carregando pedidos..." />;
   }
 
   return (
@@ -314,6 +316,29 @@ export default function OrdersPage() {
                           {order.customer.name || order.customer.email}
                         </p>
                       )}
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                        {order.paymentMethod && (
+                          <span>
+                            Pagamento: {PAYMENT_LABELS[order.paymentMethod] ?? order.paymentMethod}
+                          </span>
+                        )}
+                        {order.customer?.phone && (
+                          <>
+                            <span>·</span>
+                            <span>{formatPhone(order.customer.phone)}</span>
+                            <a
+                              href={`https://wa.me/55${order.customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá! Sou da loja ${order.store?.name ?? ""}, estou em contato sobre seu pedido #${order.id.slice(-6).toUpperCase()}.`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-green-600 hover:text-green-700"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MessageCircle className="h-3.5 w-3.5" />
+                              WhatsApp
+                            </a>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-1 items-center justify-end gap-3 sm:gap-4">
