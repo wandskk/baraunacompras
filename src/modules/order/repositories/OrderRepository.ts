@@ -81,7 +81,11 @@ export class OrderRepository {
   async findManyByStore(storeId: string, tenantId: string) {
     return prisma.order.findMany({
       where: { storeId, tenantId },
-      include: { customer: true },
+      include: {
+        customer: true,
+        _count: { select: { items: true } },
+        items: { include: { product: { select: { name: true } } } },
+      },
     });
   }
 

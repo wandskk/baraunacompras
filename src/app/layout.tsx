@@ -1,6 +1,7 @@
 import { Nunito, DM_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { NavigationLoading } from "@/components/NavigationLoading";
+import { GlobalActionLoader } from "@/components/GlobalActionLoader";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -27,6 +28,7 @@ export default function RootLayout({
       <body className={`${nunito.className} min-h-screen antialiased`}>
         {children}
         <NavigationLoading />
+        <GlobalActionLoader />
         <Toaster
           position="top-right"
           toastOptions={{

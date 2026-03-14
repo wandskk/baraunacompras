@@ -8,6 +8,10 @@ import Link from "next/link";
 import { Button, LoadingSpinner } from "@/components/ui";
 import { toast } from "@/lib/toast";
 import { useSession } from "@/hooks/useSession";
+import {
+  startGlobalActionLoading,
+  endGlobalActionLoading,
+} from "@/components/GlobalActionLoader";
 
 type OrderItem = {
   id: string;
@@ -72,6 +76,7 @@ export default function OrderDetailPage() {
   async function handleStatusChange(newStatus: string) {
     if (!session || !order) return;
     setStatusLoading(true);
+    startGlobalActionLoading();
     try {
       const res = await fetch(
         `/api/tenants/${session.tenantId}/stores/${storeId}/orders/${orderId}`,
@@ -92,6 +97,7 @@ export default function OrderDetailPage() {
       }
     } finally {
       setStatusLoading(false);
+      endGlobalActionLoading();
     }
   }
 
