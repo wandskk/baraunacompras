@@ -12,6 +12,11 @@ const navLinks = [
   { href: "#contato", label: "Contato" },
 ];
 
+const btnOutline =
+  "inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg border-2 border-primary px-4 text-sm font-medium text-primary transition-opacity hover:bg-primary/10";
+const btnPrimary =
+  "inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg border-2 border-transparent bg-primary px-4 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90";
+
 export function LandingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -45,16 +50,10 @@ export function LandingHeader() {
         </nav>
 
         <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
-          <Link
-            href="/login"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg border-2 border-primary px-3 py-1.5 text-sm font-medium text-primary transition-opacity hover:bg-primary/10 xl:px-4 xl:py-2"
-          >
+          <Link href="/login" className={btnOutline}>
             Entrar
           </Link>
-          <Link
-            href="/register"
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 xl:px-4 xl:py-2"
-          >
+          <Link href="/register" className={btnPrimary}>
             Criar conta
           </Link>
         </div>
@@ -90,14 +89,14 @@ export function LandingHeader() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="inline-flex w-full items-center justify-center rounded-lg border-2 border-primary px-4 py-2 font-medium text-primary transition-opacity hover:bg-primary/10"
+                className={`${btnOutline} w-full`}
               >
                 Entrar
               </Link>
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                className={`${btnPrimary} w-full`}
               >
                 Criar conta
               </Link>

@@ -9,7 +9,6 @@ const footerLinks = {
     { href: "#contato", label: "Contato" },
   ],
   plataforma: [
-    { href: "/loja", label: "Explorar Lojas" },
     { href: "/login", label: "Entrar" },
     { href: "/register", label: "Criar conta" },
   ],
