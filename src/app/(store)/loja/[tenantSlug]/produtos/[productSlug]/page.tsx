@@ -76,7 +76,7 @@ export default async function ProductPage({ params }: PageProps) {
       <nav aria-label="Navegação">
         <Link
           href={`/loja/${tenantSlug}`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 transition-colors hover:text-primary"
         >
           <ChevronLeftIcon className="h-4 w-4" />
           Voltar aos produtos
@@ -84,12 +84,12 @@ export default async function ProductPage({ params }: PageProps) {
       </nav>
 
       {/* Product card */}
-      <article className={`overflow-hidden rounded-2xl border shadow-sm ${onPromo ? "border-amber-400/70 bg-amber-50/30" : "border-gray-200 bg-white"}`}>
+      <article className={`overflow-hidden rounded-2xl border shadow-sm ${onPromo ? "border-primary/50 bg-primary/5" : "border-gray-200 bg-white"}`}>
         <div className="grid gap-6 p-6 sm:gap-8 sm:p-8 lg:grid-cols-2 lg:gap-12">
           {/* Image */}
           <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100 lg:aspect-4/5">
             {onPromo && (
-              <span className="absolute left-4 top-4 z-10 rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-bold text-black shadow-md">
+              <span className="absolute left-4 top-4 z-10 rounded-lg bg-primary px-3 py-1.5 text-sm font-bold text-primary-foreground shadow-md">
                 PROMO
               </span>
             )}
@@ -125,7 +125,7 @@ export default async function ProductPage({ params }: PageProps) {
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <div>
-                <p className={`text-3xl font-bold ${onPromo ? "text-amber-800" : "text-primary"}`}>
+                <p className="text-3xl font-bold text-primary">
                   {formatCurrency(price)}
                 </p>
                 {originalPrice != null && originalPrice > price && (
@@ -182,7 +182,7 @@ export default async function ProductPage({ params }: PageProps) {
       <section className="pt-6 sm:pt-8">
         {relatedProducts.length > 0 ? (
           <>
-            <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
+            <h2 className="mb-4 text-lg font-semibold text-primary sm:text-xl">
               {product.category
                 ? `Mais em ${product.category.name}`
                 : "Outros produtos"}
@@ -203,7 +203,7 @@ export default async function ProductPage({ params }: PageProps) {
             <div className="mt-6 flex justify-center">
               <Link
                 href={`/loja/${tenantSlug}${product.category ? `?categoryId=${product.category.id}` : ""}`}
-                className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="rounded-lg border border-primary/30 bg-white px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
               >
                 Ver mais produtos
               </Link>
@@ -213,7 +213,7 @@ export default async function ProductPage({ params }: PageProps) {
           <div className="flex justify-center">
             <Link
               href={`/loja/${tenantSlug}`}
-              className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="rounded-lg border border-primary/30 bg-white px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
             >
               Ver mais produtos
             </Link>

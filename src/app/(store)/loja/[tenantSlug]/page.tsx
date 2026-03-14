@@ -52,7 +52,7 @@ export default async function StoreHomePage({ params, searchParams }: PageProps)
 
       {/* Featured products */}
       <section id="produtos" className="py-6 sm:py-8">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900 sm:text-xl">
+        <h2 className="mb-4 text-lg font-semibold text-primary sm:text-xl">
           Produtos em destaque
         </h2>
         {products.length === 0 ? (
@@ -85,7 +85,7 @@ export default async function StoreHomePage({ params, searchParams }: PageProps)
                 {pagination.page > 1 && (
                   <Link
                     href={`/loja/${tenantSlug}?page=${pagination.page - 1}${categoryId ? `&categoryId=${categoryId}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border border-primary/30 bg-white px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
                   >
                     Anterior
                   </Link>
@@ -96,7 +96,7 @@ export default async function StoreHomePage({ params, searchParams }: PageProps)
                 {pagination.page * pagination.limit < pagination.total && (
                   <Link
                     href={`/loja/${tenantSlug}?page=${pagination.page + 1}${categoryId ? `&categoryId=${categoryId}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-                    className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                    className="rounded-lg border border-primary/30 bg-white px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
                   >
                     Próxima
                   </Link>
