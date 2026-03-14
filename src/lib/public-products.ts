@@ -20,7 +20,7 @@ export type PublicProductsResult = {
 export async function getPublicProducts(
   q?: string,
   page = 1,
-  limit = 12,
+  limit = 10,
 ): Promise<PublicProductsResult> {
   try {
     const where = q?.trim()

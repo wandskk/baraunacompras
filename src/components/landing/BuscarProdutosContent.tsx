@@ -63,7 +63,7 @@ export function BuscarProdutosContent({
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     params.set("page", String(page));
-    params.set("limit", "12");
+    params.set("limit", "10");
     fetch(`/api/public/products?${params}`)
       .then((res) => res.json())
       .then((data: { products: PublicProductItem[]; pagination: Pagination }) => {
@@ -222,7 +222,7 @@ export function BuscarProdutosContent({
             )}
             {loading ? (
               <div className="min-w-0 flex-1 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {Array.from({ length: 12 }).map((_, i) => (
+                {Array.from({ length: 10 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>

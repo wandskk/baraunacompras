@@ -3,7 +3,7 @@ import { BuscarProdutosContent } from "./BuscarProdutosContent";
 
 export async function BuscarProdutosSection() {
   const { products: initialProducts, pagination: initialPagination } =
-    await getPublicProducts(undefined, 1, 12);
+    await getPublicProducts(undefined, 1, 10);
 
   return (
     <section
