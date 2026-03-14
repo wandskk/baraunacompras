@@ -40,7 +40,7 @@ export async function GET(_request: Request, { params }: Params) {
         where: {
           storeId: { in: storeIds },
           tenantId,
-          status: { not: "cancelled" },
+          status: "delivered",
           createdAt: { gte: startOfMonth },
         },
         _sum: { total: true },
