@@ -7,7 +7,9 @@ import { ShoppingBag } from "lucide-react";
 
 function getInternalLinkPath(target: EventTarget | null): string | null {
   if (!target || !(target instanceof Node)) return null;
-  const anchor = (target as Element).closest?.("a[href]");
+  const el = target as Element;
+  if (el.closest?.("[data-prevent-nav]")) return null;
+  const anchor = el.closest?.("a[href]");
   if (!anchor || !(anchor instanceof HTMLAnchorElement)) return null;
   const href = anchor.getAttribute("href");
   if (!href || href === "#" || href.startsWith("javascript:")) return null;

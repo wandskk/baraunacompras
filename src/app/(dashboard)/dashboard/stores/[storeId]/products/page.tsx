@@ -472,6 +472,7 @@ export default function ProductsPage() {
               </p>
               <Button
                 variant="outline"
+                data-prevent-nav
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();

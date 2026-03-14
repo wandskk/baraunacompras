@@ -139,7 +139,10 @@ export class OrderService {
 
   async update(id: string, tenantId: string, input: UpdateOrderInput) {
     const existing = await this.getById(id, tenantId);
-    const order = await this.repository.update(id, tenantId, input);
+    const order =
+      input.status === "cancelled"
+        ? await this.repository.updateToCancelled(id, tenantId)
+        : await this.repository.update(id, tenantId, input);
     if (order && input.status && input.status !== existing.status) {
       const statusesToNotify = ["confirmed", "shipped", "delivered"];
       if (statusesToNotify.includes(input.status)) {

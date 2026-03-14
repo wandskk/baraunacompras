@@ -64,6 +64,22 @@ export class OrderRepository {
             size: i.size ?? "",
           })),
         });
+
+        const byProduct = new Map<string, number>();
+        for (const i of items) {
+          byProduct.set(i.productId, (byProduct.get(i.productId) ?? 0) + i.quantity);
+        }
+        for (const [productId, qty] of byProduct) {
+          if (qty <= 0) continue;
+          const affected = await tx.$executeRaw`
+            UPDATE "Product"
+            SET stock = stock - ${qty}
+            WHERE id = ${productId} AND "tenantId" = ${data.tenantId} AND stock >= ${qty}
+          `;
+          if (affected === 0) {
+            throw new Error("Estoque insuficiente para um ou mais produtos");
+          }
+        }
       }
       return tx.order.findUniqueOrThrow({
         where: { id: order.id },
@@ -153,6 +169,40 @@ export class OrderRepository {
         customer: true,
         items: { include: { product: true } },
       },
+    });
+  }
+
+  /** Atualiza status para cancelado e restaura estoque dos produtos. */
+  async updateToCancelled(id: string, tenantId: string) {
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.order.findFirst({
+        where: { id, tenantId },
+        include: { store: true, customer: true, items: { include: { product: true } } },
+      });
+      if (!order) return null;
+
+      await tx.order.update({
+        where: { id },
+        data: { status: "cancelled" },
+      });
+
+      const byProduct = new Map<string, number>();
+      for (const item of order.items) {
+        byProduct.set(item.productId, (byProduct.get(item.productId) ?? 0) + item.quantity);
+      }
+      for (const [productId, qty] of byProduct) {
+        if (qty <= 0) continue;
+        await tx.$executeRaw`
+          UPDATE "Product"
+          SET stock = stock + ${qty}
+          WHERE id = ${productId} AND "tenantId" = ${tenantId}
+        `;
+      }
+
+      return tx.order.findUniqueOrThrow({
+        where: { id },
+        include: { store: true, customer: true, items: { include: { product: true } } },
+      });
     });
   }
 
