@@ -7,6 +7,7 @@ import type { PublicStoreItem } from "@/lib/public-stores";
 
 type Props = {
   stores: PublicStoreItem[];
+  ctaSlot?: React.ReactNode;
 };
 
 function normalize(str: string): string {
@@ -16,12 +17,13 @@ function normalize(str: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-export function LojasCadastradasContent({ stores }: Props) {
-  const [query, setQuery] = useState("");
+export function LojasCadastradasContent({ stores, ctaSlot }: Props) {
+  const [inputValue, setInputValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const filteredStores = useMemo(() => {
-    if (!query.trim()) return stores;
-    const q = normalize(query.trim());
+    if (!searchQuery.trim()) return stores;
+    const q = normalize(searchQuery.trim());
     return stores.filter((item) => {
       const name = normalize(item.store.name);
       const tenant = normalize(item.tenantName);
@@ -30,77 +32,127 @@ export function LojasCadastradasContent({ stores }: Props) {
         : "";
       return name.includes(q) || tenant.includes(q) || desc.includes(q);
     });
-  }, [stores, query]);
+  }, [stores, searchQuery]);
+
+  const displayedStores = filteredStores.slice(0, 9);
+
+  const handleSearch = () => {
+    setSearchQuery(inputValue);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    if (!value.trim()) setSearchQuery("");
+  };
+
+  const handleClear = () => {
+    setInputValue("");
+    setSearchQuery("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSearch();
+  };
 
   return (
-    <div className="mt-12">
-      <div className="mx-auto max-w-md">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+    <div className="mt-4">
+      {/* Hero de busca - destaque com identidade */}
+      <div className="mx-auto max-w-2xl">
+        <div
+          className="relative flex overflow-hidden rounded-2xl border-2 border-navy/10 bg-white/95 shadow-xl shadow-primary/10 ring-2 ring-white/50 transition-all duration-300 focus-within:border-primary/50 focus-within:shadow-2xl focus-within:shadow-primary/15 focus-within:ring-4 focus-within:ring-primary/10 backdrop-blur-sm"
+          role="search"
+          aria-label="Buscar lojas"
+        >
+          <Search className="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-primary/70" />
           <input
             type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nome da loja..."
-            className="w-full rounded-xl border border-[#202C59]/20 py-3 pl-11 pr-4 text-gray-700 outline-none transition-colors placeholder:text-gray-400 focus:border-[#2F8743] focus:ring-2 focus:ring-[#2F8743]/20"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Buscar lojas (ex: mercearia, farmácia, padaria...)"
+            className="w-full rounded-l-2xl py-4 pl-14 pr-4 text-lg font-medium text-navy outline-none placeholder:text-gray-400"
             aria-label="Buscar lojas"
           />
+          <button
+            type="button"
+            onClick={handleSearch}
+            className="shrink-0 rounded-r-xl bg-primary px-6 py-4 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            aria-label="Buscar"
+          >
+            Buscar
+          </button>
         </div>
-        {stores.length > 0 && (
-          <p className="mt-2 text-center text-sm text-gray-500">
+        {stores.length > 0 && searchQuery.trim() && (
+          <p className="mt-3 text-center text-sm text-gray-500">
             {filteredStores.length === stores.length
-              ? `${stores.length} loja${stores.length !== 1 ? "s" : ""} encontrada${stores.length !== 1 ? "s" : ""}`
-              : `${filteredStores.length} de ${stores.length} loja${stores.length !== 1 ? "s" : ""}`}
+              ? `${displayedStores.length} loja${displayedStores.length !== 1 ? "s" : ""} disponíve${displayedStores.length !== 1 ? "is" : "l"}`
+              : filteredStores.length > 9
+                ? `Mostrando 9 de ${filteredStores.length} encontrada${filteredStores.length !== 1 ? "s" : ""}`
+                : `${filteredStores.length} loja${filteredStores.length !== 1 ? "s" : ""} encontrada${filteredStores.length !== 1 ? "s" : ""}`}
           </p>
         )}
       </div>
 
-      {filteredStores.length > 0 ? (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredStores.map((item) => (
-            <Link
-              key={item.tenantSlug}
-              href={`/loja/${item.tenantSlug}`}
-              className="group flex items-center gap-4 rounded-2xl border border-[#202C59]/10 bg-white p-4 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-[#2F8743]/30 hover:shadow-lg sm:p-5"
-            >
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#2F8743]/10 sm:h-16 sm:w-16">
-                {item.store.logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.store.logoUrl}
-                    alt={item.store.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <Store className="h-7 w-7 text-[#2F8743] sm:h-8 sm:w-8" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className="truncate font-semibold text-[#202C59] group-hover:text-[#2F8743]">
-                  {item.store.name}
-                </h3>
-                <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">
-                  {item.store.description ?? `Loja de ${item.tenantName}`}
-                </p>
-              </div>
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#2F8743]/10 text-[#2F8743] transition-all group-hover:bg-[#2F8743] group-hover:text-white">
-                <ChevronRight className="h-5 w-5" />
-              </div>
-            </Link>
-          ))}
+      {/* CTA entre busca e lojas - visível no hero no mobile */}
+      {ctaSlot && (
+        <div className="mt-4 flex justify-center md:hidden">{ctaSlot}</div>
+      )}
+
+      {/* Lojas logo abaixo */}
+      {displayedStores.length > 0 ? (
+        <div className="mt-4 sm:mt-6">
+          <h3 className="mb-3 text-base font-bold text-navy sm:mb-6 sm:text-xl">
+            {searchQuery.trim()
+              ? "Resultados da busca"
+              : "Lojas disponíveis em Baraúna"}
+          </h3>
+          <div className="grid gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {displayedStores.map((item) => (
+              <Link
+                key={`${item.tenantSlug}-${item.store.id}`}
+                href={`/loja/${item.tenantSlug}--${item.store.slug}`}
+                className="group flex items-center gap-3 rounded-xl border border-navy/10 bg-white/90 p-3 shadow-md shadow-navy/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 sm:gap-4 sm:rounded-2xl sm:p-5"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10 ring-2 ring-primary/5 sm:h-16 sm:w-16 sm:rounded-xl">
+                  {item.store.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.store.logoUrl}
+                      alt={item.store.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Store className="h-5 w-5 text-primary sm:h-8 sm:w-8" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="truncate text-sm font-semibold text-navy transition-colors group-hover:text-primary sm:text-base">
+                    {item.store.name}
+                  </h4>
+                  <p className="mt-0.5 line-clamp-1 text-xs text-gray-500 sm:line-clamp-2 sm:text-sm">
+                    {item.store.description ?? `Loja de ${item.tenantName}`}
+                  </p>
+                </div>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-white sm:h-10 sm:w-10">
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       ) : (
-        <div className="mt-8 rounded-2xl border border-[#202C59]/10 bg-gray-50/50 p-12 text-center">
+        <div className="mt-6 rounded-2xl border border-navy/10 bg-white/60 p-8 text-center backdrop-blur-sm">
           <p className="text-gray-600">
-            {query.trim()
+            {searchQuery.trim()
               ? "Nenhuma loja encontrada para essa busca. Tente outro termo."
               : "Nenhuma loja cadastrada ainda."}
           </p>
-          {query.trim() && (
+          {searchQuery.trim() && (
             <button
               type="button"
-              onClick={() => setQuery("")}
-              className="mt-4 text-sm font-medium text-[#2F8743] hover:underline"
+              onClick={handleClear}
+              className="mt-4 text-sm font-semibold text-primary hover:underline"
             >
               Limpar busca
             </button>

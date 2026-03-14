@@ -323,7 +323,7 @@ export default function DashboardPage() {
                     )}
                     {store.tenant && (
                       <a
-                        href={`/loja/${store.tenant.slug}`}
+                        href={`/loja/${store.tenant.slug}--${store.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="ml-auto inline-flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-gray-700"

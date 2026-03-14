@@ -1,7 +1,6 @@
 import {
   LandingHeader,
   LandingHero,
-  LojasCadastradasSection,
   BuscarProdutosSection,
   QuemSomosSection,
   ContatoSection,
@@ -13,7 +12,6 @@ export default function HomePage() {
     <main className="min-h-screen bg-gray-50">
       <LandingHeader />
       <LandingHero />
-      <LojasCadastradasSection />
       <BuscarProdutosSection />
       <QuemSomosSection />
       <ContatoSection />

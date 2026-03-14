@@ -19,14 +19,33 @@ export type PublicProduct = {
   category: Category | null;
 };
 
-export async function getPublicStore(tenantSlug: string, storeSlug?: string) {
+/** Parse "tenantSlug" or "tenantSlug--storeSlug" into parts */
+export function parseStoreSlug(segment: string): {
+  tenantSlug: string;
+  storeSlug?: string;
+} {
+  if (segment.includes("--")) {
+    const [tenantSlug, storeSlug] = segment.split("--", 2);
+    return { tenantSlug: tenantSlug ?? "", storeSlug: storeSlug || undefined };
+  }
+  return { tenantSlug: segment };
+}
+
+export async function getPublicStore(
+  tenantSlugOrComposite: string,
+  storeSlug?: string,
+) {
+  const { tenantSlug, storeSlug: parsedStoreSlug } =
+    parseStoreSlug(tenantSlugOrComposite);
+  const actualStoreSlug = storeSlug ?? parsedStoreSlug;
+
   const tenant = await prisma.tenant.findUnique({
     where: { slug: tenantSlug },
   });
   if (!tenant) return null;
-  const store = storeSlug
+  const store = actualStoreSlug
     ? await prisma.store.findFirst({
-        where: { slug: storeSlug, tenantId: tenant.id },
+        where: { slug: actualStoreSlug, tenantId: tenant.id },
       })
     : await prisma.store.findFirst({
         where: { tenantId: tenant.id },

@@ -13,6 +13,7 @@ type ProductItem = {
   price: string;
   storeName: string;
   tenantSlug: string;
+  storeSlug: string;
 };
 
 function formatPrice(value: string): string {
@@ -105,7 +106,7 @@ export function BuscarProdutosSection() {
             {products.map((item) => (
               <Link
                 key={item.id}
-                href={`/loja/${item.tenantSlug}/produtos/${item.slug}`}
+                href={`/loja/${item.tenantSlug}--${item.storeSlug}/produtos/${item.slug}`}
                 className="group flex flex-col overflow-hidden rounded-2xl border border-[#202C59]/10 bg-white shadow-sm transition-all duration-300 hover:scale-[1.02] hover:border-[#2266B0]/30 hover:shadow-lg"
               >
                 <div className="relative aspect-square overflow-hidden bg-gray-100">

@@ -9,6 +9,7 @@ export type PublicProductItem = {
   price: string;
   storeName: string;
   tenantSlug: string;
+  storeSlug: string;
 };
 
 export async function getPublicProducts(q?: string): Promise<PublicProductItem[]> {
@@ -53,6 +54,7 @@ export async function getPublicProducts(q?: string): Promise<PublicProductItem[]
         price: p.price.toString(),
         storeName: p.store.name,
         tenantSlug: p.store.tenant.slug,
+        storeSlug: p.store.slug,
       }));
   } catch {
     return [];

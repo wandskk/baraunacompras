@@ -15,7 +15,7 @@ export type PublicStoreItem = {
 export async function getPublicStores(): Promise<PublicStoreItem[]> {
   try {
     const stores = await prisma.store.findMany({
-      take: 24,
+      take: 50,
       orderBy: { createdAt: "desc" },
       include: {
         tenant: {

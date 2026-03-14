@@ -62,7 +62,7 @@ export default function ProductsPage() {
   const initialLowStock = searchParams.get("lowStock") === "true";
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tenantSlug, setTenantSlug] = useState<string | null>(null);
+  const [storeSegment, setStoreSegment] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -114,7 +114,9 @@ export default function ProductsPage() {
         if (categoriesRes.ok) setCategories(await categoriesRes.json());
         if (storeRes.ok) {
           const store = await storeRes.json();
-          setTenantSlug(store?.tenant?.slug ?? null);
+          const ts = store?.tenant?.slug;
+          const ss = store?.slug;
+          setStoreSegment(ts && ss ? `${ts}--${ss}` : ts ?? null);
         }
       })
       .finally(() => setLoading(false));
@@ -430,8 +432,8 @@ export default function ProductsPage() {
           <DataListItem
             key={p.id}
             href={
-              tenantSlug
-                ? `/loja/${tenantSlug}/produtos/${p.slug}`
+              storeSegment
+                ? `/loja/${storeSegment}/produtos/${p.slug}`
                 : undefined
             }
           >
