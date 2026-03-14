@@ -32,8 +32,18 @@ export class OrderController {
     return this.service.getById(id, tenantId);
   }
 
-  async listByStore(storeId: string, tenantId: string) {
-    return this.service.listByStore(storeId, tenantId);
+  async listByStore(
+    storeId: string,
+    tenantId: string,
+    opts?: {
+      status?: string;
+      order?: "asc" | "desc";
+      page?: number;
+      limit?: number;
+      q?: string;
+    }
+  ) {
+    return this.service.listByStore(storeId, tenantId, opts);
   }
 
   async listByTenant(tenantId: string) {

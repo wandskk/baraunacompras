@@ -21,18 +21,18 @@ export async function GET(_request: Request, { params }: Params) {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [pendingOrders, ordersThisMonth, lowStockRows] = await Promise.all([
+    const [pendingOrders, revenueAgg, lowStockRows] = await Promise.all([
       prisma.order.count({
         where: { storeId, tenantId, status: "pending" },
       }),
-      prisma.order.findMany({
+      prisma.order.aggregate({
         where: {
           storeId,
           tenantId,
           status: { not: "cancelled" },
           createdAt: { gte: startOfMonth },
         },
-        select: { total: true },
+        _sum: { total: true },
       }),
       prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*) as count FROM "Product"
@@ -41,11 +41,7 @@ export async function GET(_request: Request, { params }: Params) {
       `,
     ]);
     const lowStockCount = Number(lowStockRows[0]?.count ?? 0);
-
-    const revenueThisMonth = ordersThisMonth.reduce(
-      (sum, o) => sum + Number(o.total),
-      0
-    );
+    const revenueThisMonth = Number(revenueAgg._sum.total ?? 0);
 
     return NextResponse.json({
       pendingOrders,

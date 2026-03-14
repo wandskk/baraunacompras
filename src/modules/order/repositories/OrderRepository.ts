@@ -79,16 +79,60 @@ export class OrderRepository {
     });
   }
 
-  async findManyByStore(storeId: string, tenantId: string) {
-    return prisma.order.findMany({
-      where: { storeId, tenantId },
-      include: {
-        store: { select: { name: true } },
-        customer: true,
-        _count: { select: { items: true } },
-        items: { include: { product: { select: { name: true } } } },
-      },
-    });
+  async findManyByStore(
+    storeId: string,
+    tenantId: string,
+    opts?: {
+      status?: string;
+      order?: "asc" | "desc";
+      page?: number;
+      limit?: number;
+      q?: string;
+    }
+  ) {
+    const page = Math.max(1, opts?.page ?? 1);
+    const limit = Math.min(50, Math.max(1, opts?.limit ?? 10));
+    const skip = (page - 1) * limit;
+
+    const where: Parameters<typeof prisma.order.findMany>[0]["where"] = {
+      storeId,
+      tenantId,
+    };
+    if (opts?.status) {
+      (where as { status: string }).status = opts.status;
+    }
+    const q = opts?.q?.trim();
+    if (q) {
+      (where as { OR?: unknown[] }).OR = [
+        { id: { contains: q, mode: "insensitive" } },
+        {
+          customer: {
+            OR: [
+              { name: { contains: q, mode: "insensitive" } },
+              { email: { contains: q, mode: "insensitive" } },
+            ],
+          },
+        },
+      ];
+    }
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        orderBy: { createdAt: opts?.order ?? "desc" },
+        skip,
+        take: limit,
+        include: {
+          store: { select: { name: true } },
+          customer: true,
+          _count: { select: { items: true } },
+          items: { include: { product: { select: { name: true } } } },
+        },
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    return { orders, pagination: { page, limit, total } };
   }
 
   async findManyByTenant(tenantId: string) {

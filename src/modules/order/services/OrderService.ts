@@ -119,8 +119,18 @@ export class OrderService {
     return order;
   }
 
-  async listByStore(storeId: string, tenantId: string) {
-    return this.repository.findManyByStore(storeId, tenantId);
+  async listByStore(
+    storeId: string,
+    tenantId: string,
+    opts?: {
+      status?: string;
+      order?: "asc" | "desc";
+      page?: number;
+      limit?: number;
+      q?: string;
+    }
+  ) {
+    return this.repository.findManyByStore(storeId, tenantId, opts);
   }
 
   async listByTenant(tenantId: string) {
