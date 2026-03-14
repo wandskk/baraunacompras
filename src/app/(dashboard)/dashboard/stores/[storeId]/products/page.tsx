@@ -114,9 +114,7 @@ export default function ProductsPage() {
         if (categoriesRes.ok) setCategories(await categoriesRes.json());
         if (storeRes.ok) {
           const store = await storeRes.json();
-          const ts = store?.tenant?.slug;
-          const ss = store?.slug;
-          setStoreSegment(ts && ss ? `${ts}--${ss}` : ts ?? null);
+          setStoreSegment(store?.slug ?? null);
         }
       })
       .finally(() => setLoading(false));

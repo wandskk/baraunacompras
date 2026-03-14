@@ -331,7 +331,7 @@ export default function StoreDetailPage() {
               <p className="mt-0.5 text-sm text-gray-500">/{store.slug}</p>
               {store.tenant && (
                 <a
-                  href={`/loja/${store.tenant.slug}--${store.slug}`}
+                  href={`/loja/${store.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"

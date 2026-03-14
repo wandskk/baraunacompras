@@ -19,40 +19,13 @@ export type PublicProduct = {
   category: Category | null;
 };
 
-/** Parse "tenantSlug" or "tenantSlug--storeSlug" into parts */
-export function parseStoreSlug(segment: string): {
-  tenantSlug: string;
-  storeSlug?: string;
-} {
-  if (segment.includes("--")) {
-    const [tenantSlug, storeSlug] = segment.split("--", 2);
-    return { tenantSlug: tenantSlug ?? "", storeSlug: storeSlug || undefined };
-  }
-  return { tenantSlug: segment };
-}
-
-export async function getPublicStore(
-  tenantSlugOrComposite: string,
-  storeSlug?: string,
-) {
-  const { tenantSlug, storeSlug: parsedStoreSlug } =
-    parseStoreSlug(tenantSlugOrComposite);
-  const actualStoreSlug = storeSlug ?? parsedStoreSlug;
-
-  const tenant = await prisma.tenant.findUnique({
-    where: { slug: tenantSlug },
+export async function getPublicStore(storeSlug: string) {
+  const store = await prisma.store.findUnique({
+    where: { slug: storeSlug },
+    include: { tenant: true },
   });
-  if (!tenant) return null;
-  const store = actualStoreSlug
-    ? await prisma.store.findFirst({
-        where: { slug: actualStoreSlug, tenantId: tenant.id },
-      })
-    : await prisma.store.findFirst({
-        where: { tenantId: tenant.id },
-        orderBy: { createdAt: "asc" },
-      });
   if (!store) return null;
-  return { store, tenantId: tenant.id };
+  return { store, tenantId: store.tenantId };
 }
 
 type ProductFilters = {
@@ -63,11 +36,10 @@ type ProductFilters = {
 };
 
 export async function getPublicStoreWithProducts(
-  tenantSlug: string,
-  storeSlug?: string,
+  storeSlug: string,
   filters?: ProductFilters,
 ) {
-  const data = await getPublicStore(tenantSlug, storeSlug);
+  const data = await getPublicStore(storeSlug);
   if (!data) return null;
   const page = filters?.page ?? 1;
   const limit = filters?.limit ?? 50;
@@ -116,11 +88,10 @@ export async function getPublicStoreWithProducts(
 }
 
 export async function getPublicProduct(
-  tenantSlug: string,
+  storeSlug: string,
   productSlug: string,
-  storeSlug?: string,
 ): Promise<PublicProduct | null> {
-  const data = await getPublicStore(tenantSlug, storeSlug);
+  const data = await getPublicStore(storeSlug);
   if (!data) return null;
   const product = await prisma.product.findFirst({
     where: {
@@ -138,13 +109,12 @@ export function isProductAvailable(product: { stock: number }): boolean {
 }
 
 export async function getRelatedProducts(
-  tenantSlug: string,
+  storeSlug: string,
   productId: string,
   categoryId: string | null,
-  storeSlug?: string,
   limit = 8,
 ): Promise<PublicProduct[]> {
-  const data = await getPublicStore(tenantSlug, storeSlug);
+  const data = await getPublicStore(storeSlug);
   if (!data) return [];
   const where: {
     storeId: string;

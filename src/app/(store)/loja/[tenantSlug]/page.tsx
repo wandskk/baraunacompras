@@ -13,7 +13,7 @@ type PageProps = {
 export default async function StoreHomePage({ params, searchParams }: PageProps) {
   const { tenantSlug } = await params;
   const { q, categoryId, page } = await searchParams;
-  const data = await getPublicStoreWithProducts(tenantSlug, undefined, {
+  const data = await getPublicStoreWithProducts(tenantSlug, {
     q: q ?? undefined,
     categoryId: categoryId ?? undefined,
     page: page ? parseInt(page, 10) : 1,

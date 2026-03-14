@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       page: searchParams.get("page") ?? undefined,
       limit: searchParams.get("limit") ?? undefined,
     });
-    const data = await getPublicStoreWithProducts(tenantSlug, undefined, filters);
+    const data = await getPublicStoreWithProducts(tenantSlug, filters);
     if (!data) {
       return NextResponse.json({ error: "Store not found" }, { status: 404 });
     }

@@ -122,7 +122,7 @@ export function BuscarProdutosContent({ initialProducts }: Props) {
           {products.map((item) => (
             <Link
               key={item.id}
-              href={`/loja/${item.tenantSlug}--${item.storeSlug}/produtos/${item.slug}`}
+              href={`/loja/${item.storeSlug}/produtos/${item.slug}`}
               className="group flex flex-col overflow-hidden rounded-xl border border-navy/10 bg-white shadow-md shadow-navy/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 sm:rounded-2xl"
             >
               <div className="relative aspect-square overflow-hidden bg-gray-100">
