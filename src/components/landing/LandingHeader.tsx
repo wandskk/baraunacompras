@@ -65,7 +65,11 @@ export function LandingHeader() {
           className="shrink-0 rounded-lg p-2 text-[#202C59] lg:hidden"
           aria-label={mobileMenuOpen ? "Fechar menu" : "Abrir menu"}
         >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </button>
       </div>
 

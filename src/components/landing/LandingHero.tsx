@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Store, ArrowRight } from "lucide-react";
 import { getPublicStores } from "@/lib/public-stores";
 import { LojasCadastradasContent } from "./LojasCadastradasContent";
@@ -23,20 +22,12 @@ export async function LandingHero() {
       />
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col flex-start px-4 sm:px-6 lg:px-8">
-        {/* Ícone + texto */}
+        {/* Título e subtítulo */}
         <div
-          className="flex flex-col items-center justify-center gap-6 opacity-0 animate-hero-fade sm:flex-row sm:items-center sm:justify-center sm:gap-8"
+          className="flex flex-col items-center justify-center text-center opacity-0 animate-hero-fade"
           style={{ animationDelay: "0ms", animationFillMode: "forwards" }}
         >
-          <Image
-            src="/logo-icon.png"
-            alt="Baraúna Compras"
-            width={112}
-            height={112}
-            className="h-16 w-16 object-contain drop-shadow-md sm:h-20 sm:w-20 lg:h-24 lg:w-24"
-            priority
-          />
-          <div className="text-center sm:text-left">
+          <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-navy sm:text-3xl lg:text-4xl xl:text-5xl">
               Busque lojas em <span className="text-primary">Baraúna</span>
             </h1>
