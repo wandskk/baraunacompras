@@ -24,9 +24,9 @@ export function LandingFooter() {
               <Image
                 src="/logo-nova.png"
                 alt="Baraúna Compras"
-                width={140}
-                height={42}
-                className="h-10 w-auto object-contain"
+                width={200}
+                height={60}
+                className="h-14 w-auto object-contain sm:h-16"
               />
             </Link>
             <p className="mt-4 text-sm text-white/80">
