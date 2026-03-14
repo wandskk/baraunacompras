@@ -11,8 +11,8 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-gray-50">
       <LandingHeader />
-      <LandingHero />
       <BuscarProdutosSection />
+      <LandingHero />
       <QuemSomosSection />
       <ContatoSection />
       <LandingFooter />

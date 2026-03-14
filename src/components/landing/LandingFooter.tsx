@@ -3,8 +3,8 @@ import Image from "next/image";
 
 const footerLinks = {
   navegacao: [
-    { href: "#lojas-cadastradas", label: "Lojas Cadastradas" },
     { href: "#buscar-produtos", label: "Buscar Produtos" },
+    { href: "#lojas-cadastradas", label: "Lojas Cadastradas" },
     { href: "#quem-somos", label: "Quem Somos" },
     { href: "#contato", label: "Contato" },
   ],

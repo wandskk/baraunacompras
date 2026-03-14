@@ -85,6 +85,9 @@
 }
 
 @layer utilities {
+  .font-product {
+    font-family: var(--font-dm-sans), var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  }
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

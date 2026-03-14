@@ -2,19 +2,40 @@ import { getPublicProducts } from "@/lib/public-products";
 import { BuscarProdutosContent } from "./BuscarProdutosContent";
 
 export async function BuscarProdutosSection() {
-  const initialProducts = await getPublicProducts();
+  const { products: initialProducts, pagination: initialPagination } =
+    await getPublicProducts(undefined, 1, 12);
 
   return (
     <section
       id="buscar-produtos"
       className="scroll-mt-20 relative flex flex-col justify-center overflow-hidden py-6 sm:py-8 lg:py-12"
     >
+      {/* Base gradient */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-white via-white to-primary/[0.03]"
+        className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/20"
+        aria-hidden
+      />
+      {/* Gradient orbs */}
+      <div
+        className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-primary/25 blur-3xl"
         aria-hidden
       />
       <div
-        className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(#2F8743_1px,transparent_1px)] [background-size:20px_20px]"
+        className="absolute -right-20 -bottom-20 h-[28rem] w-[28rem] rounded-full bg-primary/30 blur-3xl"
+        aria-hidden
+      />
+      <div
+        className="absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/15 blur-3xl"
+        aria-hidden
+      />
+      {/* Warm accent orb */}
+      <div
+        className="absolute right-1/4 top-1/4 h-48 w-48 rounded-full bg-amber-400/20 blur-3xl"
+        aria-hidden
+      />
+      {/* Dot pattern */}
+      <div
+        className="absolute inset-0 opacity-[0.25] [background-image:radial-gradient(#2F8743_1.5px,transparent_1.5px)] [background-size:24px_24px]"
         aria-hidden
       />
 
@@ -31,7 +52,10 @@ export async function BuscarProdutosSection() {
           </p>
         </div>
 
-        <BuscarProdutosContent initialProducts={initialProducts} />
+        <BuscarProdutosContent
+          initialProducts={initialProducts}
+          initialPagination={initialPagination}
+        />
       </div>
     </section>
   );

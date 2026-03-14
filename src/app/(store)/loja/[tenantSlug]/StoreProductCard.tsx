@@ -26,7 +26,7 @@ export function StoreProductCard({ tenantSlug, product, available }: Props) {
 
   return (
     <article
-      className={`group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md ${!available ? "opacity-70" : ""}`}
+      className={`font-product group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md ${!available ? "opacity-70" : ""}`}
     >
       <Link href={productUrl} className="flex flex-1 flex-col">
         {product.imageUrl ? (
