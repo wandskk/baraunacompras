@@ -64,6 +64,8 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
             storeDeliveryFee={(data.store as { deliveryFee?: number | string }).deliveryFee != null ? Number((data.store as { deliveryFee: number | string }).deliveryFee) : undefined}
             storeDeliveryDays={(data.store as { deliveryDays?: number }).deliveryDays ?? undefined}
             storeAddress={data.store as { addressStreet?: string; addressNumber?: string; addressComplement?: string; addressNeighborhood?: string; addressCity?: string; addressState?: string; addressZipCode?: string }}
+            contactPhone={(data.store as { contactPhone?: string | null }).contactPhone ?? null}
+            contactPhoneIsWhatsApp={(data.store as { contactPhoneIsWhatsApp?: boolean }).contactPhoneIsWhatsApp ?? false}
           />
         </div>
       </div>
@@ -119,6 +121,8 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
           storeDeliveryFee={(data.store as { deliveryFee?: number | string }).deliveryFee != null ? Number((data.store as { deliveryFee: number | string }).deliveryFee) : undefined}
           storeDeliveryDays={(data.store as { deliveryDays?: number }).deliveryDays ?? undefined}
           storeAddress={data.store as { addressStreet?: string; addressNumber?: string; addressComplement?: string; addressNeighborhood?: string; addressCity?: string; addressState?: string; addressZipCode?: string }}
+          contactPhone={(data.store as { contactPhone?: string | null }).contactPhone ?? null}
+          contactPhoneIsWhatsApp={(data.store as { contactPhoneIsWhatsApp?: boolean }).contactPhoneIsWhatsApp ?? false}
         />
       </div>
     </div>

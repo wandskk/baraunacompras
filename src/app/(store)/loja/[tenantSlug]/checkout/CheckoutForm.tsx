@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapPin, Store } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MapPin, Store, MessageCircle } from "lucide-react";
 import { Button, Input } from "@/components/ui";
 import { AddressCityStateSelect } from "@/components/AddressCityStateSelect";
 import { toast } from "@/lib/toast";
-import { getBuyerData, setBuyerData, type BuyerAddress } from "@/lib/buyer-storage";
+import {
+  getBuyerData,
+  setBuyerData,
+  type BuyerAddress,
+} from "@/lib/buyer-storage";
 import { formatCurrency } from "@/lib/format";
 
 type StoreAddress = {
@@ -30,6 +35,8 @@ type CheckoutFormProps = {
   storeDeliveryFee?: number;
   storeDeliveryDays?: number;
   storeAddress?: StoreAddress;
+  contactPhone?: string | null;
+  contactPhoneIsWhatsApp?: boolean;
 };
 
 function formatStoreAddress(addr: StoreAddress): string {
@@ -58,11 +65,14 @@ export function CheckoutForm({
   storeDeliveryFee = 0,
   storeDeliveryDays,
   storeAddress = {},
+  contactPhone,
+  contactPhoneIsWhatsApp = false,
 }: CheckoutFormProps) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [deliveryOption, setDeliveryOption] = useState<"pickup" | "delivery">(
-    storeDeliveryType === "delivery" ? "delivery" : "pickup"
+    storeDeliveryType === "delivery" ? "delivery" : "pickup",
   );
   const [zipCode, setZipCode] = useState("");
   const [street, setStreet] = useState("");
@@ -76,9 +86,16 @@ export function CheckoutForm({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderItems, setOrderItems] = useState<
+    Array<{ quantity: number; product: { name: string }; variation?: string; size?: string }>
+  >([]);
+  const [cartInvalid, setCartInvalid] = useState(false);
 
-  const hasPickup = storeDeliveryType === "pickup" || storeDeliveryType === "both";
-  const hasDelivery = storeDeliveryType === "delivery" || storeDeliveryType === "both";
+  const hasPickup =
+    storeDeliveryType === "pickup" || storeDeliveryType === "both";
+  const hasDelivery =
+    storeDeliveryType === "delivery" || storeDeliveryType === "both";
   const subtotal = cartId ? (cartTotal ?? 0) : (productTotal ?? 0);
   const deliveryFee = deliveryOption === "delivery" ? storeDeliveryFee : 0;
   const total = subtotal + deliveryFee;
@@ -93,7 +110,8 @@ export function CheckoutForm({
     city.trim() !== "";
   const isFormValid =
     isEmailValid &&
-    (deliveryOption === "pickup" || (deliveryOption === "delivery" && isDeliveryAddressValid));
+    (deliveryOption === "pickup" ||
+      (deliveryOption === "delivery" && isDeliveryAddressValid));
 
   useEffect(() => {
     const saved = getBuyerData();
@@ -116,10 +134,22 @@ export function CheckoutForm({
     if (cartId && tenantSlug) {
       fetch(`/api/public/${tenantSlug}/cart`, { credentials: "include" })
         .then((r) => r.json())
-        .then((data) => setCartTotal(data.total ?? 0))
-        .catch(() => setCartTotal(0));
+        .then((data) => {
+          const isEmpty =
+            !data.cart || !data.items?.length || (data.total ?? 0) <= 0;
+          if (isEmpty) {
+            setCartInvalid(true);
+            router.replace(`/loja/${tenantSlug}`);
+            return;
+          }
+          setCartTotal(data.total ?? 0);
+        })
+        .catch(() => {
+          setCartInvalid(true);
+          router.replace(`/loja/${tenantSlug}`);
+        });
     }
-  }, [cartId, tenantSlug]);
+  }, [cartId, tenantSlug, router]);
 
   async function handleCepBlur() {
     const digits = zipCode.replace(/\D/g, "");
@@ -201,7 +231,7 @@ export function CheckoutForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
           credentials: "include",
-        }
+        },
       );
       const data = await res.json();
       if (!res.ok) {
@@ -210,11 +240,24 @@ export function CheckoutForm({
         toast.error(msg);
         return;
       }
-      const buyerData: { email: string; name?: string; address?: BuyerAddress } = {
+      const existing = getBuyerData();
+      const buyerData: {
+        email: string;
+        name?: string;
+        address?: BuyerAddress;
+      } = {
         email,
         name: name || undefined,
+        address: existing?.address,
       };
-      if (deliveryOption === "delivery" && street && number && neighborhood && city && state) {
+      if (
+        deliveryOption === "delivery" &&
+        street &&
+        number &&
+        neighborhood &&
+        city &&
+        state
+      ) {
         buyerData.address = {
           zipCode,
           street,
@@ -228,6 +271,21 @@ export function CheckoutForm({
       setBuyerData(buyerData);
       window.dispatchEvent(new CustomEvent("cart-updated"));
       toast.success("Pedido realizado com sucesso!");
+      setOrderId(data.id ?? null);
+      if (cartId && data.items?.length) {
+        setOrderItems(
+          data.items.map((i: { quantity: number; product: { name: string }; variation?: string; size?: string }) => ({
+            quantity: i.quantity,
+            product: i.product,
+            variation: i.variation,
+            size: i.size,
+          }))
+        );
+      } else if (productId && productName) {
+        setOrderItems([
+          { quantity: 1, product: { name: productName } },
+        ]);
+      }
       setSuccess(true);
     } catch {
       setError("Erro de conexão");
@@ -237,13 +295,65 @@ export function CheckoutForm({
     }
   }
 
+  if (cartInvalid && cartId) {
+    return null;
+  }
+
+  const showWhatsAppButton =
+    contactPhone &&
+    contactPhoneIsWhatsApp &&
+    contactPhone.replace(/\D/g, "").length >= 10;
+
+  const orderShortId = orderId ? `#${orderId.slice(-6).toUpperCase()}` : "";
+  const storeLink =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/loja/${tenantSlug}`
+      : "";
+
+  const itemsList =
+    orderItems.length > 0
+      ? orderItems
+          .map((i) => {
+            const extras = [i.variation, i.size].filter(Boolean).join(" • ");
+            return `• ${i.quantity}x ${i.product.name}${extras ? ` (${extras})` : ""}`;
+          })
+          .join("\n")
+      : "";
+
+  const whatsappMessage = [
+    "Olá!",
+    orderShortId && `Acabei de realizar o pedido ${orderShortId}.`,
+    "Gostaria de acompanhar e saber mais sobre meu pedido.",
+    itemsList && `Itens do pedido:\n${itemsList}`,
+    storeLink && `Link da loja: ${storeLink}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const whatsappUrl =
+    showWhatsAppButton &&
+    `https://wa.me/55${contactPhone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
+
   if (success) {
     return (
       <div className="mt-6 rounded-2xl bg-primary/5 p-6 text-center">
-        <p className="font-semibold text-primary">Pedido realizado com sucesso!</p>
+        <p className="font-semibold text-primary">
+          Pedido realizado com sucesso!
+        </p>
         <p className="mt-2 text-sm text-gray-600">
           Você receberá a confirmação por email.
         </p>
+        {whatsappUrl && (
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-green-700"
+          >
+            <MessageCircle className="h-5 w-5" />
+            Acompanhar pedido pelo WhatsApp
+          </a>
+        )}
       </div>
     );
   }
@@ -253,7 +363,10 @@ export function CheckoutForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-5 pb-28 sm:pb-6">
+    <form
+      onSubmit={handleSubmit}
+      className="mt-6 flex flex-col gap-5 pb-28 sm:pb-6"
+    >
       <section className="space-y-4">
         <div className="space-y-3">
           <Input
@@ -308,21 +421,29 @@ export function CheckoutForm({
         </section>
       ) : null}
 
-      {deliveryOption === "pickup" && hasPickup && formatStoreAddress(storeAddress) && (
-        <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4">
-          <Store className="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
-          <div>
-            <p className="text-sm font-medium text-navy">Endereço para retirada</p>
-            <p className="mt-0.5 text-sm text-gray-600">{formatStoreAddress(storeAddress)}</p>
+      {deliveryOption === "pickup" &&
+        hasPickup &&
+        formatStoreAddress(storeAddress) && (
+          <div className="flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+            <Store className="mt-0.5 h-5 w-5 shrink-0 text-gray-400" />
+            <div>
+              <p className="text-sm font-medium text-navy">
+                Endereço para retirada
+              </p>
+              <p className="mt-0.5 text-sm text-gray-600">
+                {formatStoreAddress(storeAddress)}
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {deliveryOption === "delivery" && hasDelivery && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-navy">Endereço de entrega</span>
+            <span className="text-sm font-medium text-navy">
+              Endereço de entrega
+            </span>
           </div>
           <div className="space-y-3">
             <Input
@@ -387,14 +508,18 @@ export function CheckoutForm({
       )}
 
       {error && (
-        <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600">{error}</div>
+        <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600">
+          {error}
+        </div>
       )}
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-100 bg-white/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:z-auto sm:border-0 sm:bg-transparent sm:p-0 sm:pb-0 sm:backdrop-blur-none">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-4 sm:flex-col sm:items-stretch sm:gap-3">
           <div className="min-w-0 sm:rounded-xl sm:border sm:border-gray-100 sm:bg-gray-50/50 sm:p-4">
             <p className="text-xs text-gray-500">Total</p>
-            <p className="text-xl font-bold text-primary">{formatCurrency(total)}</p>
+            <p className="text-xl font-bold text-primary">
+              {formatCurrency(total)}
+            </p>
           </div>
           <Button
             type="submit"
