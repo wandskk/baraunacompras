@@ -5,6 +5,15 @@ import Link from "next/link";
 import { Package, Search, Store, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import type { PublicProductItem } from "@/lib/public-products";
 
+const SUGESTOES_RAPIDAS = [
+  "arroz",
+  "café",
+  "remédio",
+  "material de construção",
+  "bebidas",
+  "moda",
+];
+
 function formatPrice(value: string): string {
   const num = parseFloat(value);
   if (isNaN(num)) return value;
@@ -94,71 +103,138 @@ export function BuscarProdutosContent({
 
   return (
     <>
+      {/* Área de busca central */}
       <div
-        className="mx-auto mt-6 w-full max-w-2xl opacity-0 animate-hero-scale"
+        className="mx-auto mt-8 w-full max-w-2xl opacity-0 animate-hero-scale"
         style={{ animationDelay: "80ms", animationFillMode: "forwards" }}
       >
         <div
-          className="relative flex overflow-hidden rounded-2xl border-2 border-navy/10 bg-white/95 shadow-xl shadow-primary/10 ring-2 ring-white/50 transition-all duration-300 focus-within:border-primary/50 focus-within:shadow-2xl focus-within:shadow-primary/15 focus-within:ring-4 focus-within:ring-primary/10 backdrop-blur-sm"
+          className="relative flex overflow-hidden rounded-2xl border-2 border-navy/10 bg-white shadow-lg shadow-primary/5 ring-1 ring-white transition-all duration-300 focus-within:border-primary focus-within:shadow-xl focus-within:shadow-primary/10 focus-within:ring-2 focus-within:ring-primary/20"
           role="search"
           aria-label="Buscar produtos"
         >
-          <Search className="absolute left-5 top-1/2 h-6 w-6 -translate-y-1/2 text-primary/70" />
+          <Search className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary/60 sm:h-6 sm:w-6" />
           <input
             type="search"
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Ex: arroz, café, remédio..."
-            className="w-full rounded-l-2xl py-4 pl-14 pr-4 text-lg font-medium text-navy outline-none placeholder:text-gray-400"
+            placeholder="O que você procura? Ex: arroz, café, remédio..."
+            className="w-full rounded-l-2xl py-3.5 pl-12 pr-4 text-base font-medium text-navy outline-none placeholder:text-gray-400 sm:py-4 sm:pl-14 sm:text-lg"
             aria-label="Buscar produtos"
           />
           <button
             type="button"
             onClick={handleSearch}
-            className="shrink-0 rounded-r-xl bg-primary px-6 py-4 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            className="shrink-0 rounded-r-xl bg-primary px-5 py-3.5 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 sm:px-6 sm:py-4"
             aria-label="Buscar"
           >
             Buscar
           </button>
         </div>
+
+        {/* Chips de sugestão rápida */}
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+          <span className="text-xs font-medium text-gray-500 sm:text-sm">
+            Sugestões:
+          </span>
+          {SUGESTOES_RAPIDAS.map((termo) => (
+            <button
+              key={termo}
+              type="button"
+              onClick={() => {
+                setInputValue(termo);
+                fetchProducts(termo, 1);
+              }}
+              className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-xs font-medium text-primary transition-colors hover:border-primary/50 hover:bg-primary/10 sm:px-3.5 sm:py-1.5 sm:text-sm"
+            >
+              {termo}
+            </button>
+          ))}
+        </div>
+
+        {/* Ação alternativa: ver lojas */}
+        <div className="mt-4 flex justify-center">
+          <Link
+            href="#lojas-cadastradas"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+          >
+            <Store className="h-4 w-4" />
+            Ver lojas cadastradas
+          </Link>
+        </div>
       </div>
 
       {(products.length > 0 || loading) ? (
-        <div className="mt-6">
-          <div className="flex items-center gap-1 sm:gap-2">
+        <div className="mt-10 w-full">
+          {/* Label clara da seção + paginação mobile (em cima, canto direito) */}
+          <div className="mb-4 flex items-center justify-between gap-2 px-1">
+            <h2 className="min-w-0 flex-1 text-base font-bold text-navy sm:text-lg">
+              {loading
+                ? "Buscando..."
+                : searchQuery.trim()
+                  ? `${pagination.total} resultado${pagination.total !== 1 ? "s" : ""} encontrado${pagination.total !== 1 ? "s" : ""}`
+                  : "Produtos em destaque"}
+            </h2>
+            {hasPagination && !loading && (
+              <>
+                <span className="hidden text-xs text-gray-500 sm:inline sm:text-sm">
+                  Página {pagination.page} de {totalPages}
+                </span>
+                <div className="flex shrink-0 items-center justify-end gap-2 sm:hidden">
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={pagination.page <= 1}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-navy/15 bg-white text-navy/70 shadow-sm disabled:opacity-40"
+                    aria-label="Página anterior"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <span className="text-sm font-medium text-navy">
+                    {pagination.page} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={pagination.page >= totalPages}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-navy/15 bg-white text-navy/70 shadow-sm disabled:opacity-40"
+                    aria-label="Próxima página"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3">
             {hasPagination && (
               <button
                 type="button"
                 onClick={() => handlePageChange(pagination.page - 1)}
                 disabled={pagination.page <= 1 || loading}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-navy/10 bg-white text-navy/70 shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-md disabled:pointer-events-none disabled:opacity-40 sm:h-10 sm:w-10"
+                className="hidden shrink-0 items-center justify-center self-center rounded-full border border-navy/10 bg-white p-2.5 text-navy/70 shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-md disabled:pointer-events-none disabled:opacity-40 sm:flex sm:h-11 sm:w-11"
                 aria-label="Página anterior"
               >
                 <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             )}
             {loading ? (
-              <div
-                className="min-w-0 flex-1 grid grid-cols-4 gap-2 opacity-0 animate-hero-scale sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-6 sm:gap-3"
-                style={{ animationDelay: "80ms", animationFillMode: "forwards" }}
-              >
+              <div className="min-w-0 flex-1 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {Array.from({ length: 12 }).map((_, i) => (
                   <ProductCardSkeleton key={i} />
                 ))}
               </div>
             ) : (
-              <div
-                className="min-w-0 flex-1 grid grid-cols-4 gap-2 opacity-0 animate-hero-scale sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-6 sm:gap-3"
-                style={{ animationDelay: "80ms", animationFillMode: "forwards" }}
-              >
+              <div className="min-w-0 flex-1 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {products.map((item) => (
               <Link
                 key={item.id}
-                href={`/loja/${item.storeSlug}/produtos/${item.slug}`}
-                className="font-product group flex flex-col overflow-hidden rounded-lg border border-navy/10 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+                href={`/loja/${item.tenantSlug}/produtos/${item.slug}`}
+                className="font-product group flex flex-col overflow-hidden rounded-xl border border-navy/10 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md hover:shadow-primary/5"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
                   {item.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -167,19 +243,19 @@ export function BuscarProdutosContent({
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gray-50">
-                      <Package className="h-10 w-10 text-gray-300 sm:h-12 sm:w-12" />
+                    <div className="flex h-full w-full items-center justify-center bg-primary/5">
+                      <Package className="h-10 w-10 text-primary/30 sm:h-12 sm:w-12" />
                     </div>
                   )}
-                  <span className="absolute bottom-1 left-1 right-1 truncate rounded bg-white/95 px-1.5 py-0.5 text-xs font-medium text-gray-600">
+                  <span className="absolute bottom-1.5 left-1.5 right-1.5 truncate rounded-md bg-white/95 px-2 py-1 text-[10px] font-medium text-gray-600 shadow-sm sm:text-xs">
                     {item.storeName}
                   </span>
                 </div>
-                <div className="flex flex-1 flex-col p-1.5 sm:p-2">
+                <div className="flex flex-1 flex-col p-2 sm:p-2.5">
                   <h3 className="line-clamp-2 min-h-0 flex-1 text-xs font-semibold leading-tight text-navy sm:text-sm group-hover:text-primary">
                     {item.name}
                   </h3>
-                  <p className="mt-auto pt-1 text-sm font-bold text-primary sm:text-base">
+                  <p className="mt-auto pt-1.5 text-sm font-bold text-primary sm:text-base">
                     {formatPrice(item.price)}
                   </p>
                 </div>
@@ -192,13 +268,40 @@ export function BuscarProdutosContent({
                 type="button"
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={pagination.page >= totalPages || loading}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-navy/10 bg-white text-navy/70 shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-md disabled:pointer-events-none disabled:opacity-40 sm:h-10 sm:w-10"
+                className="hidden shrink-0 items-center justify-center self-center rounded-full border border-navy/10 bg-white p-2.5 text-navy/70 shadow-sm transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary hover:shadow-md disabled:pointer-events-none disabled:opacity-40 sm:flex sm:h-11 sm:w-11"
                 aria-label="Próxima página"
               >
                 <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             )}
           </div>
+
+          {/* Paginação mobile (em baixo, canto direito) */}
+          {hasPagination && !loading && (
+            <div className="mt-4 flex items-center justify-end gap-2 sm:hidden">
+              <button
+                type="button"
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-navy/15 bg-white text-navy/70 shadow-sm disabled:opacity-40"
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="text-sm font-medium text-navy">
+                {pagination.page} / {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page >= totalPages}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-navy/15 bg-white text-navy/70 shadow-sm disabled:opacity-40"
+                aria-label="Próxima página"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       ) : null}
       {products.length === 0 && !loading ? (
@@ -219,22 +322,38 @@ export function BuscarProdutosContent({
               ? "Explore as lojas ou tente novamente mais tarde."
               : `Não encontramos resultados para "${searchQuery}". Tente outros termos.`}
           </p>
-          {!isEmptySearch && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="mt-5 text-sm font-semibold text-primary hover:underline"
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+            {!isEmptySearch && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-sm font-semibold text-primary hover:underline"
+              >
+                Limpar busca
+              </button>
+            )}
+            <Link
+              href="#lojas-cadastradas"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
             >
-              Limpar busca
-            </button>
-          )}
+              <Store className="h-4 w-4" />
+              Ver lojas cadastradas
+            </Link>
+          </div>
         </div>
       ) : null}
 
       <div
-        className="mt-8 flex justify-center opacity-0 animate-hero-fade"
+        className="mt-10 flex flex-col items-center gap-4 opacity-0 animate-hero-fade sm:flex-row sm:gap-6"
         style={{ animationDelay: "120ms", animationFillMode: "forwards" }}
       >
+        <Link
+          href="#lojas-cadastradas"
+          className="inline-flex items-center gap-2 rounded-xl border-2 border-primary px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 sm:px-8 sm:py-3.5 sm:text-base"
+        >
+          <Store className="h-4 w-4 sm:h-5 sm:w-5" />
+          Ver todas as lojas
+        </Link>
         <Link
           href="/register"
           className="inline-flex items-center gap-2 rounded-xl border-2 border-primary bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 sm:px-8 sm:py-3.5 sm:text-base"
